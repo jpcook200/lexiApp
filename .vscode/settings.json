@@ -3,5 +3,8 @@
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit",
     "source.sortMembers": "explicit"
-  }
+  },
+  "editor.fontSize": 14,
+  "editor.formatOnSave": true,
+  "postman.settings.dotenv-detection-notification-visibility": false
 }

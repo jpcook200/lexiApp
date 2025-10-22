@@ -1,0 +1,168 @@
+import { ActiveWordsType } from '@/app/(tabs)/learn';
+import useDatabase from '@/db/useDatabase';
+import useGetUser from '@/hooks/useGetUser';
+import { useSQLiteContext } from 'expo-sqlite';
+import { useTranslation } from 'react-i18next';
+import { Dimensions, Text } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, { interpolate, SharedValue, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
+import WordCard from './WordCard';
+
+type CardStackCardProps = {
+    index: number;
+    numOfCards?: number;
+    activeIndex: SharedValue<number>;
+    word: any;
+    indexState: number;
+    setActiveWords?: React.Dispatch<React.SetStateAction<ActiveWordsType>>;
+    activeWords?: ActiveWordsType;
+    updateProgress?: () => void;
+    practice?: boolean;
+};
+
+
+const CardStackCard = ({ index, numOfCards, activeIndex, word, setActiveWords, updateProgress, practice = false }: CardStackCardProps) => {
+    const { t } = useTranslation();
+    const { markAsLearned, insertIntoLearnedWords, getDailyWords } = useDatabase();
+    const db = useSQLiteContext();
+    const { user } = useGetUser();
+    const screenWidth = Dimensions.get('window').width;
+    const screenHeight = Dimensions.get('window').height;
+    const translationX = useSharedValue(0);
+    const translationY = useSharedValue(0);
+
+    const handleSwipeUp = async () => {
+        if (!word || !user || !setActiveWords || !updateProgress || practice) return;
+        try {
+            await insertIntoLearnedWords(word);
+            await markAsLearned(word.word_id)
+            updateProgress();
+            setActiveWords(prev => (Array.isArray(prev) ? prev.filter(w => w.id !== word.id) : []));
+
+        } catch (error) {
+            console.error('Error marking word as learned:', error);
+        }
+    };
+
+    const loopCards = (index: number) => {
+        if (!setActiveWords) return;
+        setTimeout(() => {
+            setActiveWords(prev => {
+                const currentActive = prev || [];
+                if (index < 0 || index >= currentActive.length) return prev;
+
+                const swipedCard = currentActive[index];
+                const remaining = [
+                    ...currentActive.slice(0, index),
+                    ...currentActive.slice(index + 1)
+                ];
+                const updated = [...remaining, swipedCard];
+                return updated ;
+            });
+        }, 150);
+    };
+
+    const gesture = Gesture.Pan()
+        .onChange((event) => {
+            translationX.value = event.translationX;
+            translationY.value = event.translationY;
+            activeIndex.value = interpolate(
+                Math.abs(translationX.value),
+                [0, 500],
+                [index, index + 1]
+            );
+
+        })
+        .onEnd((event) => {
+            if (Math.abs(event.velocityX) > 400) {
+                translationX.value = withSpring(
+                    Math.sign(event.velocityX) * (screenWidth * 1.5),
+                    { velocity: event.velocityX },
+                );
+                scheduleOnRN(loopCards, index);
+                activeIndex.value = withSpring(index + 1);
+            } else if (event.velocityY < -150) { // swipe up threshold
+                translationY.value = withSpring(
+                    Math.sign(event.velocityY) * (screenHeight * 1.5),
+                    { velocity: event.velocityY },
+                );
+                scheduleOnRN(handleSwipeUp);
+                activeIndex.value = withSpring(index + 1);
+            } else {
+                translationY.value = withSpring(0);
+                translationX.value = withSpring(0);
+            }
+
+        })
+
+    
+    const animatedStyle = useAnimatedStyle(() => ({
+        opacity: interpolate(
+            activeIndex.value,
+            [index - 3, index - 2, index - 1, index, index + 1],
+            [0, 0.4, 1, 1, 1],
+            'clamp'
+        ),
+        transform: [
+            {
+                scale: interpolate(
+                    activeIndex.value,
+                    [index - 1, index,
+                    index + 1],
+                    [0.95, 1, 1]
+                )
+            },
+            {
+                translateY: interpolate(
+                    activeIndex.value,
+                    [index - 1, index, index + 1],
+                    [-30, 0, 0]
+                )
+            },
+            {
+                translateX: translationX.value
+            },
+            {
+                translateY: practice === true ? 0 : translationY.value
+            },
+            {
+                rotateZ: `${interpolate(translationX.value,
+                    [-screenWidth / 1.5, 0, screenWidth / 1.5],
+                    [-15, 0, 30])}deg`
+            }
+            
+        ],
+    }));
+
+    const learnedAnimatedStyle = useAnimatedStyle(() => ({
+        opacity: interpolate(
+            translationY.value,
+            [-screenHeight / 4, -screenHeight / 8],
+            [1, 0],
+            'clamp'
+        ),
+    }));
+
+    return (
+        <GestureDetector gesture={gesture}>
+            <Animated.View
+                style={[animatedStyle, {position: 'absolute', zIndex: numOfCards && numOfCards - index}]}
+                className='h-full w-full absolute'
+            >
+                <WordCard
+                    word={word}
+                    setActiveWords={setActiveWords}
+                    practice={practice}
+                />
+                {!practice &&
+                    <Animated.View style={[learnedAnimatedStyle]} className='absolute bottom-10 left-10 p-2 border-2 border-green-400 rounded-md flex justify-center items-center'>
+                        <Text className='text-green-400 text-md uppercase'>{ t("learned") }</Text>
+                    </Animated.View>
+                }
+            </Animated.View>
+        </GestureDetector>
+    )
+}
+
+export default CardStackCard
