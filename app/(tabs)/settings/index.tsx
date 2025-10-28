@@ -10,14 +10,14 @@ import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Linking, ScrollView, Switch, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, ScrollView, Switch, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Settings() {
     const { t } = useTranslation();
     const { user, loading, error, fetchUser } = useGetUser();
     const { colorScheme, toggleColorScheme } = useColorScheme();
-    const { setRemindersOn } = useDatabase();
+    const { setRemindersOn, resetProgressByLanguagePair } = useDatabase();
 
     const sendEmail = () => {
         const email = 'support@example.com';
@@ -52,6 +52,29 @@ export default function Settings() {
             fetchUser(); // refresh user data to get updated reminders_on value
         }
     };
+
+    const handleResetProgress = async () => { 
+        try {
+            if (!user) return;
+            await resetProgressByLanguagePair(user.native_lang, user.learn_lang);
+            router.replace('/'); // navigate to home to refresh data
+        } catch (error) {
+            console.error('Error resetting progress:', error);
+            alert('An error occurred while resetting progress.');
+        }
+    }
+
+    const showResetPopUp = () => {
+        Alert.alert(
+            t("are_you_sure"),
+            t("confirm_reset_message"),
+            [
+            { text: "Confirm", onPress: () => handleResetProgress()},
+            { text: "Cancel", style: "cancel" }
+            ]
+        );
+    };
+
 
     if (loading || !user) {
         return (
@@ -178,6 +201,11 @@ export default function Settings() {
                                 <ThemedIcon className='ml-auto' name='ChevronRight' size={20} />
                             </TouchableOpacity>
                         </ThemedView>
+                    </View>
+                    <View>
+                        <TouchableOpacity className='h-16 bg-red-500 flex items-center justify-center rounded-md border-red-400 border-2' onPress={() => showResetPopUp()}>
+                            <ThemedText className='text-center font-bold'>{ t("reset_progress") }</ThemedText>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </ScrollView>

@@ -48,25 +48,32 @@ export default function RootLayout() {
                 databaseName="userDatabase.db"
                 onInit={async (db) => {
                     await db.execAsync(`
-                       
+ 
+                        
                         CREATE TABLE IF NOT EXISTS users (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             native_lang TEXT,
                             learn_lang TEXT,
                             words_per_day INTEGER DEFAULT 5,
                             onboarding_completed BOOLEAN DEFAULT 0,
-                            difficulty_level TEXT,
                             reminders_on BOOLEAN DEFAULT 0,
                             timezone TEXT,
-                            last_set INTEGER DEFAULT 0
+                            last_set INTEGER DEFAULT 0,
+                            last_fetched DATETIME,
+                            tutorial_completed BOOLEAN DEFAULT 0
+                        );
+                        
+                        CREATE TABLE IF NOT EXISTS difficulties (
+                            lang TEXT PRIMARY KEY,
+                            level TEXT
                         );
                        
                         CREATE TABLE IF NOT EXISTS learned_words (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             word_id INTEGER,
                             user_id INTEGER,
-                            learning_language TEXT,
-                            native_language TEXT,
+                            learn_lang TEXT,
+                            native_lang TEXT,
                             native_word TEXT,
                             learning_word TEXT,
                             learning_pronunciation TEXT,
@@ -81,14 +88,13 @@ export default function RootLayout() {
                             favourite BOOLEAN DEFAULT 0,
                             FOREIGN KEY (user_id) REFERENCES users(id)
                         );
-                       
-                        
+                            
                         CREATE TABLE IF NOT EXISTS daily_words (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             word_id INTEGER,
                             user_id INTEGER,
-                            learning_language TEXT,
-                            native_language TEXT,
+                            learn_lang TEXT,
+                            native_lang TEXT,
                             native_word TEXT,
                             learning_word TEXT,
                             learning_pronunciation TEXT,
@@ -102,6 +108,24 @@ export default function RootLayout() {
                             time_sent TEXT DEFAULT (datetime('now', 'localtime')),
                             favourite BOOLEAN DEFAULT 0,
                             learned BOOLEAN DEFAULT 0,
+                            FOREIGN KEY (user_id) REFERENCES users(id)
+                        );
+                        
+                        CREATE TABLE IF NOT EXISTS streak (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            user_id INTEGER,
+                            date TEXT,
+                            lang_pair_code TEXT,
+                            completed BOOLEAN DEFAULT 0,
+                            UNIQUE(user_id, date, lang_pair_code),
+                            FOREIGN KEY (user_id) REFERENCES users(id)
+                        );
+
+                        CREATE TABLE IF NOT EXISTS streak_counts (
+                            user_id INTEGER,
+                            lang_pair_code TEXT UNIQUE,
+                            current INT,
+                            longest INT,
                             FOREIGN KEY (user_id) REFERENCES users(id)
                         );
 

@@ -16,15 +16,18 @@ const WelcomeThree = () => {
             <BackButton />
   
             <View className='flex-1 justify-center items-center w-full'>
-                <View className='w-5/6 relative'>
-                        <Streak />
-                        <View className='w-14 h-14 bg-primary mb-2 rounded-full flex justify-center items-center absolute -top-2 -right-2'>
-                            <Image
-                                source={require('@/assets/images/fire.png')}
-                                className='w-3/4 h-3/4'
-                            />
-                        </View>
+                <View className='w-[90%] relative'>
+                    <Streak
+                        
+                        displayOnly={ true }
+                    />
+                    <View className='w-14 h-14 bg-primary mb-2 rounded-full flex justify-center items-center absolute -top-2 -right-2'>
+                        <Image
+                            source={require('@/assets/images/fire.png')}
+                            className='w-3/4 h-3/4'
+                        />
                     </View>
+                </View>
                 
             </View>
             

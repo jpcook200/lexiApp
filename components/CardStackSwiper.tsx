@@ -1,49 +1,36 @@
-import { ActiveWordsType } from '@/app/(tabs)/learn';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
+import { useSharedValue } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 import getUser from '../hooks/useGetUser';
+import { Word } from '../types/types';
 import CardStackCard from './CardStackCard';
 import ThemedIcon from './ThemedIcon';
 import ThemedText from './ThemedText';
 
-
 type CardStackSwiperProps = {
-    activeWords?: ActiveWordsType
-    setActiveWords?: React.Dispatch<React.SetStateAction<ActiveWordsType>>;
+    activeWords?: Word[]
+    setActiveWords?: React.Dispatch<React.SetStateAction<Word[]>>;
     updateProgress?: () => void;
     progress?: number;
     practice?: boolean;
     isPending?: boolean;
-    getPracticeWords?: () => Promise<void>;
 };
 
-const CardStackSwiper = ({ activeWords, setActiveWords, updateProgress, progress, practice, isPending, getPracticeWords }: CardStackSwiperProps) => {
+const CardStackSwiper = ({ activeWords, setActiveWords, updateProgress, progress, practice, isPending }: CardStackSwiperProps) => {
     const { user } = getUser();
     const activeIndex = useSharedValue(0);
     const [indexState, setIndexState] = useState(0);
     const { t } = useTranslation();
-    
-    useAnimatedReaction(
-        () => activeIndex.value,
-        (value, prevValue) => {
-            if (value !== indexState) {
-                scheduleOnRN(setIndexState, Math.floor(value));
-
-            }
-        }
-    );
 
     useEffect(() => {
         scheduleOnRN(() => {
             activeIndex.value = 0;
         });
-        setIndexState(0);
-    }, [activeWords]);
+    }, [activeWords]);  
 
     return (
         <GestureHandlerRootView className="w-full h-full px-6 flex justify-center items-center">
@@ -63,18 +50,19 @@ const CardStackSwiper = ({ activeWords, setActiveWords, updateProgress, progress
                 <View className="w-full h-full">
                     {Array.isArray(activeWords) &&
                         activeWords.slice(0, 4).map((word, index) => (
-                        <CardStackCard
-                            key={`${word.id}-${index}`}
-                            index={index}
-                            indexState={indexState}
-                            activeIndex={activeIndex}
-                            word={word}
-                            setActiveWords={setActiveWords}
-                            activeWords={activeWords}
-                            updateProgress={updateProgress}
-                            practice={practice}
-                            numOfCards={ activeWords?.length }
-                        />
+                            <CardStackCard
+                                key={`${word.id}-${index}`}
+                                index={index}
+                                indexState={indexState}
+                                activeIndex={activeIndex}
+                                word={word}
+                                setActiveWords={setActiveWords}
+                                activeWords={activeWords}
+                                updateProgress={updateProgress}
+                                practice={practice}
+                                numOfCards={activeWords?.length}
+                                user={user!}
+                            />
                     ))}
                 </View>
             )}

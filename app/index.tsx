@@ -1,6 +1,6 @@
 // app/index.tsx
-import { User } from '@/hooks/useGetUser';
 import i18next from '@/services/i18next';
+import { User } from '@/types/types';
 import * as Localization from 'expo-localization';
 import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';

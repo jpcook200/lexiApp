@@ -1,7 +1,6 @@
 import { textToSpeech } from '@/api/textToSpeech';
-import { ActiveWordsType } from '@/app/(tabs)/learn';
 import useDatabase from '@/db/useDatabase';
-import useGetUser from '@/hooks/useGetUser';
+import { User, Word } from '@/types/types';
 import { Heart, Mars, Venus } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useRef, useState } from 'react';
@@ -13,15 +12,15 @@ import ThemedView from './ThemedView';
 
 type WordCardProps = {
     word: any;
-    setActiveWords?: React.Dispatch<React.SetStateAction<ActiveWordsType>>;
+    setActiveWords?: React.Dispatch<React.SetStateAction<Word[]>>;
     displayOnly?: boolean;
     practice?: boolean;
+    user?: User;
 };
 
 
-export default function WordCard({ word, setActiveWords, displayOnly, practice }: WordCardProps) {
+export default function WordCard({ word, setActiveWords, displayOnly, practice, user }: WordCardProps) {
     const { t } = useTranslation();
-    const { user } = useGetUser();
     const { toggleFavourite } = useDatabase();
     const [ttsDisabled, setTtsDisabled] = useState(false);
     const { colorScheme } = useColorScheme();
@@ -70,21 +69,24 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice }
 
     const handleFavourite = async () => {
         if (!word || !setActiveWords) return;
-        setActiveWords(prev => ({
-            ...prev,
-            active: (Array.isArray(prev.active) ? prev.active : []).map(w =>
-                w.id === word.id
-                    ? { ...w, favourite: !w.favourite } // toggle favourite
-                    : w
-            )
-        }));
+        setActiveWords((prev: Word[]) => prev!.map(w => {
+            if (w.id === word.id) {
+                return {
+                    ...w,
+                    favourite: w.favourite === 1 ? 0 : 1
+                };
+            }
+            return w;
+            })
+        );
+
         if (practice) {
             toggleFavourite(word.id, word.favourite === false ? 1 : 0); // update database
         }
     };
 
     const handleTextToSpeech = async (text: string, lang: string) => {
-        if (ttsDisabled) return;
+        if (ttsDisabled || !user) return;
         try {
             setTtsDisabled(true);
             await textToSpeech(text, lang);
@@ -143,7 +145,7 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice }
                                                 : null
                                         }
                                         </View>
-                                        <TouchableOpacity onPress={user ? (() => handleTextToSpeech(word?.learning_sentence, user.learn_lang)) : () => { }} disabled={displayOnly || ttsDisabled} className={`${ttsDisabled ? 'opacity-50' : ''}`}>
+                                        <TouchableOpacity onPress={() => handleTextToSpeech(word?.learning_sentence, user?.learn_lang || 'en')} disabled={displayOnly || ttsDisabled} className={`${ttsDisabled ? 'opacity-50' : ''}`}>
                                             <ThemedIcon name={ ttsDisabled ? 'VolumeOff' : 'Volume2' } size={28}/>
                                         </TouchableOpacity>
                                     </View>

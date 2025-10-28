@@ -2,17 +2,20 @@ import ThemedText from '@/components/ThemedText';
 import ThemedView from '@/components/ThemedView';
 import { levels } from '@/constants/languages';
 import useDatabase from '@/db/useDatabase';
+import useGetUser from '@/hooks/useGetUser';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { TouchableOpacity } from 'react-native';
 
 const LearningLanguages = () => {
-    const { setDifficultyLevel } = useDatabase();
+    const { user } = useGetUser();
+    const { insertDifficultyLevel } = useDatabase();
     const { t } = useTranslation();
     
     const handleSelectLevel = async (levelCode: string) => {
+        if (!user) return;
         try {
-            await setDifficultyLevel(levelCode);
+            await insertDifficultyLevel(user.learn_lang, levelCode);
             router.back();
         } catch (error) {
             console.error('Error setting learning language:', error);

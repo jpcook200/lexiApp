@@ -18,8 +18,8 @@
     "simple_effective": "Simple & Effective",
     "simple_effective_desc": "Daily practice builds strong vocabulary over time. Focused learning with no clutter or distractions. A larger vocabulary leads to easier contextual understanding.",
     
-    "whats_your_native_language": "What's your native language?",
-    "whats_your_learning_language": "What language are you learning?",
+    "whats_your_native_language": "What's Your Native Language?",
+    "whats_your_learning_language": "What Language Are You Learning?",
     "please_select": "Please select an option",
     
     "en": "English",
@@ -33,7 +33,7 @@
     "ru": "Russian",
     "hi": "Hindi",
 
-    "whats_your_proficiency_level": "What's your proficiency level?",
+    "whats_your_proficiency_level": "What's Your Proficiency Level?",
     "proficiency_level": "Proficiency Level",
     "beginner": "Beginner",
     "elementary": "Elementary",
@@ -66,6 +66,8 @@
     "skip": "Skip",
 
     "streak": "Streak",
+    "current_streak": "Current",
+    "longest_streak": "Longest",
     "monday_abrv": "Mon",
     "tuesday_abrv": "Tue",
     "wednesday_abrv": "Wed",
@@ -74,7 +76,7 @@
     "saturday_abrv": "Sat",
     "sunday_abrv": "Sun",
     "today": "Today",
-    "this_week": "This Week",
+    "past_week": "Past Week",
     "all_time": "All Time",
     "no_words": "No words learned yet",
     "words_learned": "Words Learned",
@@ -148,5 +150,11 @@
     "faq_feedback_a": "Use the \"Feedback\" button in the app to send your comments. This opens your default email app pre-filled with our support email.",
 
     "faq_offline_q": "Does the app work offline?",
-    "faq_offline_a": "Yes, most features work offline once your words are downloaded. You will need internet access to fetch new words or use the text-to-speech feature."
+    "faq_offline_a": "Yes, most features work offline once your words are downloaded. You will need internet access to fetch new words or use the text-to-speech feature.",
+
+    "reset_progress": "Reset Progress",
+    "are_you_sure": "Are you sure?",
+    "confirm_reset_message": "This will erase all progress for the current language pair.\nIf you already have had words today, they will be reset tomorrow.\nThis action cannot be undone."
+
+
 }

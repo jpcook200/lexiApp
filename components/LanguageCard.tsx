@@ -11,9 +11,9 @@ type LanguageCardProps = {
 
 const LanguageCard = ({ icon, name, code, active, onPress }: LanguageCardProps) => {
     return (
-        <Pressable onPress={ onPress } className={`w-36 h-36 border ${active ? 'border-accent-light' : 'border-border-light'} ${active ? 'dark:border-accent-dark' : 'dark:border-border-dark'} rounded-2xl p-2 justify-center items-center ${active ? 'bg-yellow-700' : 'bg-item-light dark:bg-item-dark'}`}>
+        <Pressable onPress={ onPress } className={`shadow-md w-36 h-36 border-2 ${active ? 'border-yellow-500' : 'border-border-light'} ${active ? 'dark:border-orange-500' : 'dark:border-border-dark'} rounded-2xl p-2 justify-center items-center ${active ? 'bg-orange-400' : 'bg-item-light dark:bg-item-dark'}`}>
             <Text className='text-4xl'>{icon}</Text>
-            <ThemedText className='text-lg font-medium'>{name}</ThemedText>
+            <ThemedText className='text-lg font-bold'>{name}</ThemedText>
         </Pressable>
     )
 }

@@ -9,20 +9,26 @@ import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 
 const WordsPerDay = () => {
     const { t } = useTranslation();
-    const { setWordsPerDay } = useDatabase();
+    const { setWordsPerDay, updateStreakRecord, updateStreakCount} = useDatabase();
     const { user, loading } = useGetUser();
     const [selectedNumber, setSelectedNumber] = useState<number>(10);
     const numbers = Array.from({ length: 30 }, (_, i) => i + 1);
 
     useEffect(() => {
         if (user && user.words_per_day) {
-            setSelectedNumber(user.words_per_day);
+            setSelectedNumber(Number(user.words_per_day));
         }
     }, [user]);
 
-    const handleSave = async (selectedNumber: string) => {
+    const handleSave = async (selectedNumber: number) => {
+        if (!user) return;
         try {
             await setWordsPerDay(selectedNumber);
+            if (selectedNumber > user.words_per_day) { 
+                const date = new Date().toLocaleString('en-CA').split(',')[0];
+                await updateStreakCount('decrement');
+                await updateStreakRecord(0, date);
+            }
             router.back();
         } catch (error) {
             console.error('Error saving words per day:', error);

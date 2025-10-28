@@ -29,7 +29,7 @@ module.exports = {
         },
         shade: {
           light: "#dadadaff", // light theme color
-          dark: "#242020ff",  // dark theme color
+          dark: "#222020",  // dark theme color
         },
         text: {
           light: "#000000", // light theme color

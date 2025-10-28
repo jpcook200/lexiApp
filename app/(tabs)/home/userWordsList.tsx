@@ -2,7 +2,8 @@ import FiltersModal from '@/components/FiltersModal';
 import MainButton from '@/components/MainButton';
 import ThemedIcon from '@/components/ThemedIcon';
 import ThemedText from '@/components/ThemedText';
-import useDatabase, { Word } from '@/db/useDatabase';
+import useDatabase from '@/db/useDatabase';
+import { FiltersType, Word } from '@/types/types';
 import { router, useFocusEffect } from 'expo-router';
 import { Heart } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
@@ -11,11 +12,6 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-type FiltersType = {
-    sortBy: 'dateAdded' | 'alphabetical' | 'difficulty';
-    favouritesOnly: boolean;
-}
- 
 const userWordsList = () => {
     const { t } = useTranslation();
     const { toggleFavourite } = useDatabase();
@@ -40,7 +36,7 @@ const userWordsList = () => {
         }
     }
 
-    const handleFavourite = async (wordId: number, isFavourite: number) => { 
+    const handleFavourite = async (wordId: number, isFavourite: 0 | 1) => { 
         try {
             await toggleFavourite(wordId, isFavourite);
             // Update local state to reflect the change

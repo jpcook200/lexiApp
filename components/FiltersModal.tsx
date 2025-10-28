@@ -1,13 +1,11 @@
+import { FiltersType } from '@/types/types';
 import { Picker } from '@react-native-picker/picker';
 import { useTranslation } from 'react-i18next';
 import { Modal, Switch, TouchableOpacity, View } from 'react-native';
 import MainButton from './MainButton';
 import ThemedText from './ThemedText';
 
-type FiltersType = {
-    favouritesOnly: boolean;
-    sortBy: string;
-}
+
 
 type FiltersModalProps = {
     modalVisible: boolean;

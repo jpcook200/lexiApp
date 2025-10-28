@@ -4,6 +4,7 @@ import LanguageIndicator from '@/components/LanguageIndicator'
 import ThemedText from '@/components/ThemedText'
 import useDatabase from '@/db/useDatabase'
 import useGetUser from '@/hooks/useGetUser'
+import { Word } from '@/types/types'
 import { useFocusEffect } from 'expo-router'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -17,7 +18,7 @@ const practice = () => {
     
     const [modalVisible, setModalVisible] = useState(false);
     const [difficultyLevel, setDifficultyLevel] = useState('');
-    const [activeWords, setActiveWords] = useState([]);
+    const [activeWords, setActiveWords] = useState<Word[]>([]);
 
     const handleGetPracticeWords = async () => { 
         try {

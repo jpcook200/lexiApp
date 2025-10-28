@@ -1,7 +1,5 @@
-import { ActiveWordsType } from '@/app/(tabs)/learn';
 import useDatabase from '@/db/useDatabase';
-import useGetUser from '@/hooks/useGetUser';
-import { useSQLiteContext } from 'expo-sqlite';
+import { User, Word } from '@/types/types';
 import { useTranslation } from 'react-i18next';
 import { Dimensions, Text } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -10,23 +8,21 @@ import { scheduleOnRN } from 'react-native-worklets';
 import WordCard from './WordCard';
 
 type CardStackCardProps = {
+    user: User;
     index: number;
     numOfCards?: number;
     activeIndex: SharedValue<number>;
     word: any;
     indexState: number;
-    setActiveWords?: React.Dispatch<React.SetStateAction<ActiveWordsType>>;
-    activeWords?: ActiveWordsType;
+    setActiveWords?: React.Dispatch<React.SetStateAction<Word[]>>;
+    activeWords?: Word[];
     updateProgress?: () => void;
     practice?: boolean;
 };
 
-
-const CardStackCard = ({ index, numOfCards, activeIndex, word, setActiveWords, updateProgress, practice = false }: CardStackCardProps) => {
+const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWords, activeWords = [], updateProgress, practice = false}: CardStackCardProps) => {
     const { t } = useTranslation();
-    const { markAsLearned, insertIntoLearnedWords, getDailyWords } = useDatabase();
-    const db = useSQLiteContext();
-    const { user } = useGetUser();
+    const { markAsLearned, insertIntoLearnedWords} = useDatabase();
     const screenWidth = Dimensions.get('window').width;
     const screenHeight = Dimensions.get('window').height;
     const translationX = useSharedValue(0);
@@ -35,10 +31,11 @@ const CardStackCard = ({ index, numOfCards, activeIndex, word, setActiveWords, u
     const handleSwipeUp = async () => {
         if (!word || !user || !setActiveWords || !updateProgress || practice) return;
         try {
+            console.log('Marking word as learned:', word);
             await insertIntoLearnedWords(word);
             await markAsLearned(word.word_id)
             updateProgress();
-            setActiveWords(prev => (Array.isArray(prev) ? prev.filter(w => w.id !== word.id) : []));
+            setActiveWords((prev: Word[]) => (Array.isArray(prev) ? prev.filter(w => w.id !== word.id) : []));
 
         } catch (error) {
             console.error('Error marking word as learned:', error);
@@ -48,7 +45,7 @@ const CardStackCard = ({ index, numOfCards, activeIndex, word, setActiveWords, u
     const loopCards = (index: number) => {
         if (!setActiveWords) return;
         setTimeout(() => {
-            setActiveWords(prev => {
+            setActiveWords((prev: Word[]) => {
                 const currentActive = prev || [];
                 if (index < 0 || index >= currentActive.length) return prev;
 
@@ -75,14 +72,14 @@ const CardStackCard = ({ index, numOfCards, activeIndex, word, setActiveWords, u
 
         })
         .onEnd((event) => {
-            if (Math.abs(event.velocityX) > 400) {
+            if (Math.abs(event.velocityX) > 400 && activeWords.length > 1) {
                 translationX.value = withSpring(
                     Math.sign(event.velocityX) * (screenWidth * 1.5),
                     { velocity: event.velocityX },
                 );
                 scheduleOnRN(loopCards, index);
                 activeIndex.value = withSpring(index + 1);
-            } else if (event.velocityY < -150) { // swipe up threshold
+            } else if (event.velocityY < -300) {
                 translationY.value = withSpring(
                     Math.sign(event.velocityY) * (screenHeight * 1.5),
                     { velocity: event.velocityY },
@@ -94,7 +91,7 @@ const CardStackCard = ({ index, numOfCards, activeIndex, word, setActiveWords, u
                 translationX.value = withSpring(0);
             }
 
-        })
+        });
 
     
     const animatedStyle = useAnimatedStyle(() => ({
@@ -121,15 +118,15 @@ const CardStackCard = ({ index, numOfCards, activeIndex, word, setActiveWords, u
                 )
             },
             {
-                translateX: translationX.value
+                translateX: activeWords.length > 1 ? translationX.value : 0
             },
             {
                 translateY: practice === true ? 0 : translationY.value
             },
             {
-                rotateZ: `${interpolate(translationX.value,
+                rotateZ: activeWords.length > 1 ? `${interpolate(translationX.value,
                     [-screenWidth / 1.5, 0, screenWidth / 1.5],
-                    [-15, 0, 30])}deg`
+                    [-15, 0, 30])}deg` : '0deg'
             }
             
         ],
@@ -154,6 +151,7 @@ const CardStackCard = ({ index, numOfCards, activeIndex, word, setActiveWords, u
                     word={word}
                     setActiveWords={setActiveWords}
                     practice={practice}
+                    user={user}
                 />
                 {!practice &&
                     <Animated.View style={[learnedAnimatedStyle]} className='absolute bottom-10 left-10 p-2 border-2 border-green-400 rounded-md flex justify-center items-center'>

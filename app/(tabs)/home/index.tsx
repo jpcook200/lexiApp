@@ -1,30 +1,44 @@
 import LanguageIndicator from '@/components/LanguageIndicator';
+import Logo from '@/components/Logo';
 import Streak from '@/components/Streak';
 import ThemedText from '@/components/ThemedText';
 import ThemedView from '@/components/ThemedView';
-import { Word } from '@/db/useDatabase';
+import useDatabase from '@/db/useDatabase';
 import useGetUser from '@/hooks/useGetUser';
-import { router } from 'expo-router';
-import { TouchableOpacity } from 'react-native';
-
-import Logo from '@/components/Logo';
+import useInitStreak from '@/hooks/useInitStreak';
+import { LearnedCounts, Word } from '@/types/types';
 import { useFocusEffect } from '@react-navigation/native';
+import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
     const { t } = useTranslation();
+    const { getLearnedWordsByTimeframe } = useDatabase();
     const { user } = useGetUser();
     const [learnedWords, setLearnedWords] = useState<Word[]>([]);
+    const [learnedCounts, setLearnedCounts] = useState<LearnedCounts>({
+        today: 0,
+        pastWeek: 0,
+        allTime: 0
+    })
+
     const db = useSQLiteContext();
+    useInitStreak();
 
     const getLearnedWords = async () => { 
         if (!user) return;
         try {
-            const results = await db.getAllAsync<Word>(`SELECT * FROM learned_words WHERE user_id = ? AND learning_language = ? AND native_language = ? ORDER BY learned_at DESC LIMIT 5`,[1, user.learn_lang, user.native_lang]);
+            const results = await db.getAllAsync<Word>(`SELECT * FROM learned_words WHERE user_id = ? AND learn_lang = ? AND native_lang = ? ORDER BY learned_at DESC LIMIT 5`, [1, user.learn_lang, user.native_lang]);
+            const { allTime, today, pastWeek } = await getLearnedWordsByTimeframe()
+            setLearnedCounts(prev => ({...prev, 
+                today: today, 
+                pastWeek: pastWeek,
+                allTime: allTime
+            }))
             setLearnedWords(results);
 
         } catch (error) {
@@ -41,37 +55,40 @@ export default function HomeScreen() {
 
     return (
         <SafeAreaView edges={['top']} className='flex-1 bg-background-light dark:bg-background-dark px-4'>
-            <View className="mb-6 flex-row justify-between items-center">
-                <Logo/>
-                <LanguageIndicator/>
-            </View>
-            <ScrollView className='g'>
-                <Streak/>
+            <ScrollView className=''>
+                <View className="mb-6 flex-row justify-between items-center">
+                    <Logo/>
+                    <LanguageIndicator/>
+                </View>
+            
+                <Streak
+                    displayOnly={false}
+                />
                 <ThemedView variant='shaded' className='border border-border-light dark:border-border-dark rounded-2xl'>
                     <View className='p-4'>
                         <ThemedText className='text-lg font-bold'>{t('words_learned')}</ThemedText>
                         <View className='flex-row justify-between mt-4'>
                             <View>
-                                <ThemedText className='text-4xl font-bold'>0</ThemedText>
+                                <ThemedText className='text-4xl font-bold'>{ learnedCounts.today }</ThemedText>
                                 <ThemedText variant='accent' className='text-md font-bold text-primary'>{t("today")}</ThemedText>
                             </View>
                             <View>
-                                <ThemedText className='text-4xl font-bold'>0</ThemedText>
-                                <ThemedText variant='accent' className='text-md font-bold text-primary'>{t("this_week")}</ThemedText>
+                                <ThemedText className='text-4xl font-bold'>{ learnedCounts.pastWeek }</ThemedText>
+                                <ThemedText variant='accent' className='text-md font-bold text-primary'>{t("past_week")}</ThemedText>
                             </View>
                             <View>
-                                <ThemedText className='text-4xl font-bold'>0</ThemedText>
+                                <ThemedText className='text-4xl font-bold'>{ learnedCounts.allTime }</ThemedText>
                                 <ThemedText variant='accent' className='text-md font-bold text-primary'>{t("all_time")}</ThemedText>
                             </View>
                         </View>
-                        <ThemedView className='mt-6 border border-border-light dark:border-border-dark rounded-lg min-h-32 overflow-hidden' variant='item'>
+                        <ThemedView style={{minHeight: 135}} className='mt-6 border border-border-light dark:border-border-dark rounded-lg overflow-hidden' variant='item'>
                             { learnedWords?.length === 0 ? (
                                 <View className='flex-1 justify-center items-center py-10 px-4'>
                                     <ThemedText variant='subtext' className='text-center italic opacity-50'>{t("no_words")}</ThemedText>
                                 </View>
                             ) : (
                                 learnedWords?.map((word, index) => (
-                                    <View key={index} className={`px-4 w-full py-4 flex-row justify-between ${index % 2 === 0 ? 'bg-background-light dark:bg-background-dark' : 'bg-secondary-light dark:bg-secondary-dark' }`}>
+                                    <View style={{height: 45}} key={index} className={`px-4 w-full flex-row justify-between items-center ${index % 2 === 0 ? 'bg-background-light dark:bg-background-dark' : 'bg-secondary-light dark:bg-secondary-dark' }`}>
                                         <ThemedText className='font-bold'>{ word?.learning_word }</ThemedText>
                                         <ThemedText variant='subtext' className='italic'>{ word?.native_word }</ThemedText>
                                     </View>

@@ -5,6 +5,7 @@ import { View } from 'react-native';
 
 export default function TabLayout() {
     const { colorScheme } = useColorScheme();
+    
     return (
         <View className="flex-1">
             <Tabs
