@@ -1,4 +1,5 @@
 import useDatabase from '@/db/useDatabase';
+import { useUserStore } from '@/hooks/useGetUser';
 import { User, Word } from '@/types/types';
 import { useTranslation } from 'react-i18next';
 import { Dimensions, Text } from 'react-native';
@@ -22,6 +23,7 @@ type CardStackCardProps = {
 
 const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWords, activeWords = [], updateProgress, practice = false}: CardStackCardProps) => {
     const { t } = useTranslation();
+    const { setSelectedWordId } = useUserStore();
     const { markAsLearned, insertIntoLearnedWords} = useDatabase();
     const screenWidth = Dimensions.get('window').width;
     const screenHeight = Dimensions.get('window').height;
@@ -31,7 +33,6 @@ const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWo
     const handleSwipeUp = async () => {
         if (!word || !user || !setActiveWords || !updateProgress || practice) return;
         try {
-            console.log('Marking word as learned:', word);
             await insertIntoLearnedWords(word);
             await markAsLearned(word.word_id)
             updateProgress();
@@ -44,6 +45,7 @@ const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWo
 
     const loopCards = (index: number) => {
         if (!setActiveWords) return;
+        setSelectedWordId(activeWords[index + 1].word_id)
         setTimeout(() => {
             setActiveWords((prev: Word[]) => {
                 const currentActive = prev || [];
@@ -146,6 +148,10 @@ const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWo
             <Animated.View
                 style={[animatedStyle, {position: 'absolute', zIndex: numOfCards && numOfCards - index}]}
                 className='h-full w-full absolute'
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityLabel={`${word?.text ?? 'Word'} card`}
+                accessibilityHint="Swipe left or right to navigate, swipe up to mark as learned"
             >
                 <WordCard
                     word={word}

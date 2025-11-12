@@ -78,6 +78,14 @@ export default function SettingsLayout() {
                     title: 'FAQs',
                 }}
             />
+            <Stack.Screen
+                name="changeLangConfirm"
+                options={{
+                    presentation: 'modal',
+                    headerShown: true,
+                    title: t("confirm_language_change"),
+                }}
+            />
         </Stack>
     );
 }

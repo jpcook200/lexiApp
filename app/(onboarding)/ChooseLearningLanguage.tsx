@@ -67,6 +67,8 @@ const ChooseLearningLanguage = () => {
                         text={ t("next") }
                         onPress={handleNext}
                         next
+                        accessibilityLabel="Proceed to Difficulty Selection"
+                        accessibilityHint="Navigates to the difficulty selection screen"
                     />
                 </View>
             </View>

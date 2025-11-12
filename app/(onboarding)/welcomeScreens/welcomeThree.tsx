@@ -18,7 +18,6 @@ const WelcomeThree = () => {
             <View className='flex-1 justify-center items-center w-full'>
                 <View className='w-[90%] relative'>
                     <Streak
-                        
                         displayOnly={ true }
                     />
                     <View className='w-14 h-14 bg-primary mb-2 rounded-full flex justify-center items-center absolute -top-2 -right-2'>
@@ -41,6 +40,8 @@ const WelcomeThree = () => {
                 text={ t("next") }
                 onPress={() => router.push('/(onboarding)/ChooseLanguage')}
                 next
+                accessibilityLabel="Proceed to Language Selection"
+                accessibilityHint="Navigates to the language selection screen"
             />
         </SafeAreaView>
     )

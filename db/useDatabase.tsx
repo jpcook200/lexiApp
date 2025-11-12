@@ -4,7 +4,7 @@ import { DateTime } from "luxon";
 
 const useDatabase = () => { 
     const db = useSQLiteContext();
-
+    const freeWPDLimit = 6;
     const getLearnedWords = async (filters = { sortBy: 'dateAdded', favouritesOnly: false }) => {
         try {
             
@@ -88,7 +88,6 @@ const useDatabase = () => {
             if (!userResults) {
                 throw new Error('User not found');
             }
-                console.log(word.learn_lang)
             await db.runAsync(
                 `INSERT into learned_words (
                     user_id, word_id, native_word, learning_word, learning_pronunciation,
@@ -265,6 +264,7 @@ const useDatabase = () => {
                 `UPDATE users SET last_fetched = datetime('now', 'localtime') WHERE id = ?`,
                 [1]
             );
+            console.log('user last fetched updated')
         } catch (error) {
             console.error('Error saving last fetched date:', error);
             throw error;
@@ -420,7 +420,7 @@ const useDatabase = () => {
 
     const setLastSet = async () => {
         try {
-            await db.withTransactionAsync(async () => {
+            
             const userResults = await db.getFirstAsync<User>(
                 'SELECT * FROM users WHERE id = ?',
                 [1]
@@ -435,7 +435,7 @@ const useDatabase = () => {
             );
 
             await insertDifficultyLevel(userResults.learn_lang, 'c2');
-            });
+            
             
         } catch (error) {
             console.error('Error setting last set (transaction rolled back):', error);
@@ -484,7 +484,6 @@ const useDatabase = () => {
                     `SELECT completed FROM streak WHERE user_id = ? AND date = ? AND completed = 1 AND lang_pair_code = ?`,
                     [1, yesterday, userLangPair]
                 );
-                console.log('Yesterday completed:', yesterDayCompleted);
 
                 if (!yesterDayCompleted) {
                     await db.runAsync('UPDATE streak_counts SET longest = current WHERE current > longest AND lang_pair_code = ?', [userLangPair]);
@@ -576,7 +575,6 @@ const useDatabase = () => {
                     }
                     break;
                 case 'reset':
-                    console.log('Resetting streak count for lang pair:', userLangPair);
                     await db.runAsync(
                         `UPDATE streak_counts SET current = 0 WHERE lang_pair_code = ?`,
                         [userLangPair]
@@ -602,6 +600,10 @@ const useDatabase = () => {
     };
 
     const getStreakCount = async () => {
+        type Streak = {
+            current: number;
+            best?: number; // optional if not always present
+            };
         try {
             
             const userResults = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = ?', [1]);
@@ -609,7 +611,7 @@ const useDatabase = () => {
                 throw new Error('User not found');
             }
             const userLangPair = `${userResults.native_lang}-${userResults.learn_lang}`;
-            const result = await db.getFirstAsync(
+            const result = await db.getFirstAsync<Streak>(
                 `SELECT * FROM streak_counts WHERE user_id = ? AND lang_pair_code = ?`,
                 [1, userLangPair]
             );
@@ -645,11 +647,13 @@ const useDatabase = () => {
             });
 
             await db.runAsync(
-                `UPDATE users SET last_set = 0, difficulty_level = 'a1' WHERE id = 1`,
-                [nativeLang, learnLang]
+                `UPDATE users SET last_set = 0 WHERE id = 1`,
             );
 
-            console.log(`Progress reset for language pair: ${langPairCode}`);
+            await db.runAsync(
+                'UPDATE difficulties set level = ? WHERE lang = ?',
+                ['a1', learnLang]
+            )
         } catch (error) {
             console.error('Error resetting progress by language pair:', error);
             throw error;
@@ -668,8 +672,27 @@ const useDatabase = () => {
         }
     }
 
+    const setUserAccessLevel = async (accessLevel: string) => { 
+        try {
+            const userResults = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = ?', [1]);
+            if (!userResults) {
+                throw new Error('User not found');
+            }
+            await db.runAsync(
+                `UPDATE users SET access_level = ? WHERE id = ?`,
+                [accessLevel, 1]
+            );
+            if (userResults.words_per_day > freeWPDLimit) { 
+                await setWordsPerDay(freeWPDLimit);
+            }
+        } catch (error) {
+            console.error('Error setting user access level:', error);
+            throw error;
+        }
+    }
+
     
-    return { setTutorialCompleted, insertDifficultyLevel, saveLastFetchedDate, resetProgressByLanguagePair, getStreakCount, getLearnedWordsByTimeframe, updateStreakCount, getWeeklyStreak, updateStreakRecord, insertStreakRecord, saveLastCard, setLastSet, increaseDifficultyLevel, markAsLearned, deleteAllFromDailyWords, insertIntoLearnedWords, getLearnedWords, getLearnedWordsIds, toggleFavourite, getDailyLearnedCount, setNativeLanguage, setLearningLanguage, setWordsPerDay, getPracticeWords, setDifficultyLevel, setRemindersOn, getDailyWords, saveDailyWords };
+    return { setUserAccessLevel, setTutorialCompleted, insertDifficultyLevel, saveLastFetchedDate, resetProgressByLanguagePair, getStreakCount, getLearnedWordsByTimeframe, updateStreakCount, getWeeklyStreak, updateStreakRecord, insertStreakRecord, saveLastCard, setLastSet, increaseDifficultyLevel, markAsLearned, deleteAllFromDailyWords, insertIntoLearnedWords, getLearnedWords, getLearnedWordsIds, toggleFavourite, getDailyLearnedCount, setNativeLanguage, setLearningLanguage, setWordsPerDay, getPracticeWords, setDifficultyLevel, setRemindersOn, getDailyWords, saveDailyWords };
 }
 
 export default useDatabase;

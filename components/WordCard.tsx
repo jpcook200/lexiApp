@@ -48,21 +48,19 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
 
     const flipCard = () => {
         if(isFlipped) {
-        // animate back to the front side
-        Animated.spring(flipAnimation, {
-            toValue: 0,
-            friction: 8,
-            tension: 10,
-            useNativeDriver: true,
-        }).start();
+            Animated.spring(flipAnimation, {
+                toValue: 0,
+                friction: 8,
+                tension: 10,
+                useNativeDriver: true,
+            }).start();
         } else {
-        // animate to the back side
-        Animated.spring(flipAnimation, {
-            toValue: 180,
-            friction: 8,
-            tension: 10,
-            useNativeDriver: true,
-        }).start();
+            Animated.spring(flipAnimation, {
+                toValue: 180,
+                friction: 8,
+                tension: 10,
+                useNativeDriver: true,
+            }).start();
         }
         setIsFlipped(!isFlipped);
     };
@@ -99,15 +97,14 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
 
     return (
         <View className='w-full h-full'>
-            
-            <TouchableWithoutFeedback onPress={flipCard}>
+            <TouchableWithoutFeedback accessibilityLabel='Flip Card' onPress={flipCard}>
                 <View className='w-full h-full'>
                     <Animated.View style={[styles.card, flipToFrontStyle]} className='flex-1'>
                         <ThemedView variant='shaded' className={cardClass}>
                             <View className='p-8 flex-1'>
                                 <View className='gap-4 flex-1'>
                                     <View className='w-full flex-row justify-end'>
-                                        <TouchableOpacity onPress={user ? (() => handleTextToSpeech(word?.learning_word, user.learn_lang)) : () => {}} disabled={displayOnly || ttsDisabled} className={`${ttsDisabled ? 'opacity-50' : ''}`}>
+                                        <TouchableOpacity accessibilityLabel='Text to Speech for Word' onPress={user ? (() => handleTextToSpeech(word?.learning_word, user.learn_lang)) : () => {}} disabled={displayOnly || ttsDisabled} className={`${ttsDisabled ? 'opacity-50' : ''}`}>
                                             <ThemedIcon name={ ttsDisabled ? 'VolumeOff' : 'Volume2' } size={28} />
                                         </TouchableOpacity>
                                     </View>
@@ -119,12 +116,9 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
                                     <View className='bg-primary w-auto px-5 py-1 rounded-full self-start'>
                                         <ThemedText className='font-bold capitalize text-white'>{ word?.part_of_speech }</ThemedText>
                                     </View>
-                                    {/* <View>
-                                        <ThemedText variant='subtext' className='text-lg'>{ word?.learning_pronunciation }</ThemedText>
-                                    </View> */}
                                 </View>
                                 <View className="flex-row justify-end">
-                                    <TouchableOpacity disabled={ displayOnly } onPress={ () => handleFavourite() }>
+                                    <TouchableOpacity accessibilityLabel='Toggle Favourite Word' disabled={ displayOnly } onPress={ () => handleFavourite() }>
                                         <Heart size={ 28 } color={word?.favourite === true || word?.favourite === 1 ? '#fc69b4' : colorScheme === 'dark' ? '#ffffff' : '#000000' } />
                                     </TouchableOpacity>
                                 </View>
@@ -145,7 +139,7 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
                                                 : null
                                         }
                                         </View>
-                                        <TouchableOpacity onPress={() => handleTextToSpeech(word?.learning_sentence, user?.learn_lang || 'en')} disabled={displayOnly || ttsDisabled} className={`${ttsDisabled ? 'opacity-50' : ''}`}>
+                                        <TouchableOpacity accessibilityLabel='Text to Speech for Example Sentence' onPress={() => handleTextToSpeech(word?.learning_sentence, user?.learn_lang || 'en')} disabled={displayOnly || ttsDisabled} className={`${ttsDisabled ? 'opacity-50' : ''}`}>
                                             <ThemedIcon name={ ttsDisabled ? 'VolumeOff' : 'Volume2' } size={28}/>
                                         </TouchableOpacity>
                                     </View>
@@ -161,7 +155,7 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
                                     </View>
                                 </View>
                                 <View className="flex-row justify-end">
-                                    <TouchableOpacity disabled={ displayOnly } onPress={ () => handleFavourite() }>
+                                    <TouchableOpacity accessibilityLabel='Toggle Favourite word' disabled={ displayOnly } onPress={ () => handleFavourite() }>
                                         <Heart size={ 28 } color={word?.favourite === true || word?.favourite === 1 ? '#fc69b4' : colorScheme === 'dark' ? '#ffffff' : '#000000' } />
                                     </TouchableOpacity>
                                 </View>

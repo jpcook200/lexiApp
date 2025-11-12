@@ -53,11 +53,11 @@
     "go_premium_desc": "Unlock all features and take your language learning to the next level with Lexi Premium.",
     "trial_info": "Start with a free 7-day trial - Cancel anytime before the trial ends to avoid charges.",
     "benefit_one_title": "Learn up to 30 words per day",
-    "benefit_one_desc": "Get more words to practice daily and expand your vocabulary faster",
+    "benefit_one_desc": "Get more words to practice daily and expand your vocabulary faster.",
     "benefit_two_title": "Expanded Word Library",
-    "benefit_two_desc": "Access a larger selection of words across multiple difficulty levels and topics",
-    "benefit_three_title": "Remove Ads",
-    "benefit_three_desc": "Enjoy an uninterrupted learning experience with no ads",
+    "benefit_two_desc": "Access a larger selection of words across multiple difficulty levels and topics.",
+    "benefit_three_title": "Learn Multiple Languages at Once",
+    "benefit_three_desc": "Switch between different language pairs and track progress separately",
     "yearly": "yearly",
     "weekly": "weekly",
     "per_year": "/year",
@@ -154,7 +154,24 @@
 
     "reset_progress": "Reset Progress",
     "are_you_sure": "Are you sure?",
-    "confirm_reset_message": "This will erase all progress for the current language pair.\nIf you already have had words today, they will be reset tomorrow.\nThis action cannot be undone."
+    "confirm_reset_message": "This will erase all progress for the current language pair.\nIf you already have had words today, they will be reset tomorrow.\nThis action cannot be undone.",
 
+    "swipe_left_right": "Swipe Left Or Right",
+    "to_navigate": "To Navigate Between Words",
+    "tap_on_word": "Tap On A Word",
+    "to_see_translation": "To See The Translation",
+    "mark_words": "Mark Words As Learned",
+    "swiping_up": "By Swiping Up On The Card",
+    "swipe_up_info": "These words will be stored in your practice words. Any unlearned words will be returned to the pool to be learned again another day.",
 
+    "noun": "Noun",
+    "verb": "Verb",
+    "adjective": "Adjective",
+    "adverb": "Adverb",
+    "pronoun": "Pronoun",
+    "preposition": "Preposition",
+    "conjunction": "Conjunction",
+    "determiner": "Determiner",
+    "interjection": "Interjection",
+    "exclamation": "Exclamation"
 }

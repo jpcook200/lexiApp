@@ -2,114 +2,198 @@ import BackButton from '@/components/BackButton';
 import MainButton from '@/components/MainButton';
 import ThemedIcon from '@/components/ThemedIcon';
 import ThemedText from '@/components/ThemedText';
+import useDatabase from '@/db/useDatabase';
+import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ErrorCode, hasActiveSubscriptions, useIAP } from 'react-native-iap';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+const { appStoreSharedSecret } = Constants.expoConfig!.extra as { appStoreSharedSecret: string };
+
 const Subscribe = () => {
-    const [selectedPlan, setSelectedPlan] = useState<string>('yearly');
-    const { t } = useTranslation();
-    const features = [
-    { 
-        icon: 'Zap', 
-        title: t("benefit_one_title"), 
-        desc: t("benefit_one_desc")
-    },
-    { 
-        icon: 'BookOpen', 
-        title: t("benefit_two_title"), 
-        desc: t("benefit_two_desc")
-    },
-    { 
-        icon: 'ShieldCheck', 
-        title: t("benefit_three_title"), 
-        desc: t("benefit_three_desc")
-    },
-];
+  const { setUserAccessLevel } = useDatabase();
+  const [selectedPlan, setSelectedPlan] = useState<string>('lexigramproyearly');
+  const { t } = useTranslation();
+  const [loading, setLoading] = useState(true);
+   const {
+    connected,
+    subscriptions,
+    fetchProducts,
+    requestPurchase,
+    getActiveSubscriptions,
     
-    const plans = [
-        {
-            id: 'weekly',
-            name: t("weekly_plan"),
-            price: '$1.99',
-            billingCycle: t("weekly"),
-            per: t("per_week"),
-            caption: "per week after 7 day free trial"
-        },
-        {
-            id: 'yearly',
-            name: t("yearly_plan"),
-            price: '$29.99',
-            billingCycle: t("yearly"),
-            per: t("per_year"),
-            caption: "per year after 7 day free trial"
-        },
-    ];
+    
+   } = useIAP({
+      onPurchaseSuccess: (purchase) => {
+        setUserAccessLevel('pro');
+        router.replace('/(tabs)/home')
+      },
+      onPurchaseError: (error) => {
+        switch (error.code) {
+          case ErrorCode.UserCancelled:
+            // User cancelled — no need to alert
+            break;
+          case ErrorCode.NetworkError:
+            Alert.alert('Network Error', 'Please check your connection.');
+            break;
+          case ErrorCode.ItemUnavailable:
+            Alert.alert('Item Unavailable', 'This item is not available for purchase.');
+            break;
+          default:
+            Alert.alert('Purchase Failed', error.message);
+        }
+      },
+    });
 
+  const subscriptionSkus = Platform.select({
+    ios: ['lexigramproweekly', 'lexigramproyearly'],
+    android: ['com.yourapp.lexigram.pro.weekly', 'com.yourapp.lexigram.pro.yearly'],
+  }) || [];
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      if (connected) {
+        try {
+          const activeSubscriptions = await hasActiveSubscriptions();
+          if (activeSubscriptions) {
+            await setUserAccessLevel('pro');
+            router.replace('/(tabs)/home')
+          } else { 
+            await setUserAccessLevel('free');
+          }
+          fetchProducts({ skus: subscriptionSkus, type: 'subs' });
+        } catch (error) {
+          console.error('Error fetching products:', error);
+        } finally { 
+          setLoading(false);
+        }
+      }
+    };
+
+    loadProducts();
+  }, [connected]);
+
+  // Move these inside the component
+  const features = [
+    { icon: 'Zap', title: t("benefit_one_title"), desc: t("benefit_one_desc") },
+    { icon: 'BookOpen', title: t("benefit_two_title"), desc: t("benefit_two_desc") },
+    { icon: 'Globe', title: t("benefit_three_title"), desc: t("benefit_three_desc") },
+  ];
+
+  const plans = [
+    { id: subscriptions[0]?.id, name: t("weekly_plan"), price: subscriptions[0]?.displayPrice, billingCycle: t("weekly"), per: t("per_week"), caption: "per week after 7 day free trial"  },
+    { id: subscriptions[1]?.id, name: t("yearly_plan"), price: subscriptions[1]?.displayPrice, billingCycle: t("yearly"), per: t("per_year"), caption: "per year after 7 day free trial" },
+  ];
+
+  const buySubscriptionWithOffer = async (
+    subscriptionId: string,
+    // discountOffer?: DiscountOfferInputIOS,
+  ) => {
+    try { 
+      await requestPurchase({
+      request: {
+        ios: {
+          sku: subscriptionId,
+          // // Optional: apply promotional offer
+          // ...(discountOffer && {withOffer: discountOffer}),
+        },
+        android: {skus: [subscriptionId]},
+      },
+      type: 'subs',
+    });
+
+    } finally { 
+      setLoading(false);
+    }
+  };
+
+  if (loading) { 
     return (
-        <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark bg-item-light dark:bg-item-dark p-6">
-            <View className='absolute -top-10 -left-60 h-[100%] aspect-[1/1] rounded-br-full bg-background-light dark:bg-background-dark '></View>
-            <View className='flex-row items-center justify-between'>
-                <BackButton />
-                <TouchableOpacity onPress={() => router.push('/(tabs)/home')} className='flex-row items-center self-start rounded-full border border-border-light dark:border-border-dark bg-item-light dark:bg-item-dark pl-3 pr-4 py-1'>
-                    <ThemedText className='text-lg ml-2 font-bold'>{t("skip")}</ThemedText>
-                    <ThemedIcon name='ArrowRight' size={ 20 } />
-                </TouchableOpacity>
-            </View>
-            <ScrollView className='flex-1 h-full w-full py-8'>
-                <View className='pb-12'>
-                    <View className='gap-2'>
-                        <View>
-                            <ThemedText className='text-4xl font-medium'>{ t("get") }</ThemedText>
-                            <View className='flex-row'>
-                                <ThemedText className='text-5xl font-bold'>Lexigram</ThemedText>
-                                <Text className='text-primary font-bold'>PRO</Text>
-                            </View>
-                        </View>
-                        <ThemedText variant='subtext' className='text-lg'>{ t("take_your_learning") }</ThemedText>
-                    </View>
-                    <View>
-                        {features.map((feature, index) => (
-                            <View key={index} className='flex-row items-center gap-4 mt-6'>
-                                <View className='w-12 h-12 bg-item-light dark:bg-item-dark rounded-full flex items-center justify-center border border-border-light dark:border-border-dark'>
-                                    <ThemedIcon name={feature.icon} size={16} />
-                                </View>
-                                <View className='flex-1'>
-                                    <ThemedText className='text-lg font-bold'>{feature.title}</ThemedText>
-                                    <ThemedText variant='subtext' className='text-md'>{feature.desc}</ThemedText>
-                                </View>
-                            </View>
-                        ))}
-                        <ThemedText className='my-6 font-bold'>{ t("try_free") }</ThemedText>
-                        <ThemedText className='font-bold text-lg'>{ t("select_plan") }:</ThemedText>
-                        <View className='flex-row items-center justify-center gap-6 mt-6'>
-                            
-                            {plans.map((plan) => (
-                                <Pressable onPress={ () => setSelectedPlan(plan.id) } className={`bg-item-light dark:bg-item-dark border w-[40%] aspect-[1/1] rounded-xl p-4 ${selectedPlan === plan.id ? 'border-2 border-primary' : 'border-border-light dark:border-border-dark'} flex justify-between`} key={ plan.id }>
-                                    { plan.name ===  t("yearly_plan") && <View className='absolute top-0 right-4 -translate-y-[50%] bg-primary text-white px-2 py-1 rounded-full'>
-                                        <ThemedText className='text-xs font-bold text-white'>{ t("best_value") }</ThemedText>
-                                    </View> }
-
-                                    <ThemedText variant='subtext' className='capitalize text-lg'>{plan.billingCycle}</ThemedText>
-                                    <View className='flex-row items-baseline'>
-                                        <ThemedText className='text-2xl font-bold'>{plan.price}</ThemedText>
-                                        <ThemedText variant='subtext' className='text-sm'>{ plan.per }</ThemedText>
-                                    </View>
-                                    {selectedPlan === plan.id ? <Text className='mt-auto bg-primary self-start p-2 text-white font-bold rounded-md'>{ t("selected") }</Text> : <View className='mt-auto h-8' />}
-                                </Pressable>
-                            ))}
-                        </View>
-                    </View>        
-                </View>
-            </ScrollView>
-            <MainButton
-                text={ t("subscribe_now") }
-                onPress={() => console.log('nice')}
-            />
-        </SafeAreaView>
+      <ActivityIndicator size="small" className="flex-1 justify-center items-center" />
     );
+  }
+
+  return (
+    <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark bg-item-light dark:bg-item-dark p-6">
+      <View className='absolute -top-10 -left-60 h-[100%] aspect-[1/1] rounded-br-full bg-background-light dark:bg-background-dark'></View>
+      <View className='flex-row items-center justify-between'>
+        <BackButton />
+        <TouchableOpacity onPress={() => router.push('/(tabs)/home')} className='flex-row items-center self-start rounded-full border border-border-light dark:border-border-dark bg-item-light dark:bg-item-dark pl-3 pr-4 py-1'>
+          <ThemedText className='text-lg ml-2 font-bold'>{t("skip")}</ThemedText>
+          <ThemedIcon name='ArrowRight' size={20} />
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView className='flex-1 h-full w-full py-8'>
+        <View className='pb-12'>
+          <View className='gap-2'>
+            <View>
+              <ThemedText className='text-4xl font-medium'>{t("get")}</ThemedText>
+              <View className='flex-row'>
+                <ThemedText className='text-5xl font-black'>Lexigram</ThemedText>
+                <Text className='text-primary font-bold'>PRO</Text>
+              </View>
+            </View>
+            <ThemedText variant='subtext' className='text-lg'>{t("take_your_learning")}</ThemedText>
+          </View>
+
+          <View>
+            {features.map((feature, index) => (
+              <View key={index} className='flex-row items-center gap-4 mt-6'>
+                <View className='w-12 h-12 bg-item-light dark:bg-item-dark rounded-full flex items-center justify-center border border-border-light dark:border-border-dark'>
+                  <ThemedIcon name={feature.icon} size={16} />
+                </View>
+                <View className='flex-1'>
+                  <ThemedText className='text-lg font-bold'>{feature.title}</ThemedText>
+                  <ThemedText variant='subtext' className='text-md'>{feature.desc}</ThemedText>
+                </View>
+              </View>
+            ))}
+
+            <ThemedText className='my-6 font-bold'>{t("try_free")}</ThemedText>
+            <ThemedText className='font-bold text-lg'>{t("select_plan")}:</ThemedText>
+
+            <View className='flex-row items-center justify-center gap-6 mt-6'>
+              {plans.map((plan) => (
+                <Pressable
+                  onPress={() => setSelectedPlan(plan.id)}
+                  className={`bg-item-light dark:bg-item-dark border w-[40%] aspect-[1/1] rounded-xl p-4 ${selectedPlan === plan.id ? 'border-2 border-primary' : 'border-border-light dark:border-border-dark'} flex justify-between`}
+                  key={plan.id}
+                >
+                  {plan.name === t("yearly_plan") && (
+                    <View className='absolute top-0 right-4 -translate-y-[50%] bg-primary text-white px-2 py-1 rounded-full'>
+                      <ThemedText className='text-xs font-bold text-white'>{t("best_value")}</ThemedText>
+                    </View>
+                  )}
+                  <ThemedText variant='subtext' className='capitalize text-lg'>{plan.billingCycle}</ThemedText>
+                  <View className='flex-row items-baseline'>
+                    <ThemedText className='text-2xl font-bold'>{plan.price}</ThemedText>
+                    <ThemedText variant='subtext' className='text-sm'>{plan.per}</ThemedText>
+                  </View>
+                  {selectedPlan === plan.id ? (
+                    <Text className='mt-auto bg-primary self-start p-2 text-white font-bold rounded-md'>{t("selected")}</Text>
+                  ) : (
+                    <View className='mt-auto h-8' />
+                  )}
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+
+      <MainButton
+        text={(t("subscribe_now"))}
+        onPress={() => buySubscriptionWithOffer(selectedPlan)}
+        accessibilityLabel='Proceed to Homepage'
+        accessibilityHint='Navigates to the homepage'
+
+      />
+    </SafeAreaView>
+  );
 };
 
 export default Subscribe;

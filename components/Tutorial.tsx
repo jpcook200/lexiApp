@@ -1,11 +1,13 @@
 import useDatabase from '@/db/useDatabase';
 import { Dispatch, SetStateAction, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 import GestureIndicator from './GestureIndicator';
 import MainButton from './MainButton';
 
 const Tutorial = ({ setShowTutorial }: {setShowTutorial: Dispatch<SetStateAction<boolean>>}) => {
     const [page, setPage] = useState(0);
+    const { t } = useTranslation();
     const { setTutorialCompleted } = useDatabase();
 
     const handleFinish = async () => {
@@ -21,14 +23,15 @@ const Tutorial = ({ setShowTutorial }: {setShowTutorial: Dispatch<SetStateAction
                             type='swipeLR'
                             color='#1c95ffff'
                         />
-                        <Text className='text-3xl font-bold text-center mb-4 mt-8'>Swipe Left Or Right</Text>
-                        <Text className='text-xl text-center font-bold text-gray-600'>To Navigate Between Words</Text>
+                        <Text className='text-3xl font-bold text-center mb-4 mt-8'>{ t("swipe_left_right") }</Text>
+                        <Text className='text-xl text-center font-bold text-gray-600'>{t("to_navigate")}</Text>
                     </View>
                     
                     <MainButton
                         text='Next'
                         onPress={() => setPage(1)}
                         className='self-end'
+                        accessibilityLabel='Next Page'
                     />
                 </View>
             )}
@@ -39,12 +42,13 @@ const Tutorial = ({ setShowTutorial }: {setShowTutorial: Dispatch<SetStateAction
                             type='tap'
                             color='#1c95ffff'
                         />
-                        <Text className='text-3xl font-bold text-center mb-4 mt-8'>Tap On A Word</Text>
-                        <Text className='text-xl text-center font-bold text-gray-600'>To See The Translation</Text>
+                        <Text className='text-3xl font-bold text-center mb-4 mt-8'>{t("tap_on_word")}</Text>
+                        <Text className='text-xl text-center font-bold text-gray-600'>{ t("to_see_translation") }</Text>
                     </View>
                     <MainButton
                         text='Next'
                         onPress={() => setPage(2)}
+                        accessibilityLabel='Next Page'
                     />
                 </View>
             )}
@@ -55,13 +59,14 @@ const Tutorial = ({ setShowTutorial }: {setShowTutorial: Dispatch<SetStateAction
                             type='swipeUp'
                             color='#1c95ffff'
                         />
-                        <Text className='text-3xl font-bold text-center mb-4 mt-8'>Mark Words As Learned</Text>
-                        <Text className='text-xl text-center font-bold mb-4'>By Swiping Up On The Card</Text>
-                        <Text className='text-center font-medium text-lg text-gray-600'>These words will be stored in your practice words. Any unlearned words will be returned to the pool to be learned again another day.</Text>
+                        <Text className='text-3xl font-bold text-center mb-4 mt-8'>{ t("mark_words") }</Text>
+                        <Text className='text-xl text-center font-bold mb-4'>{ t("swiping_up") }</Text>
+                        <Text className='text-center font-medium text-lg text-gray-600'>{t("swipe_up_info")}</Text>
                     </View>
                         <MainButton
                         text='Next'
                         onPress={() => handleFinish()}
+                        accessibilityLabel='Close Tutorial'
                     />
                 </View>
             )}

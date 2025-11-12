@@ -39,7 +39,6 @@ const useGetWords = () => {
 
     const handleNewDayOrEmptyWords = async ({ user, learnedWordIds, dailyWordIds, localDatetime, deleteWords }: {user: User, learnedWordIds: number[], dailyWordIds: number[], localDatetime: string, deleteWords: boolean}) => {
         setProgressToday(0);
-        
         if (deleteWords) { 
             await deleteAllFromDailyWords();
         }
@@ -57,9 +56,13 @@ const useGetWords = () => {
 
         const newData = await saveDailyWords(newWords);
         const filteredResults = newData.filter((word: Word) => word.learned === 0);
+        
         const highestWordDifficulty = getHighestDifficultyLevel(filteredResults);
-
-        await increaseDifficultyLevel(highestWordDifficulty);
+        const allSameAsHighest = filteredResults.length > 0 && filteredResults.every(word => (word.learning_difficulty ?? '').toLowerCase() === highestWordDifficulty);
+        if (filteredResults.length > 0 && !allSameAsHighest) {
+            await increaseDifficultyLevel(highestWordDifficulty);
+        }
+        
         setActiveWords(filteredResults);
 
         if (user.last_set === 0 && (lastSet === true)) {
@@ -103,7 +106,6 @@ const useGetWords = () => {
 
     const handleGetWords = async (user: User) => {
         if (!user) return [];
-        console.log("fetching words for user:", user);
         try {
             const storedDailyWords = await getDailyWords();
             const dailyWordIds = storedDailyWords.map((word: Word) => word.word_id);
@@ -130,7 +132,6 @@ const useGetWords = () => {
             }
 
             if (localDate > storedDate) {
-                console.log("new day running")
                 return handleNewDayOrEmptyWords({
                     user,
                     learnedWordIds,
@@ -139,7 +140,7 @@ const useGetWords = () => {
                     deleteWords: true
                 });
             } else if (storedDate === localDate) {
-                console.log("same day running")
+
                 return handleSameDay({
                     user,
                     storedDailyWords,
@@ -148,6 +149,8 @@ const useGetWords = () => {
                     localDatetime,
                 });
             }
+
+            return storedDailyWords.filter((word) => word.learned === 0);
 
         } catch (error) {
             console.error('Error fetching daily words:', error);

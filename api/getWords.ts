@@ -1,7 +1,7 @@
 
 import { Word, getWordsParams } from '@/types/types';
 import Constants from 'expo-constants';
-const { apiUrl } = Constants.expoConfig!.extra as { apiUrl: string };
+const { apiUrl, apiKey } = Constants.expoConfig!.extra as { apiUrl: string, apiKey: string };
 
 type GetWordsResponse = { 
     words: Word[];
@@ -10,12 +10,11 @@ type GetWordsResponse = {
 
 export const getWords = async ({ nativeLang, learningLang, difficulty = 'a1', limit, excludeIds, localDatetime }: getWordsParams): Promise<GetWordsResponse> => {
     try {
-        console.log('Fetching words with params:', { nativeLang, learningLang, difficulty, limit, excludeIds, localDatetime });
-
         const response = await fetch(`${apiUrl}/api/words/get-daily?nativeLang=${nativeLang}&learningLang=${learningLang}&difficulty=${difficulty || 'a1'}&limit=${limit}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                "api-key": apiKey,
             },
             body: JSON.stringify({ excludeIds, localDatetime }),
         });

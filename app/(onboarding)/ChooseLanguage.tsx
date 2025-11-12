@@ -80,6 +80,8 @@ const ChooseLanguage = () => {
                     text={ t("next") }
                     onPress={handleNext}
                     next
+                    accessibilityLabel="Proceed to Learning Language Selection"
+                    accessibilityHint="Navigates to the learning language selection screen"
                 />
             </View>
         </SafeAreaView>

@@ -4,7 +4,7 @@ import Streak from '@/components/Streak';
 import ThemedText from '@/components/ThemedText';
 import ThemedView from '@/components/ThemedView';
 import useDatabase from '@/db/useDatabase';
-import useGetUser from '@/hooks/useGetUser';
+import { useUserStore } from '@/hooks/useGetUser';
 import useInitStreak from '@/hooks/useInitStreak';
 import { LearnedCounts, Word } from '@/types/types';
 import { useFocusEffect } from '@react-navigation/native';
@@ -12,13 +12,14 @@ import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
     const { t } = useTranslation();
+    const db  = useSQLiteContext()
     const { getLearnedWordsByTimeframe } = useDatabase();
-    const { user } = useGetUser();
+    const { user, loading, fetchUser, setUser } = useUserStore();
     const [learnedWords, setLearnedWords] = useState<Word[]>([]);
     const [learnedCounts, setLearnedCounts] = useState<LearnedCounts>({
         today: 0,
@@ -26,7 +27,6 @@ export default function HomeScreen() {
         allTime: 0
     })
 
-    const db = useSQLiteContext();
     useInitStreak();
 
     const getLearnedWords = async () => { 
@@ -53,12 +53,29 @@ export default function HomeScreen() {
         }, [user])
     );
 
+    useFocusEffect(
+        useCallback(() => {
+            fetchUser(db)
+
+        }, [])
+    );
+
+    if (!user) { 
+        return (
+            <SafeAreaView edges={['top']} className='flex-1 h-full bg-background-light dark:bg-background-dark p-4 justify-center items-center'>
+                <ActivityIndicator size='small' color='#1c95ffff'/>
+            </SafeAreaView>
+        )
+    }
+
     return (
         <SafeAreaView edges={['top']} className='flex-1 bg-background-light dark:bg-background-dark px-4'>
             <ScrollView className=''>
                 <View className="mb-6 flex-row justify-between items-center">
                     <Logo/>
-                    <LanguageIndicator/>
+                    <LanguageIndicator
+                        language={user.learn_lang}
+                    />
                 </View>
             
                 <Streak
@@ -96,7 +113,7 @@ export default function HomeScreen() {
                             )}
                             
                         </ThemedView>
-                        <TouchableOpacity style={{boxShadow: '0 4px 0 #2889e3ff'}} onPress={() => router.push('/(tabs)/home/userWordsList')} className='h-12 bg-primary w-full text-center rounded-lg mt-6 flex justify-center items-center'>
+                        <TouchableOpacity accessibilityLabel='View All Learned Words' accessibilityHint='View all your learned words' style={{boxShadow: '0 4px 0 #2889e3ff'}} onPress={() => router.push('/(tabs)/home/userWordsList')} className='h-12 bg-primary w-full text-center rounded-lg mt-6 flex justify-center items-center'>
                             <Text className='font-bold text-text-dark'>{ t("view_all") }</Text>
                         </TouchableOpacity>
                     </View>

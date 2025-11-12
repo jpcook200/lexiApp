@@ -1,5 +1,4 @@
 import { router, Tabs } from 'expo-router';
-import { House, Layers, Settings } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { View } from 'react-native';
 
@@ -34,7 +33,7 @@ export default function TabLayout() {
                     options={{
                         title: 'Dashboard',
                         headerShown: false, 
-                        tabBarIcon: ({ color }) => <House color={color} size={28} strokeWidth={2.5} />,
+                        // tabBarIcon: ({ color }) => <House color={color} size={28} strokeWidth={2.5} />,
                     }}
                 />
                 <Tabs.Screen
@@ -42,7 +41,7 @@ export default function TabLayout() {
                     options={{
                         title: 'Learn',
                         headerShown: false,
-                        tabBarIcon: ({ color }) => <Layers color={color} size={28} strokeWidth={2.5} />,
+                        // tabBarIcon: ({ color }) => <Layers color={color} size={28} strokeWidth={2.5} />,
                     }}
                 />
                 <Tabs.Screen
@@ -50,7 +49,7 @@ export default function TabLayout() {
                     options={{
                         title: 'Settings',
                         headerShown: false,
-                        tabBarIcon: ({ color }) => <Settings color={color} size={28} strokeWidth={2.5} />,
+                        // tabBarIcon: ({ color }) => <Settings color={color} size={28} strokeWidth={2.5} />,
                     }}
                 />
             </Tabs>

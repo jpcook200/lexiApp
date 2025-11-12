@@ -1,5 +1,5 @@
 import Constants from 'expo-constants';
-const { apiUrl } = Constants.expoConfig!.extra as { apiUrl: string };
+const { apiUrl, apiKey } = Constants.expoConfig!.extra as { apiUrl: string, apiKey: string };
 
 import { Audio } from 'expo-av';
 
@@ -7,7 +7,10 @@ export const textToSpeech = async (text: string, lang: string) => {
     try {
         const response = await fetch(`${apiUrl}/api/words/text-to-speech`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                "api-key": apiKey,
+             },
             body: JSON.stringify({ text, lang }),
         });
 

@@ -99,6 +99,8 @@ const WelcomeTwo = () => {
                 text={ t("next") }
                 onPress={() => router.push('/(onboarding)/welcomeScreens/welcomeThree')}
                 next
+                accessibilityLabel="Proceed to Next Welcome Screen"
+                accessibilityHint="Navigates to the third welcome screen"
             />
         </SafeAreaView>
     )

@@ -14,8 +14,7 @@ const Index = () => {
         try {
             const locals = Localization.getLocales();
             const languageCode = locals[0]?.languageCode || 'en'
-            const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            console.log(userTimezone)
+            const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
             const user = await db.getFirstAsync<User>('SELECT * FROM users');
 
             if (!user) {

@@ -1,3 +1,4 @@
+import BackButton from '@/components/BackButton';
 import FiltersModal from '@/components/FiltersModal';
 import MainButton from '@/components/MainButton';
 import ThemedIcon from '@/components/ThemedIcon';
@@ -27,16 +28,16 @@ const userWordsList = () => {
     });
     
     //functions
-    const fetchLearnedWords = async (filters: FiltersType) => { 
+    const fetchLearnedWords = async (filters: FiltersType) => {
         try {
             const words = await getLearnedWords(filters); // Assuming user_id is 1 for demo
             setLearnedWords(words);
         } catch (error) {
             console.error('Error fetching learned words:', error);
         }
-    }
+    };
 
-    const handleFavourite = async (wordId: number, isFavourite: 0 | 1) => { 
+    const handleFavourite = async (wordId: number, isFavourite: 0 | 1) => {
         try {
             await toggleFavourite(wordId, isFavourite);
             // Update local state to reflect the change
@@ -44,7 +45,7 @@ const userWordsList = () => {
         } catch (error) {
             console.error('Error toggling favourite status:', error);
         }
-    }
+    };
 
     const applyFilters = (filters: FiltersType) => { 
         fetchLearnedWords(filters)
@@ -59,20 +60,15 @@ const userWordsList = () => {
     
     return (
         <SafeAreaView edges={['top']} className='h-full bg-item-light dark:bg-item-dark'>
-            <TouchableOpacity onPress={() => router.back()} className='flex-row items-center self-start mb-6 px-4'>
-                <View className='w-10 h-10 bg-item-light dark:bg-item-dark rounded-full flex items-center justify-center border border-border-light dark:border-border-dark'>
-                    <ThemedIcon name='ArrowLeft' size={ 20 } />
-                </View>
-                <ThemedText className='text-lg ml-2 font-bold'>{ t("back") }</ThemedText>
-            </TouchableOpacity>
             <View className='px-4 border-b-2 border-border-light dark:border-border-dark pb-4'>
-                <ThemedText className='text-4xl font-bold mb-4'>{ t("your_vocabulary") }</ThemedText>
+                <BackButton/>
+                <ThemedText className='text-4xl font-bold my-4'>{ t("your_vocabulary") }</ThemedText>
                 <View className='flex-row justify-between items-center'>
                     <View>
                         <ThemedText variant='subtext'>{ t("total") }</ThemedText>
                         <ThemedText className='text-2xl font-bold'>{learnedWords.length}</ThemedText>
                     </View>
-                    <TouchableOpacity onPress={() => setModalVisible(!modalVisible)} className=''>
+                    <TouchableOpacity accessibilityLabel='Open Filters Menu' onPress={() => setModalVisible(!modalVisible)}>
                         <ThemedIcon name='Settings' size={24} />
                     </TouchableOpacity>
                 </View>
@@ -94,7 +90,7 @@ const userWordsList = () => {
                             </View>
 
                         </View>
-                        <TouchableOpacity className='ml-auto' onPress={ () => handleFavourite(word?.id, word?.favourite) }>
+                        <TouchableOpacity accessibilityLabel='Toggle Word Favourite' className='ml-auto' onPress={ () => handleFavourite(word?.id, word?.favourite) }>
                             <Heart size={ 24 } color={word?.favourite === 1 ? '#fc69b4' : colorScheme === 'dark' ? '#ffffff' : '#000000' } />
                         </TouchableOpacity>
                     </View>

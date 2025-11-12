@@ -31,7 +31,8 @@ const FiltersModal = ({ modalVisible, setModalVisible, filters, setFilters, appl
                     <ThemedText className='text-lg font-medium'>{t("show_faves_only")}</ThemedText>
                     <Switch
                         value={filters.favouritesOnly}
-                        onChange={() => setFilters(prev => ({...prev, favouritesOnly: !prev.favouritesOnly}))}
+                        onChange={() => setFilters(prev => ({ ...prev, favouritesOnly: !prev.favouritesOnly }))}
+                        accessibilityLabel='Toggle show favourites only'
                     />
                 </View>
 
@@ -42,6 +43,7 @@ const FiltersModal = ({ modalVisible, setModalVisible, filters, setFilters, appl
                             selectedValue={filters.sortBy}
                             onValueChange={(value) => setFilters(prev => ({...prev, sortBy: value}))}
                             dropdownIconColor="#888"
+                            accessibilityLabel='Choose Sort by Option'
                         >
                             <Picker.Item label={ t("alphabetical") } value="alphabetical" />
                             <Picker.Item label={ t("date_added") } value="dateAdded" />
@@ -53,6 +55,7 @@ const FiltersModal = ({ modalVisible, setModalVisible, filters, setFilters, appl
                 <MainButton
                     text={t("apply")}
                     onPress={applyFilters}
+                    accessibilityLabel='Apply filters'
                 />
             </View>
         </Modal>

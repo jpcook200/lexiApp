@@ -1,18 +1,30 @@
 import { User } from '@/types/types';
-import { useFocusEffect } from '@react-navigation/native';
-import { useSQLiteContext } from 'expo-sqlite';
-import { useCallback, useState } from 'react';
+import { SQLiteDatabase } from 'expo-sqlite';
+import { create } from 'zustand';
 
-const useGetUser = () => {
-    const db = useSQLiteContext();
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<Error | null>(null);
+// Define store state + actions
+type UserState = {
+    user: User | null;
+    loading: boolean;
+    error: Error | null;
+    selectedWordId: number | null;
+    fetchUser: (db: SQLiteDatabase) => Promise<User | null>;
+    setUser: (user: User | null) => void;
+    setSelectedWordId: (id: number | null) => void;
+};
 
-    const fetchUser = async () => {
+// Create Zustand store
+export const useUserStore = create<UserState>((set) => ({
+    user: null,
+    loading: true,
+    error: null,
+    selectedWordId: null,
+
+    fetchUser: async (db: SQLiteDatabase) => {
+        set({ loading: true, error: null });
         try {
             const result = await db.getFirstAsync<User & { difficulty_level?: string }>(
-            `
+                `
                 SELECT 
                     users.*, 
                     difficulties.level AS difficulty_level
@@ -20,31 +32,22 @@ const useGetUser = () => {
                 LEFT JOIN difficulties 
                     ON users.learn_lang = difficulties.lang
                 WHERE users.id = ?
-            `, [1]);
-            setUser(result || null);
+                `,
+                [1]
+            );
+
+            set({ user: result || null });
+            return result || null;
         } catch (err) {
-            setError(err as Error);
+            
             console.error('Error fetching user:', err);
+            set({ error: err as Error });
+            return null;
         } finally {
-            setLoading(false);
+            set({ loading: false });
         }
-    };
+    },
 
-
-    useFocusEffect(
-        useCallback(() => {
-            let isActive = true; 
-            setLoading(true);
-            fetchUser();
-            setLoading(false);
-
-            return () => {
-                isActive = false;
-            };
-        }, [db])
-    );
-
-    return { user, loading, error, fetchUser };
-};
-
-export default useGetUser;
+    setUser: (user) => set({ user }),
+    setSelectedWordId: (id) => set({ selectedWordId: id }),
+}));

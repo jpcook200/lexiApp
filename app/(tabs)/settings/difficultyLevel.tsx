@@ -2,13 +2,13 @@ import ThemedText from '@/components/ThemedText';
 import ThemedView from '@/components/ThemedView';
 import { levels } from '@/constants/languages';
 import useDatabase from '@/db/useDatabase';
-import useGetUser from '@/hooks/useGetUser';
+import { useUserStore } from '@/hooks/useGetUser';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { TouchableOpacity } from 'react-native';
 
 const LearningLanguages = () => {
-    const { user } = useGetUser();
+    const { user } = useUserStore();
     const { insertDifficultyLevel } = useDatabase();
     const { t } = useTranslation();
     
@@ -29,6 +29,7 @@ const LearningLanguages = () => {
                     key={ level.code }
                     onPress={() => handleSelectLevel(level.code)}
                     className="p-6 border-b border-border-light dark:border-border-dark"
+                    accessibilityLabel={`Select Difficulty Level ${level.code}`}
                 >
                     <ThemedText className="text-lg font-medium">{t(level.label.replace(' ', '_').toLowerCase())} ({t(level.code)})</ThemedText>
                 </TouchableOpacity>

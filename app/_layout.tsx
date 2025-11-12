@@ -48,7 +48,6 @@ export default function RootLayout() {
                 databaseName="userDatabase.db"
                 onInit={async (db) => {
                     await db.execAsync(`
- 
                         
                         CREATE TABLE IF NOT EXISTS users (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -60,7 +59,8 @@ export default function RootLayout() {
                             timezone TEXT,
                             last_set INTEGER DEFAULT 0,
                             last_fetched DATETIME,
-                            tutorial_completed BOOLEAN DEFAULT 0
+                            tutorial_completed BOOLEAN DEFAULT 0,
+                            access_level TEXT DEFAULT 'free'
                         );
                         
                         CREATE TABLE IF NOT EXISTS difficulties (

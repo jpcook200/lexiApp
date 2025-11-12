@@ -31,6 +31,7 @@ const DifficultyModal = ({ modalVisible, setModalVisible, difficultyLevel, setDi
                             }}
                             selectedValue={difficultyLevel}
                             onValueChange={(value) => setDifficultyLevel(value)}
+                            accessibilityLabel='Choose Difficulty Level'
                         >
                             <Picker.Item label={ t("all") } value="" />
                             <Picker.Item label={ t("beginner") + ' ' +  `(${t("a1")})` } value="A1" />
@@ -44,6 +45,7 @@ const DifficultyModal = ({ modalVisible, setModalVisible, difficultyLevel, setDi
                     <MainButton
                         text={t("apply")}
                         onPress={handleApply}
+                        accessibilityLabel='Apply difficulty level'
                     />
                 </View>
             </View>

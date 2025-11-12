@@ -3,19 +3,23 @@ import ThemedIcon from '@/components/ThemedIcon';
 import ThemedText from '@/components/ThemedText';
 import ThemedView from '@/components/ThemedView';
 import useDatabase from '@/db/useDatabase';
-import useGetUser from '@/hooks/useGetUser';
+import { useUserStore } from '@/hooks/useGetUser';
 import { getLanguageFlag } from '@/utilities/helpers';
 import { scheduleDailyReminder } from '@/utilities/notifications';
+import { useFocusEffect } from '@react-navigation/native';
 import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
+import { useSQLiteContext } from 'expo-sqlite';
 import { useColorScheme } from 'nativewind';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Linking, ScrollView, Switch, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Settings() {
     const { t } = useTranslation();
-    const { user, loading, error, fetchUser } = useGetUser();
+    const db = useSQLiteContext()
+    const { user, loading, fetchUser, setUser } = useUserStore();
     const { colorScheme, toggleColorScheme } = useColorScheme();
     const { setRemindersOn, resetProgressByLanguagePair } = useDatabase();
 
@@ -49,7 +53,7 @@ export default function Settings() {
         } catch (error) {
             console.error('Error toggling reminders:', error);
         } finally { 
-            fetchUser(); // refresh user data to get updated reminders_on value
+            fetchUser(db); // refresh user data to get updated reminders_on value
         }
     };
 
@@ -75,19 +79,17 @@ export default function Settings() {
         );
     };
 
+    useFocusEffect(
+        useCallback(() => {
+            fetchUser(db)
 
-    if (loading || !user) {
+        }, [])
+    );
+
+    if (!user) {
         return (
             <SafeAreaView edges={['top']} className='flex-1 h-full bg-background-light dark:bg-background-dark p-4 justify-center items-center'>
                 <ActivityIndicator size='small' color='#1c95ffff'/>
-            </SafeAreaView>
-        );
-    }
-
-    if (error) {
-        return (
-            <SafeAreaView edges={['top']} className='flex-1 h-full bg-background-light dark:bg-background-dark p-4'>
-                <ThemedText>Error loading user data.</ThemedText>
             </SafeAreaView>
         );
     }
@@ -134,37 +136,37 @@ export default function Settings() {
                     <View>
                         <ThemedText>{t("subscription")}</ThemedText>
                         <ThemedView variant='item' className='border border-border-light dark:border-border-dark rounded-lg mt-2 px-4'>
-                            <View className='flex-row items-center gap-4 h-20'>
+                            <TouchableOpacity onPress={() => router.push('../../(onboarding)/Subscribe')} className='flex-row items-center gap-4 h-20'>
                                 <ThemedIcon name={'CreditCard'} size={20} />
                                 <ThemedText className='text-lg font-medium'>{t("subscription")}</ThemedText>
-                                <ThemedText className='ml-auto font-medium'>Premium</ThemedText>
+                                <ThemedText className='ml-auto font-medium'>{ t(user.access_level) }</ThemedText>
                                 <ThemedIcon name='ChevronRight' size={20} />
-                            </View>
+                            </TouchableOpacity>
                             
                         </ThemedView>
                     </View>
                     <View>
                         <ThemedText>{ t("user") }</ThemedText>
                         <ThemedView variant='item' className='border border-border-light dark:border-border-dark rounded-lg mt-2 px-4'>
-                            <TouchableOpacity onPress={() => router.push('/settings/nativeLanguages')} className='flex-row items-center gap-4 py-6 border-b border-border-light dark:border-border-dark h-20'>
+                            <TouchableOpacity accessibilityLabel='Choose Native Language' onPress={() => router.push('/settings/nativeLanguages')} className='flex-row items-center gap-4 py-6 border-b border-border-light dark:border-border-dark h-20'>
                                 <ThemedIcon name={'Earth'} size={20} />
                                 <ThemedText className='text-lg font-medium'>{ t("native_language") }</ThemedText>
                                 <ThemedText className='ml-auto'>{getLanguageFlag(user.native_lang) + ' ' +  t(user.native_lang) }</ThemedText>
                                 <ThemedIcon name='ChevronRight' size={20} />
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => router.push('/settings/learningLanguages')} className='flex-row items-center gap-4 py-6 border-b border-border-light dark:border-border-dark'>
+                            <TouchableOpacity accessibilityLabel='Choose Learning Language' onPress={() => router.push('/settings/learningLanguages')} className='flex-row items-center gap-4 py-6 border-b border-border-light dark:border-border-dark'>
                                 <ThemedIcon name={'BookA'} size={20} />
                                 <ThemedText className='text-lg font-medium'>{ t("learning_language") }</ThemedText>
                                 <ThemedText className='ml-auto'>{getLanguageFlag(user.learn_lang) + ' ' + t(user.learn_lang) }</ThemedText>
                                 <ThemedIcon name='ChevronRight' size={20} />
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => router.push('/settings/wordsPerDay')} className='flex-row items-center gap-4 py-6 border-b border-border-light dark:border-border-dark'>
+                            <TouchableOpacity accessibilityLabel='Choose Words per Day' onPress={() => router.push('/settings/wordsPerDay')} className='flex-row items-center gap-4 py-6 border-b border-border-light dark:border-border-dark'>
                                 <ThemedIcon name={'ListOrdered'} size={20} />
                                 <ThemedText className='text-lg font-medium'>{ t("words_per_day") }</ThemedText>
                                 <ThemedText className='ml-auto'>{ user?.words_per_day}</ThemedText>
                                 <ThemedIcon name='ChevronRight' size={20} />
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => router.push('/settings/difficultyLevel')} className='flex-row items-center gap-4 py-6'>
+                            <TouchableOpacity accessibilityLabel='Choose Proficiency Level' onPress={() => router.push('/settings/difficultyLevel')} className='flex-row items-center gap-4 py-6'>
                                 <ThemedIcon name='Gauge' size={20} />
                                 <ThemedText className='text-lg font-medium'>{ t("proficiency_level") }</ThemedText>
                                 <ThemedText className='ml-auto uppercase w-'>{ user?.difficulty_level}</ThemedText>
@@ -175,12 +177,12 @@ export default function Settings() {
                     <View>
                         <ThemedText>{ t("privacy_security") }</ThemedText>
                         <ThemedView variant='item' className='border border-border-light dark:border-border-dark rounded-lg px-4 mt-2'>
-                            <TouchableOpacity onPress={() => router.push('/settings/privacy')} className='flex-row items-center gap-4 border-b border-border-light dark:border-border-dark h-20'>
+                            <TouchableOpacity accessibilityLabel='View Privacy Policy' onPress={() => router.push('/settings/privacy')} className='flex-row items-center gap-4 border-b border-border-light dark:border-border-dark h-20'>
                                 <ThemedIcon name={'HatGlasses'} size={20} />
                                 <ThemedText className='text-lg font-medium'>{ t("privacy_policy") }</ThemedText>
                                 <ThemedIcon className='ml-auto' name='ChevronRight' size={20} />
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => router.push('/settings/terms')} className='flex-row items-center gap-4 h-20'>
+                            <TouchableOpacity accessibilityLabel='View Terms of Service' onPress={() => router.push('/settings/terms')} className='flex-row items-center gap-4 h-20'>
                                 <ThemedIcon name={'Handshake'} size={20} />
                                 <ThemedText className='text-lg font-medium'>{ t("terms_of_service") }</ThemedText>
                                 <ThemedIcon className='ml-auto' name='ChevronRight' size={20} />
@@ -190,12 +192,12 @@ export default function Settings() {
                     <View>
                         <ThemedText>{ t("help_support") }</ThemedText>
                         <ThemedView variant='item' className='border border-border-light dark:border-border-dark rounded-lg px-4 mt-2'>
-                            <TouchableOpacity onPress={() => router.push('/settings/faqs')} className='flex-row items-center gap-4 border-b border-border-light dark:border-border-dark h-20'>
+                            <TouchableOpacity accessibilityLabel='View FAQs' onPress={() => router.push('/settings/faqs')} className='flex-row items-center gap-4 border-b border-border-light dark:border-border-dark h-20'>
                                 <ThemedIcon name={'CircleQuestionMark'} size={20} />
                                 <ThemedText className='text-lg font-medium'>{ t("faqs") }</ThemedText>
                                 <ThemedIcon className='ml-auto' name='ChevronRight' size={20} />
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => sendEmail()} className='flex-row items-center gap-4 h-20'>
+                            <TouchableOpacity accessibilityLabel='Leave Feedback' onPress={() => sendEmail()} className='flex-row items-center gap-4 h-20'>
                                 <ThemedIcon name={'MessageCircle'} size={20} />
                                 <ThemedText className='text-lg font-medium'>{ t("feedback") }</ThemedText>
                                 <ThemedIcon className='ml-auto' name='ChevronRight' size={20} />
@@ -203,8 +205,8 @@ export default function Settings() {
                         </ThemedView>
                     </View>
                     <View>
-                        <TouchableOpacity className='h-16 bg-red-500 flex items-center justify-center rounded-md border-red-400 border-2' onPress={() => showResetPopUp()}>
-                            <ThemedText className='text-center font-bold'>{ t("reset_progress") }</ThemedText>
+                        <TouchableOpacity accessibilityLabel='Reset Progress' className='h-16 bg-red-500 flex items-center justify-center rounded-md border-red-400 border-2' onPress={() => showResetPopUp()}>
+                            <Text className='text-center font-bold text-white'>{ t("reset_progress") }</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

@@ -1,4 +1,7 @@
+import useDatabase from '@/db/useDatabase';
+import { useFocusEffect } from '@react-navigation/native';
 import { Flame } from 'lucide-react-native';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import ThemedText from './ThemedText';
@@ -11,7 +14,20 @@ type LearningTrackerProps = {
 
 const LearningTracker = ({ progress, goal }: LearningTrackerProps) => {
     const { t } = useTranslation();
+    const { getStreakCount } = useDatabase();
+    const [currentStreak, setCurrentStreak] = useState();
     const progressPercent = Math.min((progress / goal) * 100, 100);
+
+    const handleGetStreakCount = async () => {
+        const streak = await getStreakCount();
+        setCurrentStreak(streak?.current || 0)
+    }
+
+    useFocusEffect(
+        useCallback(() => {
+            handleGetStreakCount()
+        }, [])
+    );
 
     return (
         <ThemedView variant='shaded' className=' overflow-hidden border border-border-light dark:border-border-dark rounded-2xl mt-6'>    
@@ -32,7 +48,7 @@ const LearningTracker = ({ progress, goal }: LearningTrackerProps) => {
                 <View className='mt-4 flex-row justify-start items-center'>
                     
                     <ThemedText variant='subtext'>{ t("daily_streak") }</ThemedText>
-                    <ThemedText className='text-2xl font-bold ml-auto'>0</ThemedText>
+                    <ThemedText className='text-2xl font-bold ml-auto'>{ currentStreak }</ThemedText>
                     <Flame size={20} color='#fc6a03' strokeWidth={3} />
                 </View>
             </View>

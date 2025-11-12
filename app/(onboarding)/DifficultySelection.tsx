@@ -4,10 +4,10 @@ import ThemedIcon from '@/components/ThemedIcon';
 import ThemedText from '@/components/ThemedText';
 import { levels } from '@/constants/languages';
 import useDatabase from '@/db/useDatabase';
-import useGetUser from '@/hooks/useGetUser';
-import { router } from 'expo-router';
+import { useUserStore } from '@/hooks/useGetUser';
+import { router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,14 +15,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const DifficultySelection = () => {
     const [activeLevel, setActiveLevel] = useState<string | null>(null);
     const { insertDifficultyLevel } = useDatabase();
-    const { user } = useGetUser();
     const db = useSQLiteContext();
     const { t } = useTranslation();
+    const { user, fetchUser } = useUserStore();
+
     
     const handleNext = async () => { 
         if (!user) {
             return;
         }
+        
         if (!activeLevel) {
             alert(t("please_select"));
             return;
@@ -40,6 +42,12 @@ const DifficultySelection = () => {
             console.error('Error updating learning language:', error);
         }
     };
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchUser(db)
+        },[])
+    )
 
     return (
         <SafeAreaView className="flex-1 h-full bg-secondary-light dark:bg-secondary-dark">
@@ -68,6 +76,8 @@ const DifficultySelection = () => {
                         text={ t("next") }
                         onPress={handleNext}
                         next
+                        accessibilityLabel="Proceed to Subscribe Selection"
+                        accessibilityHint="Navigates to the subscribe screen"
                     />
                 </View>
             </View>

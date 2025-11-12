@@ -63,7 +63,7 @@ const faqs = () => {
                 <ThemedText className="text-4xl font-bold mb-6">{ t("faqs") }</ThemedText>
                 {faqs.map((faq, index) => (
                     <View key={index} className="mb-4 border-b border-border-light dark:border-border-dark">
-                        <TouchableOpacity onPress={() => toggleAccordion(index)} className="py-5 flex-row items-center">
+                        <TouchableOpacity accessibilityLabel='Open Question' onPress={() => toggleAccordion(index)} className="py-5 flex-row items-center">
                             <ThemedText className="text-lg font-bold flex-1 pr-4">{faq.question}</ThemedText>
                             <ThemedIcon name="ChevronDown" />
                         </TouchableOpacity>
