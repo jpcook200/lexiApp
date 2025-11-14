@@ -58,7 +58,7 @@ const faqs = () => {
     };
 
     return (
-        <ThemedView variant="item" className="flex-1 bg-item-light dark:bg-item-dark px-4 pt-4">
+        <ThemedView className="flex-1 bg-item-light dark:bg-item-dark px-4 pt-4">
             <ScrollView showsVerticalScrollIndicator={false}>
                 <ThemedText className="text-4xl font-bold mb-6">{ t("faqs") }</ThemedText>
                 {faqs.map((faq, index) => (

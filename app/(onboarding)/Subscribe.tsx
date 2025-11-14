@@ -8,7 +8,7 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { ErrorCode, hasActiveSubscriptions, useIAP } from 'react-native-iap';
+import { ErrorCode, useIAP } from 'react-native-iap';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { appStoreSharedSecret } = Constants.expoConfig!.extra as { appStoreSharedSecret: string };
@@ -18,23 +18,18 @@ const Subscribe = () => {
   const [selectedPlan, setSelectedPlan] = useState<string>('lexigramproyearly');
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
-   const {
+  const [purchaseLoading, setPurchaseLoading] = useState(false);
+  const {
     connected,
     subscriptions,
     fetchProducts,
     requestPurchase,
     getActiveSubscriptions,
-    
-    
+    validateReceipt
    } = useIAP({
-      onPurchaseSuccess: (purchase) => {
-        setUserAccessLevel('pro');
-        router.replace('/(tabs)/home')
-      },
       onPurchaseError: (error) => {
         switch (error.code) {
           case ErrorCode.UserCancelled:
-            // User cancelled — no need to alert
             break;
           case ErrorCode.NetworkError:
             Alert.alert('Network Error', 'Please check your connection.');
@@ -45,7 +40,7 @@ const Subscribe = () => {
           default:
             Alert.alert('Purchase Failed', error.message);
         }
-      },
+     },
     });
 
   const subscriptionSkus = Platform.select({
@@ -53,28 +48,33 @@ const Subscribe = () => {
     android: ['com.yourapp.lexigram.pro.weekly', 'com.yourapp.lexigram.pro.yearly'],
   }) || [];
 
+  const [redirected, setRedirected] = useState(false);
+
   useEffect(() => {
     const loadProducts = async () => {
-      if (connected) {
-        try {
-          const activeSubscriptions = await hasActiveSubscriptions();
-          if (activeSubscriptions) {
-            await setUserAccessLevel('pro');
-            router.replace('/(tabs)/home')
-          } else { 
-            await setUserAccessLevel('free');
-          }
-          fetchProducts({ skus: subscriptionSkus, type: 'subs' });
-        } catch (error) {
-          console.error('Error fetching products:', error);
-        } finally { 
-          setLoading(false);
+      if (!connected || redirected) return;
+
+      try {
+        const activeSubs = await getActiveSubscriptions();
+        if (activeSubs.length > 0) {
+          setUserAccessLevel('pro');
+          setRedirected(true);
+          router.replace('/(tabs)/home');
+          return; 
+        } else { 
+          setUserAccessLevel('free');
         }
+        fetchProducts({ skus: subscriptionSkus, type: 'subs' });
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally { 
+        setLoading(false);
       }
     };
 
     loadProducts();
-  }, [connected]);
+  }, [connected, redirected]);
+
 
   // Move these inside the component
   const features = [
@@ -84,35 +84,38 @@ const Subscribe = () => {
   ];
 
   const plans = [
-    { id: subscriptions[0]?.id, name: t("weekly_plan"), price: subscriptions[0]?.displayPrice, billingCycle: t("weekly"), per: t("per_week"), caption: "per week after 7 day free trial"  },
-    { id: subscriptions[1]?.id, name: t("yearly_plan"), price: subscriptions[1]?.displayPrice, billingCycle: t("yearly"), per: t("per_year"), caption: "per year after 7 day free trial" },
+    { id: subscriptions[0]?.id || 'lexigramproweekly', name: t("weekly_plan"), price: subscriptions[0]?.displayPrice, billingCycle: t("weekly"), per: t("per_week"), caption: "per week after 7 day free trial"  },
+    { id: subscriptions[1]?.id || 'lexigramproyearly', name: t("yearly_plan"), price: subscriptions[1]?.displayPrice, billingCycle: t("yearly"), per: t("per_year"), caption: "per year after 7 day free trial" },
   ];
 
-  const buySubscriptionWithOffer = async (
-    subscriptionId: string,
-    // discountOffer?: DiscountOfferInputIOS,
-  ) => {
-    try { 
-      await requestPurchase({
-      request: {
-        ios: {
-          sku: subscriptionId,
-          // // Optional: apply promotional offer
-          // ...(discountOffer && {withOffer: discountOffer}),
-        },
-        android: {skus: [subscriptionId]},
-      },
-      type: 'subs',
-    });
+  const buySubscriptionWithOffer = async (subscriptionId: string) => {
+    try {
+      setPurchaseLoading(true);
 
-    } finally { 
-      setLoading(false);
+      await requestPurchase({
+        request: {
+          ios: { sku: subscriptionId },
+          android: { skus: [subscriptionId] },
+        },
+        type: 'subs',
+      });
+      const activeSubs = await getActiveSubscriptions();
+      console.log('Active subscriptions after purchase:', activeSubs);
+      if (activeSubs.length > 0) {
+        await setUserAccessLevel('pro');
+        router.replace('/(tabs)/home');
+      }
+      
+    } catch (error) {
+        console.error('Purchase request failed:', error);
+    } finally {
+        setPurchaseLoading(false);
     }
   };
 
   if (loading) { 
     return (
-      <ActivityIndicator size="small" className="flex-1 justify-center items-center" />
+      <ActivityIndicator size="small" className="flex-1 justify-center items-center bg-background-light dark:bg-background-dark" />
     );
   }
 
@@ -157,11 +160,12 @@ const Subscribe = () => {
             <ThemedText className='font-bold text-lg'>{t("select_plan")}:</ThemedText>
 
             <View className='flex-row items-center justify-center gap-6 mt-6'>
-              {plans.map((plan) => (
+              {plans.map((plan, index) => (
                 <Pressable
+                  key={index}
                   onPress={() => setSelectedPlan(plan.id)}
                   className={`bg-item-light dark:bg-item-dark border w-[40%] aspect-[1/1] rounded-xl p-4 ${selectedPlan === plan.id ? 'border-2 border-primary' : 'border-border-light dark:border-border-dark'} flex justify-between`}
-                  key={plan.id}
+                  
                 >
                   {plan.name === t("yearly_plan") && (
                     <View className='absolute top-0 right-4 -translate-y-[50%] bg-primary text-white px-2 py-1 rounded-full'>
@@ -184,14 +188,19 @@ const Subscribe = () => {
           </View>
         </View>
       </ScrollView>
-
-      <MainButton
-        text={(t("subscribe_now"))}
-        onPress={() => buySubscriptionWithOffer(selectedPlan)}
-        accessibilityLabel='Proceed to Homepage'
-        accessibilityHint='Navigates to the homepage'
-
-      />
+      <View className='h-20 items-center justify-center'>
+        {purchaseLoading ?(
+          <ActivityIndicator size="small" />
+        ) : (
+            <MainButton
+              text={(t("subscribe_now"))}
+              onPress={() => buySubscriptionWithOffer(selectedPlan)}
+              accessibilityLabel='Proceed to Homepage'
+              accessibilityHint='Navigates to the homepage'
+            />
+        )}
+      </View>
+      
     </SafeAreaView>
   );
 };

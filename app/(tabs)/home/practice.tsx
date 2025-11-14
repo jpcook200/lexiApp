@@ -43,13 +43,17 @@ const practice = () => {
             return () => {
                 isActive = false;
             };
-        }, [user])
+        }, [])
     );
 
     const handleApply = () => {
         handleGetPracticeWords();
         setModalVisible(false);
     };
+
+    if (!user) { 
+        return null;
+    }
     
     return (
         <>
@@ -60,11 +64,18 @@ const practice = () => {
                         language={user.learn_lang}
                     />
                 </View>
-                <CardStackSwiper
-                    activeWords={activeWords}
-                    setActiveWords={setActiveWords}
-                    practice={true}
-                />
+                {activeWords.length === 0 ? (
+                    <View className='flex-1 justify-center items-center mt-20 px-4'>
+                        <ThemedText className='text-center text-lg opacity-50'>{ t("no_words") }</ThemedText>
+                    </View>
+                ): (
+                        <CardStackSwiper
+                            activeWords={activeWords}
+                            setActiveWords={setActiveWords}
+                            practice={true}
+                        />
+                )}
+                
                 <View className='px-4 mt-4 flex-row justify-end'>
                     <TouchableOpacity accessibilityLabel='Open Filters Menu' onPress={() => setModalVisible(!modalVisible)} className='border-2 border-border-light dark:border-border-dark rounded-full w-14 h-14 flex justify-center items-center relative bg-shade-light dark:bg-shade-dark'>
                         <View className='bg-item-light dark:bg-item-dark absolute w-[90%] h-[90%] top-0 left-0 rounded-full'></View>

@@ -1,5 +1,6 @@
 import LanguageIndicator from '@/components/LanguageIndicator';
 import Logo from '@/components/Logo';
+import MainButton from '@/components/MainButton';
 import Streak from '@/components/Streak';
 import ThemedText from '@/components/ThemedText';
 import ThemedView from '@/components/ThemedView';
@@ -12,7 +13,7 @@ import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
@@ -113,9 +114,13 @@ export default function HomeScreen() {
                             )}
                             
                         </ThemedView>
-                        <TouchableOpacity accessibilityLabel='View All Learned Words' accessibilityHint='View all your learned words' style={{boxShadow: '0 4px 0 #2889e3ff'}} onPress={() => router.push('/(tabs)/home/userWordsList')} className='h-12 bg-primary w-full text-center rounded-lg mt-6 flex justify-center items-center'>
-                            <Text className='font-bold text-text-dark'>{ t("view_all") }</Text>
-                        </TouchableOpacity>
+                        <MainButton
+                            accessibilityLabel='View All Learned Words'
+                            accessibilityHint='View all your learned words'
+                            text={ t("view_all") }
+                            onPress={() => router.push('/(tabs)/home/userWordsList')}
+                            className='mt-4'
+                        />
                     </View>
                 </ThemedView>
             </ScrollView>

@@ -173,5 +173,11 @@
     "conjunction": "连词",
     "determiner": "限定词",
     "interjection": "感叹词",
-    "exclamation": "感叹"
+    "exclamation": "感叹",
+
+    "warning_title": "如果更改语言，您当前的进度将会丢失。",
+    "warning_body": "升级到高级账户即可在不同语言间保留您的进度。",
+    "premium_prompt": "升级到高级版",
+    "confirm": "确认",
+    "not_found": "未找到"
 }

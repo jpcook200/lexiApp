@@ -683,6 +683,7 @@ const useDatabase = () => {
                 [accessLevel, 1]
             );
             if (userResults.words_per_day > freeWPDLimit) { 
+                console.log('User words per day exceeds free limit, resetting to free limit.');
                 await setWordsPerDay(freeWPDLimit);
             }
         } catch (error) {

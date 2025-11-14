@@ -96,7 +96,7 @@
     "progress_today": "Progress Today",
     "daily_streak": "Daily Streak",
     "goal_achieved": "Goal Achieved!",
-    "goal_reached": "Your have reached your daily goal!",
+    "goal_reached": "You have reached your daily goal!",
     "reset": "Reset",
     "learned": "Learned",
 
@@ -173,5 +173,14 @@
     "conjunction": "Conjunction",
     "determiner": "Determiner",
     "interjection": "Interjection",
-    "exclamation": "Exclamation"
+    "exclamation": "Exclamation",
+
+    "pro": "Pro",
+    "free": "Free",
+
+    "warning_title": "If you change your language, your current progress will be lost.",
+    "warning_body": "Upgrade to a premium account to keep your progress across languages.",
+    "premium_prompt": "Upgrade to Premium",
+    "confirm": "Confirm",
+    "not_found": "Not Found"
 }

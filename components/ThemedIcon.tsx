@@ -10,7 +10,7 @@ interface ThemedIconProps extends ViewProps {
 }
 
 export default function ThemedIcon({name, size = 24, variant = 'primary', className, ...props}: ThemedIconProps) {
-    const { colorScheme } = useColorScheme() || 'light';
+    const { colorScheme } = useColorScheme();
 
     let iconColor = '';
     switch (variant) {
@@ -29,7 +29,7 @@ export default function ThemedIcon({name, size = 24, variant = 'primary', classN
     if (!IconComponent) return null;
 
     return (
-        <View className={className} {...props}>
+        <View className={className} pointerEvents="none" {...props}>
             <IconComponent size={size} color={iconColor} strokeWidth={2.2} />
         </View>
     );

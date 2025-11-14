@@ -3,10 +3,12 @@ import ThemedView from '@/components/ThemedView';
 import useDatabase from '@/db/useDatabase';
 import { useUserStore } from '@/hooks/useGetUser';
 import { router } from 'expo-router';
+import { useSQLiteContext } from 'expo-sqlite';
 
 const LearningLanguages = () => {
     const { setLearningLanguage } = useDatabase();
-    const { user, loading } = useUserStore();
+    const { user, loading, fetchUser } = useUserStore();
+    const db = useSQLiteContext();
     
     const handleSelectLanguage = async (languageCode: string) => {
         if(loading || !user) return;
@@ -14,13 +16,14 @@ const LearningLanguages = () => {
             if(user.learn_lang === languageCode) {
                 return router.back();
             }
-            if (user?.access_level === 'free') { 
+            if (user?.access_level === 'free') {
+                router.back();
                 return router.push({
                     pathname: `/(tabs)/settings/changeLangConfirm/${languageCode}`,
-                    params: { lang: languageCode }
                 });
             }
             await setLearningLanguage(languageCode);
+            fetchUser(db);
             router.back();
         } catch (error) {
             console.error('Error setting learning language:', error);

@@ -8,13 +8,15 @@ type GetWordsResponse = {
     lastSet: boolean;
 };
 
-export const getWords = async ({ nativeLang, learningLang, difficulty = 'a1', limit, excludeIds, localDatetime }: getWordsParams): Promise<GetWordsResponse> => {
+export const getWords = async ({ nativeLang, learningLang, difficulty = 'a1', limit, excludeIds, localDatetime, transactionId }: getWordsParams): Promise<GetWordsResponse> => {
     try {
+        console.log("transsdada", transactionId)
         const response = await fetch(`${apiUrl}/api/words/get-daily?nativeLang=${nativeLang}&learningLang=${learningLang}&difficulty=${difficulty || 'a1'}&limit=${limit}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 "api-key": apiKey,
+                "transaction-id": transactionId || ''
             },
             body: JSON.stringify({ excludeIds, localDatetime }),
         });

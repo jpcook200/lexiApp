@@ -1,5 +1,6 @@
+import { useColorScheme } from 'nativewind';
 import React from 'react';
-import { View, ViewProps, useColorScheme } from 'react-native';
+import { View, ViewProps } from 'react-native';
 
 interface ThemedViewProps extends ViewProps {
     children: React.ReactNode;
@@ -8,7 +9,7 @@ interface ThemedViewProps extends ViewProps {
 }
 
 export default function ThemedView({ children, variant = 'primary', className = '', ...props }: ThemedViewProps) {
-    const colorScheme = useColorScheme();
+    const { colorScheme } = useColorScheme();
 
     let bgClass = '';
 

@@ -173,5 +173,14 @@
     "conjunction": "接続詞",
     "determiner": "限定詞",
     "interjection": "感動詞",
-    "exclamation": "感嘆詞"
+    "exclamation": "感嘆詞",
+
+    "pro": "プロ",
+    "free": "無料",
+    
+    "warning_title": "言語を変更すると、現在の進捗が失われます。",
+    "warning_body": "プレミアムアカウントにアップグレードすると、言語間で進捗を保存できます。",
+    "premium_prompt": "プレミアムにアップグレード",
+    "confirm": "確認",
+    "not_found": "見つかりません"
 }

@@ -49,7 +49,7 @@ const PrivacyPolicy = () => {
           If you have any questions or concerns about your privacy, please contact us at:
         </ThemedText>
         <ThemedText className="text-base font-semibold text-primary">
-          FILL WITH EMAIL DO NOT FORGET
+          lexigramapp@outlook.com
         </ThemedText>
       </View>
     </ScrollView>

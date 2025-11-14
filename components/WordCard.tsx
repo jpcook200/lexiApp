@@ -119,7 +119,7 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
                                 </View>
                                 <View className="flex-row justify-end">
                                     <TouchableOpacity accessibilityLabel='Toggle Favourite Word' disabled={ displayOnly } onPress={ () => handleFavourite() }>
-                                        <Heart size={ 28 } color={word?.favourite === true || word?.favourite === 1 ? '#fc69b4' : colorScheme === 'dark' ? '#ffffff' : '#000000' } />
+                                        <Heart size={ 28 } color={word?.favourite === true || word?.favourite === 1 ? '#fc69b4' : colorScheme === 'dark' ? '#ffffff' : '#000000' } pointerEvents='none' />
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -156,7 +156,7 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
                                 </View>
                                 <View className="flex-row justify-end">
                                     <TouchableOpacity accessibilityLabel='Toggle Favourite word' disabled={ displayOnly } onPress={ () => handleFavourite() }>
-                                        <Heart size={ 28 } color={word?.favourite === true || word?.favourite === 1 ? '#fc69b4' : colorScheme === 'dark' ? '#ffffff' : '#000000' } />
+                                        <Heart size={ 28 } color={word?.favourite === true || word?.favourite === 1 ? '#fc69b4' : colorScheme === 'dark' ? '#ffffff' : '#000000' } pointerEvents='none' />
                                     </TouchableOpacity>
                                 </View>
                             </View>

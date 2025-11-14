@@ -137,8 +137,8 @@ const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWo
     const learnedAnimatedStyle = useAnimatedStyle(() => ({
         opacity: interpolate(
             translationY.value,
-            [-screenHeight / 4, -screenHeight / 8],
-            [1, 0],
+            [0, -screenHeight / 8],
+            [0, 1],
             'clamp'
         ),
     }));

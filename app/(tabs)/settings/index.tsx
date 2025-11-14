@@ -6,14 +6,14 @@ import useDatabase from '@/db/useDatabase';
 import { useUserStore } from '@/hooks/useGetUser';
 import { getLanguageFlag } from '@/utilities/helpers';
 import { scheduleDailyReminder } from '@/utilities/notifications';
-import { useFocusEffect } from '@react-navigation/native';
 import * as Notifications from 'expo-notifications';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useColorScheme } from 'nativewind';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Linking, ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { useIAP } from 'react-native-iap';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Settings() {
@@ -22,9 +22,11 @@ export default function Settings() {
     const { user, loading, fetchUser, setUser } = useUserStore();
     const { colorScheme, toggleColorScheme } = useColorScheme();
     const { setRemindersOn, resetProgressByLanguagePair } = useDatabase();
+    const { setUserAccessLevel } = useDatabase();
+    const { connected, hasActiveSubscriptions, getActiveSubscriptions } = useIAP();
 
     const sendEmail = () => {
-        const email = 'support@example.com';
+        const email = 'lexigramapp@outlook.com';
         const subject = 'App Feedback';
         const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}`;
 
@@ -53,7 +55,7 @@ export default function Settings() {
         } catch (error) {
             console.error('Error toggling reminders:', error);
         } finally { 
-            fetchUser(db); // refresh user data to get updated reminders_on value
+            fetchUser(db);
         }
     };
 
@@ -61,7 +63,7 @@ export default function Settings() {
         try {
             if (!user) return;
             await resetProgressByLanguagePair(user.native_lang, user.learn_lang);
-            router.replace('/'); // navigate to home to refresh data
+            router.replace('/');
         } catch (error) {
             console.error('Error resetting progress:', error);
             alert('An error occurred while resetting progress.');
@@ -73,17 +75,36 @@ export default function Settings() {
             t("are_you_sure"),
             t("confirm_reset_message"),
             [
-            { text: "Confirm", onPress: () => handleResetProgress()},
-            { text: "Cancel", style: "cancel" }
+                { text: "Confirm", onPress: () => handleResetProgress()},
+                { text: "Cancel", style: "cancel" }
             ]
         );
     };
 
+    const handleCheckSubscription = async () => {
+        try {
+            if (connected) {
+                const activeSubs = await getActiveSubscriptions()
+                console.log('Subscription active check:', activeSubs);
+                if (user) {
+                    console.log('Subscription active:', activeSubs.length > 0);
+                    const newAccessLevel = activeSubs.length > 0 ? 'pro' : 'free';
+                    if (user.access_level !== newAccessLevel) {
+                        await setUserAccessLevel(newAccessLevel);
+                    }
+                    await fetchUser(db);
+                }
+            }
+            
+        } catch (error) {
+            console.error('Error checking subscription status:', error);
+        } 
+    }
     useFocusEffect(
         useCallback(() => {
-            fetchUser(db)
-
-        }, [])
+            handleCheckSubscription();
+          
+        }, [connected])
     );
 
     if (!user) {
@@ -95,7 +116,7 @@ export default function Settings() {
     }
 
     return (
-        <SafeAreaView edges={['top']} className='flex-1 h-full bg-background-light dark:bg-background-dark p-4'>
+        <SafeAreaView edges={['top']} className='flex-1 h-full bg-background-light dark:bg-background-dark px-4'>
             <ScrollView
                 showsVerticalScrollIndicator={false}
             >
@@ -136,10 +157,17 @@ export default function Settings() {
                     <View>
                         <ThemedText>{t("subscription")}</ThemedText>
                         <ThemedView variant='item' className='border border-border-light dark:border-border-dark rounded-lg mt-2 px-4'>
-                            <TouchableOpacity onPress={() => router.push('../../(onboarding)/Subscribe')} className='flex-row items-center gap-4 h-20'>
+                            <TouchableOpacity onPress={() => router.push('../../(onboarding)/Subscribe')} className='flex-row items-center gap-4 h-20' disabled={ user.access_level === 'pro' }>
                                 <ThemedIcon name={'CreditCard'} size={20} />
                                 <ThemedText className='text-lg font-medium'>{t("subscription")}</ThemedText>
-                                <ThemedText className='ml-auto font-medium'>{ t(user.access_level) }</ThemedText>
+                                {user.access_level === 'pro' ? (
+                                    <Text className='ml-auto text-primary font-black text-primary'>{ t(user.access_level) }</Text>
+                                ) : (
+                                    <ThemedText className='ml-auto text-secondary font-medium'>{ t(user.access_level) }</ThemedText>
+                                ) }
+
+                                
+                                
                                 <ThemedIcon name='ChevronRight' size={20} />
                             </TouchableOpacity>
                             
@@ -205,7 +233,7 @@ export default function Settings() {
                         </ThemedView>
                     </View>
                     <View>
-                        <TouchableOpacity accessibilityLabel='Reset Progress' className='h-16 bg-red-500 flex items-center justify-center rounded-md border-red-400 border-2' onPress={() => showResetPopUp()}>
+                        <TouchableOpacity accessibilityLabel='Reset Progress' className='h-16 bg-red-500 flex items-center justify-center rounded-md border-red-400 border-2 mb-2' onPress={() => showResetPopUp()}>
                             <Text className='text-center font-bold text-white'>{ t("reset_progress") }</Text>
                         </TouchableOpacity>
                     </View>

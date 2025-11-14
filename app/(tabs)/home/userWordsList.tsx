@@ -60,7 +60,7 @@ const userWordsList = () => {
     
     return (
         <SafeAreaView edges={['top']} className='h-full bg-item-light dark:bg-item-dark'>
-            <View className='px-4 border-b-2 border-border-light dark:border-border-dark pb-4'>
+            <View className='px-4 border-b-2 border-border-light dark:border-border-dark pb-4 '>
                 <BackButton/>
                 <ThemedText className='text-4xl font-bold my-4'>{ t("your_vocabulary") }</ThemedText>
                 <View className='flex-row justify-between items-center'>
@@ -74,7 +74,12 @@ const userWordsList = () => {
                 </View>
             </View>
             <ScrollView className='flex-1'>
-                {learnedWords?.map((word, index) => (
+                {learnedWords.length === 0 ? (
+                    <View className='flex-1 justify-center items-center mt-20 px-4'>
+                        <ThemedText className='text-center text-lg opacity-50'>{ t("no_words") }</ThemedText>
+                    </View>
+                ): (
+                    learnedWords.map((word, index) => (
                     <View key={index} className={`px-4 w-full py-4 ${index % 2 === 0 ? 'bg-background-light dark:bg-background-dark' : 'bg-secondary-light dark:bg-secondary-dark'}`}>
                         <View className='flex-row items-center justify-between mb-2'>
                             <View className='flex-row items-center flex-1 gap-1'>
@@ -94,12 +99,16 @@ const userWordsList = () => {
                             <Heart size={ 24 } color={word?.favourite === 1 ? '#fc69b4' : colorScheme === 'dark' ? '#ffffff' : '#000000' } />
                         </TouchableOpacity>
                     </View>
-                ))}
+                    ))
+                )}
+                
             </ScrollView>
             <View className="mt-auto w-full px-4 py-4 bg-background-light dark:bg-background-dark border-t border-border-light dark:border-border-dark justify-start">
                 <MainButton
                     text={t("practice")}
                     onPress={() => router.push('/(tabs)/home/practice')}
+                    accessibilityLabel='Start Practicing Words'
+                    accessibilityHint='Start a practice session with your learned words'
                 />
             </View>
             <FiltersModal

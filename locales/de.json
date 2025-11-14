@@ -173,5 +173,14 @@
     "conjunction": "Konjunktion",
     "determiner": "Artikel / Bestimmungswort",
     "interjection": "Interjektion",
-    "exclamation": "Ausruf"
+    "exclamation": "Ausruf",
+
+    "pro": "Pro",
+    "free": "Kostenlos",
+
+    "warning_title": "Wenn du die Sprache änderst, geht dein aktueller Fortschritt verloren.",
+    "warning_body": "Upgrade auf ein Premium-Konto, um deinen Fortschritt über alle Sprachen hinweg zu behalten.",
+    "premium_prompt": "Zu Premium upgraden",
+    "confirm": "Bestätigen",
+    "not_found": "Nicht gefunden"
 }

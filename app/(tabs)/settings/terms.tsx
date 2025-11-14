@@ -55,7 +55,7 @@ const TermsOfService = () => {
         </ThemedText>
 
         <ThemedText className="text-base font-semibold text-primary mb-8">
-          FILL IN EMAIL HERE DO NOT FOEGTER
+          lexigramapp@outlook.com
         </ThemedText>
       </View>
     </ScrollView>

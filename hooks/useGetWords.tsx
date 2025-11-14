@@ -3,13 +3,15 @@ import useDatabase from '@/db/useDatabase';
 import { User, Word } from '@/types/types';
 import { DateTime } from 'luxon';
 import { useState } from 'react';
+import { useIAP } from 'react-native-iap';
 
 
 const useGetWords = () => {
     const { setLastSet, increaseDifficultyLevel, deleteAllFromDailyWords, getDailyLearnedCount, getDailyWords, saveDailyWords, getLearnedWordsIds, saveLastFetchedDate } = useDatabase();
     const [progressToday, setProgressToday] = useState(0);
     const [activeWords, setActiveWords] = useState<Word[]>([]);
-
+    const { getActiveSubscriptions } = useIAP();
+    
     const getHighestDifficultyLevel = (words: Word[]) => {
         const difficulties = ['a1', 'a2', 'b1', 'b2', 'c1', 'c2'];
         if (!Array.isArray(words) || words.length === 0) return 'a1';
@@ -37,12 +39,12 @@ const useGetWords = () => {
         return storedDailyWords.filter((word) => word.learned === 0);
     };
 
-    const handleNewDayOrEmptyWords = async ({ user, learnedWordIds, dailyWordIds, localDatetime, deleteWords }: {user: User, learnedWordIds: number[], dailyWordIds: number[], localDatetime: string, deleteWords: boolean}) => {
+    const handleNewDayOrEmptyWords = async ({ user, learnedWordIds, dailyWordIds, localDatetime, deleteWords, transactionId }: {user: User, learnedWordIds: number[], dailyWordIds: number[], localDatetime: string, deleteWords: boolean}) => {
         setProgressToday(0);
         if (deleteWords) { 
             await deleteAllFromDailyWords();
         }
-
+        console.log("Fetching new words for the day");
         const { words: newWords, lastSet } = await getWords({
             nativeLang: user.native_lang,
             learningLang: user.learn_lang,
@@ -50,6 +52,7 @@ const useGetWords = () => {
             limit: user.words_per_day!,
             excludeIds: [...learnedWordIds, ...dailyWordIds],
             localDatetime,
+            transactionId
         });
         
         await saveLastFetchedDate();
@@ -73,9 +76,9 @@ const useGetWords = () => {
         return filteredResults;
     };
 
-    const handleSameDay = async ({ user, storedDailyWords, learnedWordIds, dailyWordIds, localDatetime}: {user: User, storedDailyWords: Word[], learnedWordIds: number[], dailyWordIds: number[], localDatetime: string}) => {
+    const handleSameDay = async ({ user, storedDailyWords, learnedWordIds, dailyWordIds, localDatetime, transactionId}: {user: User, storedDailyWords: Word[], learnedWordIds: number[], dailyWordIds: number[], localDatetime: string}) => {
         if (user.words_per_day! > storedDailyWords.length) {
-            
+            console.log("Fetching additional words for the day");
             const { words: newWords, lastSet } = await getWords({
                 nativeLang: user.native_lang,
                 learningLang: user.learn_lang,
@@ -83,6 +86,7 @@ const useGetWords = () => {
                 limit: user.words_per_day! - storedDailyWords.length,
                 excludeIds: [...learnedWordIds, ...dailyWordIds],
                 localDatetime,
+                transactionId
             });
 
             await saveLastFetchedDate();    
@@ -107,6 +111,8 @@ const useGetWords = () => {
     const handleGetWords = async (user: User) => {
         if (!user) return [];
         try {
+            const activeSubscriptions = await getActiveSubscriptions();
+            const transactionId = activeSubscriptions[0]?.transactionId || null;
             const storedDailyWords = await getDailyWords();
             const dailyWordIds = storedDailyWords.map((word: Word) => word.word_id);
             const learnedWordIds = await getLearnedWordsIds();
@@ -127,7 +133,9 @@ const useGetWords = () => {
                     learnedWordIds,
                     dailyWordIds,
                     localDatetime,
-                    deleteWords: false
+                    deleteWords: false,
+                    transactionId
+                    
                 });
             }
 
@@ -137,7 +145,8 @@ const useGetWords = () => {
                     learnedWordIds,
                     dailyWordIds,
                     localDatetime,
-                    deleteWords: true
+                    deleteWords: true,
+                    transactionId
                 });
             } else if (storedDate === localDate) {
 
@@ -147,6 +156,7 @@ const useGetWords = () => {
                     learnedWordIds,
                     dailyWordIds,
                     localDatetime,
+                    transactionId
                 });
             }
 

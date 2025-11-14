@@ -30,7 +30,7 @@ const LearningTracker = ({ progress, goal }: LearningTrackerProps) => {
     );
 
     return (
-        <ThemedView variant='shaded' className=' overflow-hidden border border-border-light dark:border-border-dark rounded-2xl mt-6'>    
+        <ThemedView variant='shaded' className='mt-auto overflow-hidden border border-border-light dark:border-border-dark rounded-2xl'>    
             <View className='p-4'>
                 <View className='flex-row justify-between items-center'>
                     <ThemedText className='text-lg font-bold'>{ t("progress_today") }</ThemedText>

@@ -173,5 +173,14 @@
     "conjunction": "Conjonction",
     "determiner": "Déterminant",
     "interjection": "Interjection",
-    "exclamation": "Exclamation"
+    "exclamation": "Exclamation",
+
+    "pro": "Pro",
+    "free": "Gratuit",
+
+    "warning_title": "Si vous changez de langue, votre progression actuelle sera perdue.",
+    "warning_body": "Passez à un compte Premium pour conserver votre progression dans toutes les langues.",
+    "premium_prompt": "Passer à Premium",
+    "confirm": "Confirmer",
+    "not_found": "Introuvable"
 }

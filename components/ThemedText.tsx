@@ -1,5 +1,6 @@
+import { useColorScheme } from 'nativewind';
 import React from 'react';
-import { Text, TextProps, useColorScheme } from 'react-native';
+import { Text, TextProps } from 'react-native';
 
 interface ThemedTextProps extends TextProps {
   children: React.ReactNode;
@@ -8,7 +9,7 @@ interface ThemedTextProps extends TextProps {
 }
 
 export default function ThemedText({ children, variant = 'primary', className = '', ...props }: ThemedTextProps) {
-    const colorScheme = useColorScheme();
+    const { colorScheme } = useColorScheme();
     
     let colorClass = '';
     

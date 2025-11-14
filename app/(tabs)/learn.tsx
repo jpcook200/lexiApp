@@ -18,10 +18,9 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 const learn = () => {
     const { handleGetWords, setActiveWords, activeWords, handleGetProgessCount, progressToday  } = useGetWords();
     const { updateStreakRecord, updateStreakCount } = useDatabase();
-    const { user, loading, fetchUser, setUser, setSelectedWordId, selectedWordId } = useUserStore();
+    const { user, loading, fetchUser} = useUserStore();
     const [showTutorial, setShowTutorial] = useState(false);
     const [isInitialised, setIsInitialised] = useState(false)
-    const [activeWordsInit, setActiveWordsInit] = useState(false)
     const db = useSQLiteContext();
     const [cardsLoading, setCardsLoading] = useState(true)
     
@@ -44,21 +43,6 @@ const learn = () => {
         const date = new Date().toLocaleString('en-CA').split(',')[0];
         await updateStreakCount('increment');
         await updateStreakRecord(1, date);
-    }
-
-    const initialiseActiveWords = () => {
-        const lastWordIndex = activeWords.findIndex(word => word.word_id === selectedWordId)
-        const lastWord = activeWords[lastWordIndex]
-        if (lastWordIndex <= 0) return; // nothing to rotate if first item or not found
-
-        setActiveWords(prev => {
-            // Split the array into two parts
-            const before = prev.slice(0, lastWordIndex); // items before the lastWordIndex
-            const after = prev.slice(lastWordIndex);     // lastWordIndex and everything after
-
-            // Move 'before' to the end
-            return [...after, ...before];
-        });
     }
 
     useFocusEffect(
@@ -108,27 +92,33 @@ const learn = () => {
                 setShowTutorial={setShowTutorial}
             />}
             <SafeAreaView className='flex-1 bg-background-light dark:bg-background-dark px-4'>
-                <View className="mb-14 flex-row justify-between items-center">
+                <View className=" flex-row justify-between items-center">
                     <Logo/>
                     <LanguageIndicator
                         language={user.learn_lang}
                     />
                 </View>
-                <CardStackSwiper
-                    activeWords={activeWords}
-                    setActiveWords={setActiveWords}
-                    updateProgress={handleGetProgessCount}
-                    progress={progressToday}
-                    isPending={isPending}
-                    practice={false}
-                    user={user}
-                    cardsLoading={cardsLoading}
-
-                />
-                <LearningTracker
-                    progress={progressToday || 0}
-                    goal={user?.words_per_day || 0}
-                />
+                {isPending || !isInitialised ? (
+                    null
+                ) : (
+                    <>
+                        <CardStackSwiper
+                            activeWords={activeWords}
+                            setActiveWords={setActiveWords}
+                            updateProgress={handleGetProgessCount}
+                            progress={progressToday}
+                            isPending={isPending}
+                            practice={false}
+                            user={user}
+                            cardsLoading={cardsLoading}
+                        />
+                        <LearningTracker
+                            progress={progressToday || 0}
+                            goal={user?.words_per_day || 0}
+                        />
+                    </>
+                )}
+                
             </SafeAreaView>
         </>
         

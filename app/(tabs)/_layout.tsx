@@ -1,4 +1,5 @@
 import { router, Tabs } from 'expo-router';
+import { House, Layers, Settings } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { View } from 'react-native';
 
@@ -11,7 +12,7 @@ export default function TabLayout() {
                 screenOptions={{
                     headerShown: false,
                     tabBarStyle: {
-                    backgroundColor: colorScheme === 'dark' ? '#494949' : '#f5fbffff',
+                    backgroundColor: colorScheme === 'dark' ? '#494949' : '#f5fbff',
                     elevation: 0,        // Android shadow
                     shadowOpacity: 0,    // iOS shadow
                     borderTopWidth: 0,   // remove border
@@ -33,7 +34,7 @@ export default function TabLayout() {
                     options={{
                         title: 'Dashboard',
                         headerShown: false, 
-                        // tabBarIcon: ({ color }) => <House color={color} size={28} strokeWidth={2.5} />,
+                        tabBarIcon: ({ color }) => <House color={color} size={28} strokeWidth={2.5} pointerEvents='none' />,
                     }}
                 />
                 <Tabs.Screen
@@ -41,7 +42,7 @@ export default function TabLayout() {
                     options={{
                         title: 'Learn',
                         headerShown: false,
-                        // tabBarIcon: ({ color }) => <Layers color={color} size={28} strokeWidth={2.5} />,
+                        tabBarIcon: ({ color }) => <Layers color={color} size={28} strokeWidth={2.5} pointerEvents='none' />,
                     }}
                 />
                 <Tabs.Screen
@@ -49,7 +50,7 @@ export default function TabLayout() {
                     options={{
                         title: 'Settings',
                         headerShown: false,
-                        // tabBarIcon: ({ color }) => <Settings color={color} size={28} strokeWidth={2.5} />,
+                        tabBarIcon: ({ color }) => <Settings color={color} size={28} strokeWidth={2.5} pointerEvents='none' />,
                     }}
                 />
             </Tabs>

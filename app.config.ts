@@ -22,6 +22,10 @@ export default {
     },
     ios: {
       bundleIdentifier: 'com.jpcook19.lexigram',
+      userInterfaceStyle: 'automatic',
     },
+    plugins: [
+      'expo-sqlite'
+    ]
   },
 };

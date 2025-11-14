@@ -32,7 +32,7 @@ export interface User {
     last_set: number;
     last_fetched?: string;
     tutorial_completed: 0 | 1;
-    access_level: 'free' | 'premium';
+    access_level: 'free' | 'pro';
 }
 
 export interface CountType { 
