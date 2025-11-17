@@ -20,3 +20,5 @@ export const levels = [
     { label: 'Advanced', code: 'c1' },
     { label: 'Proficient', code: 'c2' },
 ];
+
+export const freeWordsAllowance = 10;

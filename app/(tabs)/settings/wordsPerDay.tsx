@@ -1,4 +1,5 @@
 import ThemedText from '@/components/ThemedText';
+import { freeWordsAllowance } from '@/constants/languages';
 import useDatabase from '@/db/useDatabase';
 import { useUserStore } from '@/hooks/useGetUser';
 import { router } from 'expo-router';
@@ -12,7 +13,6 @@ const WordsPerDay = () => {
     const { user, loading } = useUserStore();
     const [selectedNumber, setSelectedNumber] = useState<number>(10);
     const numbers = Array.from({ length: 30 }, (_, i) => i + 1);
-    const freeWordsAllowance = 6;
 
     useEffect(() => {
         if (user && user.words_per_day) {
