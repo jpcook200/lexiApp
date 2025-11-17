@@ -1,10 +1,10 @@
+import { freeWordsAllowance } from "@/constants/languages";
 import { CompletedType, CountType, StreakRow, User, Word } from "@/types/types";
 import { useSQLiteContext } from "expo-sqlite";
 import { DateTime } from "luxon";
 
 const useDatabase = () => { 
     const db = useSQLiteContext();
-    const freeWPDLimit = 6;
     const getLearnedWords = async (filters = { sortBy: 'dateAdded', favouritesOnly: false }) => {
         try {
             
@@ -680,8 +680,8 @@ const useDatabase = () => {
                 `UPDATE users SET access_level = ? WHERE id = ?`,
                 [accessLevel, 1]
             );
-            if (userResults.words_per_day > freeWPDLimit) { 
-                await setWordsPerDay(freeWPDLimit);
+            if (userResults.words_per_day > freeWordsAllowance) { 
+                await setWordsPerDay(freeWordsAllowance);
             }
         } catch (error) {
             console.error('Error setting user access level:', error);

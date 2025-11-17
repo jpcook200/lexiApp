@@ -133,8 +133,8 @@ const userWordsList = () => {
                             </View>
 
                         </View>
-                        <TouchableOpacity accessibilityLabel='Toggle Word Favourite' className='ml-auto' onPress={ () => handleFavourite(word?.id, word?.favourite) }>
-                            <Heart size={ 24 } color={word?.favourite === 1 ? '#fc69b4' : colorScheme === 'dark' ? '#ffffff' : '#000000' } />
+                        <TouchableOpacity accessibilityLabel='Toggle Word Favourite' className='ml-auto p-2' onPress={ () => handleFavourite(word?.id, word?.favourite) }>
+                            <Heart size={ 24 } color={word?.favourite === 1 ? '#fc69b4' : colorScheme === 'dark' ? '#ffffff' : '#000000' } pointerEvents='none' />
                         </TouchableOpacity>
                     </View>
                     ))

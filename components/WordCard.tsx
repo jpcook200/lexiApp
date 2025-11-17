@@ -104,7 +104,7 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
                             <View className='p-8 flex-1'>
                                 <View className='gap-4 flex-1'>
                                     <View className='w-full flex-row justify-end'>
-                                        <TouchableOpacity accessibilityLabel='Text to Speech for Word' onPress={user ? (() => handleTextToSpeech(word?.learning_word, user.learn_lang)) : () => {}} disabled={displayOnly || ttsDisabled} className={`${ttsDisabled ? 'opacity-50' : ''}`}>
+                                        <TouchableOpacity accessibilityLabel='Text to Speech for Word' onPress={user ? (() => handleTextToSpeech(word?.learning_word, user.learn_lang)) : () => {}} disabled={displayOnly || ttsDisabled} className={`p-2 ${ttsDisabled ? 'opacity-50' : ''}`}>
                                             <ThemedIcon name={ ttsDisabled ? 'VolumeOff' : 'Volume2' } size={28} />
                                         </TouchableOpacity>
                                     </View>
@@ -141,7 +141,7 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
                                                 : null
                                         }
                                         </View>
-                                        <TouchableOpacity accessibilityLabel='Text to Speech for Example Sentence' onPress={() => handleTextToSpeech(word?.learning_sentence, user?.learn_lang || 'en')} disabled={displayOnly || ttsDisabled} className={`${ttsDisabled ? 'opacity-50' : ''}`}>
+                                        <TouchableOpacity accessibilityLabel='Text to Speech for Example Sentence' onPress={() => handleTextToSpeech(word?.learning_sentence, user?.learn_lang || 'en')} disabled={displayOnly || ttsDisabled} className={`p-2 ${ttsDisabled ? 'opacity-50' : ''}`}>
                                             <ThemedIcon name={ ttsDisabled ? 'VolumeOff' : 'Volume2' } size={28}/>
                                         </TouchableOpacity>
                                     </View>

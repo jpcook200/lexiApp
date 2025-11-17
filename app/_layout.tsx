@@ -48,12 +48,6 @@ export default function RootLayout() {
                 databaseName="userDatabase.db"
                 onInit={async (db) => {
                     await db.execAsync(`
-                        drop TABLE IF EXISTS users;
-                        drop TABLE IF EXISTS difficulties;
-                        drop TABLE IF EXISTS learned_words;
-                        drop TABLE IF EXISTS daily_words;
-                        drop TABLE IF EXISTS streak;
-                        drop TABLE IF EXISTS streak_counts;
                         CREATE TABLE IF NOT EXISTS users (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             native_lang TEXT,
