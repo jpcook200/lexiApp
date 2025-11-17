@@ -73,6 +73,7 @@ const practice = () => {
                             activeWords={activeWords}
                             setActiveWords={setActiveWords}
                             practice={true}
+                            user={user}
                         />
                 )}
                 

@@ -174,6 +174,8 @@
     "determiner": "Déterminant",
     "interjection": "Interjection",
     "exclamation": "Exclamation",
+    "expression": "Expression",
+    "particle": "Particule",
 
     "pro": "Pro",
     "free": "Gratuit",
@@ -182,5 +184,7 @@
     "warning_body": "Passez à un compte Premium pour conserver votre progression dans toutes les langues.",
     "premium_prompt": "Passer à Premium",
     "confirm": "Confirmer",
-    "not_found": "Introuvable"
+    "not_found": "Introuvable",
+
+    "level_disclaimer": "La plupart des mots de cette application se situent entre les niveaux CECR A1 et B2. Des mots plus difficiles (C1 et C2) seront ajoutés progressivement dans les futures mises à jour."
 }

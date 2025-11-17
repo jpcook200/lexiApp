@@ -1,9 +1,12 @@
+import { getWordsCount } from '@/api/getWords';
+import { useTextToSpeech } from '@/api/textToSpeech';
 import BackButton from '@/components/BackButton';
 import FiltersModal from '@/components/FiltersModal';
 import MainButton from '@/components/MainButton';
 import ThemedIcon from '@/components/ThemedIcon';
 import ThemedText from '@/components/ThemedText';
 import useDatabase from '@/db/useDatabase';
+import { useUserStore } from '@/hooks/useGetUser';
 import { FiltersType, Word } from '@/types/types';
 import { router, useFocusEffect } from 'expo-router';
 import { Heart } from 'lucide-react-native';
@@ -14,10 +17,14 @@ import { ScrollView, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const userWordsList = () => {
+    const [ttsDisabled, setTtsDisabled] = useState(false);
     const { t } = useTranslation();
-    const { toggleFavourite } = useDatabase();
+    const { user } = useUserStore();
+    const { toggleFavourite, setUserWordsTotal } = useDatabase();
     const { colorScheme } = useColorScheme(); // "light" | "dark"
     const { getLearnedWords } = useDatabase();
+    const { tts } = useTextToSpeech();
+    const [ userWordsTotalState, setUserWordsTotalState ] = useState(0);
     
     //state
     const [learnedWords, setLearnedWords] = useState<Word[]>([]);
@@ -52,10 +59,34 @@ const userWordsList = () => {
         setModalVisible(false)
     };
 
+    const handleTextToSpeech = async (text: string, lang: string) => {
+        if (ttsDisabled || !user) return;
+        try {
+            setTtsDisabled(true);
+            await tts(text, lang);
+        } catch (error) {
+            alert('Error with text to speech. Please try again.');
+        } finally {
+            setTimeout(() => setTtsDisabled(false), 1500);
+        }   
+    }
+
+    const handleGetWordsCount = async () => {
+        if(!user) return;
+        try {
+            const wordsCount = await getWordsCount(user!.learn_lang, user!.access_level === 'pro');
+            await setUserWordsTotal(wordsCount);
+            setUserWordsTotalState(wordsCount);
+        }catch (error) {
+            console.error('Error getting words count:', error);
+        }
+    }
+
     useFocusEffect(
         useCallback(() => {
             fetchLearnedWords(filters);
-        }, [])
+            handleGetWordsCount()
+        }, [user])
     );
     
     return (
@@ -65,8 +96,12 @@ const userWordsList = () => {
                 <ThemedText className='text-4xl font-bold my-4'>{ t("your_vocabulary") }</ThemedText>
                 <View className='flex-row justify-between items-center'>
                     <View>
-                        <ThemedText variant='subtext'>{ t("total") }</ThemedText>
+                        <ThemedText variant='subtext'>{ t("learned") }</ThemedText>
                         <ThemedText className='text-2xl font-bold'>{learnedWords.length}</ThemedText>
+                    </View>
+                    <View>
+                        <ThemedText variant='subtext'>{ t("total") }</ThemedText>
+                        <ThemedText className='text-2xl font-bold'>{userWordsTotalState}</ThemedText>
                     </View>
                     <TouchableOpacity accessibilityLabel='Open Filters Menu' onPress={() => setModalVisible(!modalVisible)}>
                         <ThemedIcon name='Settings' size={24} />
@@ -82,8 +117,11 @@ const userWordsList = () => {
                     learnedWords.map((word, index) => (
                     <View key={index} className={`px-4 w-full py-4 ${index % 2 === 0 ? 'bg-background-light dark:bg-background-dark' : 'bg-secondary-light dark:bg-secondary-dark'}`}>
                         <View className='flex-row items-center justify-between mb-2'>
-                            <View className='flex-row items-center flex-1 gap-1'>
-                                <ThemedText className="font-bold text-xl flex-wrap">{word?.learning_word}</ThemedText>
+                                <View className='flex-row items-center flex-1 gap-1'>
+                                    <TouchableOpacity accessibilityLabel='Text to Speech for Word' onPress={user ? (() => handleTextToSpeech(word?.learning_word, user.learn_lang)) : () => {}} disabled={ttsDisabled} className={`${ttsDisabled ? 'opacity-50' : ''}`}>
+                                        <ThemedIcon name={ ttsDisabled ? 'VolumeOff' : 'Volume2' } size={20} />
+                                    </TouchableOpacity>
+                                <ThemedText className="font-bold text-xl flex-wrap mb-1 ml-1">{word?.learning_word}</ThemedText>
                                 {(word?.learning_gender && word?.learning_gender !== 'n') && <ThemedIcon name={word?.learning_gender === 'm' ? 'Mars' : 'Venus'} size={16} />}
                             </View>
                             <ThemedText variant="subtext" className="italic ml-auto">{word?.native_word}</ThemedText>

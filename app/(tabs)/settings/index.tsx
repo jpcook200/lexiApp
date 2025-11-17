@@ -85,9 +85,7 @@ export default function Settings() {
         try {
             if (connected) {
                 const activeSubs = await getActiveSubscriptions()
-                console.log('Subscription active check:', activeSubs);
                 if (user) {
-                    console.log('Subscription active:', activeSubs.length > 0);
                     const newAccessLevel = activeSubs.length > 0 ? 'pro' : 'free';
                     if (user.access_level !== newAccessLevel) {
                         await setUserAccessLevel(newAccessLevel);

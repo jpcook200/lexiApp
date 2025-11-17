@@ -1,4 +1,4 @@
-import { CompletedType, CountType, User, Word } from "@/types/types";
+import { CompletedType, CountType, StreakRow, User, Word } from "@/types/types";
 import { useSQLiteContext } from "expo-sqlite";
 import { DateTime } from "luxon";
 
@@ -264,7 +264,6 @@ const useDatabase = () => {
                 `UPDATE users SET last_fetched = datetime('now', 'localtime') WHERE id = ?`,
                 [1]
             );
-            console.log('user last fetched updated')
         } catch (error) {
             console.error('Error saving last fetched date:', error);
             throw error;
@@ -456,105 +455,6 @@ const useDatabase = () => {
         }
     };
 
-    const insertStreakRecord = async () => {
-        const date = DateTime.now().toISODate();
-        const yesterday = DateTime.now().minus({ days: 1 }).toISODate();
-        try {
-            
-            const userResults = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = ?', [1]);
-            if (!userResults) {
-                throw new Error('User not found');
-            }
-            const userLangPair = `${userResults.native_lang}-${userResults.learn_lang}`;
-
-            await db.runAsync(
-                `INSERT OR IGNORE INTO streak (user_id, date, completed, lang_pair_code) VALUES (?, ?, ?, ?)`,
-                [1, date, 0, userLangPair]
-            );
-
-            await db.runAsync(
-                `INSERT OR IGNORE INTO streak_counts (user_id, lang_pair_code, current, longest) VALUES (?, ?, ?, ?)`,
-                [1, userLangPair, 0, 0]
-            );
-
-            const allStreaks = await db.getAllAsync(`SELECT * FROM streak WHERE lang_pair_code = ?`, [userLangPair]);
-
-            if (allStreaks.length > 1) {
-                const yesterDayCompleted = await db.getFirstAsync(
-                    `SELECT completed FROM streak WHERE user_id = ? AND date = ? AND completed = 1 AND lang_pair_code = ?`,
-                    [1, yesterday, userLangPair]
-                );
-
-                if (!yesterDayCompleted) {
-                    await db.runAsync('UPDATE streak_counts SET longest = current WHERE current > longest AND lang_pair_code = ?', [userLangPair]);
-                    await db.runAsync(
-                        `UPDATE streak_counts SET current = 0 WHERE lang_pair_code = ?`,
-                        [userLangPair]
-                    );
-                }
-
-            }
-            
-            const result = await db.getFirstAsync(
-                `SELECT * FROM streak WHERE user_id = ? AND lang_pair_code = ?`,
-                [1, userLangPair]
-            );
-            
-            console.log('Streak record inserted or already exists:', result);
-            
-        } catch (error) {
-            
-            console.error('Error inserting streak record:', error);
-            throw error;
-        }
-    };
-
-    const updateStreakRecord = async (completed: 0 | 1, date: string) => {
-        try {
-            const userResults = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = ?', [1]);
-            if (!userResults) {
-                throw new Error('User not found');
-            }
-            const userLangPair = `${userResults.native_lang}-${userResults.learn_lang}`;
-            
-            await db.runAsync(
-                `UPDATE streak SET completed = ? WHERE user_id = ? AND date = ? AND lang_pair_code = ?`,
-                [completed, 1, date, userLangPair]
-            );
-            
-            console.log('Streak record updated successfully for date:', date);
-        } catch (error) {
-            console.error('Error updating streak record:', error);
-            throw error;
-        }
-    };
-
-    const getWeeklyStreak = async () => {
-        const today = DateTime.now().toISODate();
-        const sevenDaysAgo = DateTime.now().minus({ days: 7 }).toISODate();
-        
-        try {
-            
-            const userResults = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = ?', [1]);
-            if (!userResults) {
-                throw new Error('User not found');
-            }
-            const userLangPair = `${userResults.native_lang}-${userResults.learn_lang}`;
-
-            const results = await db.getAllAsync(
-                `SELECT * FROM streak WHERE user_id = ? AND lang_pair_code = ? AND date BETWEEN ? AND ? ORDER BY date ASC`,
-                [1, userLangPair, sevenDaysAgo, today]
-            );
-
-            
-            return results;
-        } catch (error) {
-            
-            console.error('Error fetching weekly streak:', error);
-            throw error;
-        }
-    };
-
     const updateStreakCount = async (instruction: 'increment' | 'reset' | 'decrement') => {
         const today = DateTime.now().toISODate();
         
@@ -599,10 +499,109 @@ const useDatabase = () => {
         }
     };
 
+    const initStreakRecord = async () => {
+        const date = DateTime.now().toISODate();
+        const yesterday = DateTime.now().minus({ days: 1 }).toISODate();
+
+        try {
+            const userResults = await db.getFirstAsync<User>(
+                'SELECT * FROM users WHERE id = ?', 
+                [1]
+            );
+            if (!userResults) throw new Error('User not found');
+
+            const userLangPair = `${userResults.native_lang}-${userResults.learn_lang}`;
+
+            // Insert today's record if missing
+            await db.runAsync(
+                `INSERT OR IGNORE INTO streak (user_id, date, completed, lang_pair_code) VALUES (?, ?, ?, ?)`,
+                [1, date, 0, userLangPair]
+            );
+
+            // Total count (safe)
+            const totalStreaks = await db.getFirstAsync<CountType>(
+                `SELECT COUNT(*) as count FROM streak WHERE user_id = ? AND lang_pair_code = ?`,
+                [1, userLangPair]
+            );
+
+            const totalCount = totalStreaks?.count ?? 0;
+
+            // Check yesterday's record
+            const yesterdayStreakRecord = await db.getAllAsync<StreakRow>(
+                `SELECT * FROM streak WHERE user_id = ? AND lang_pair_code = ? AND date = ?`,
+                [1, userLangPair, yesterday]
+            );
+
+            if (totalCount > 1) {
+                if (
+                    yesterdayStreakRecord.length === 0 ||
+                    yesterdayStreakRecord[0].completed === 0
+                ) {
+                    await updateStreakCount('reset');
+                }
+            }
+
+            await db.runAsync(
+                `INSERT OR IGNORE INTO streak_counts (user_id, lang_pair_code, current, longest) VALUES (?, ?, ?, ?)`,
+                [1, userLangPair, 0, 0]
+            );
+
+            console.log('Streak record initialized successfully:', date);
+
+        } catch (error) {
+            console.error('Error inserting streak record:', error);
+            throw error;
+        }
+    };
+
+    const updateStreakRecord = async (completed: 0 | 1) => {
+        const date = DateTime.now().toISODate();
+        try {
+            const userResults = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = ?', [1]);
+            if (!userResults) {
+                throw new Error('User not found');
+            }
+            const userLangPair = `${userResults.native_lang}-${userResults.learn_lang}`;
+            
+            await db.runAsync(
+                `UPDATE streak SET completed = ? WHERE user_id = ? AND date = ? AND lang_pair_code = ?`,
+                [completed, 1, date, userLangPair]
+            );
+            console.log('Streak record updated successfully for date:', date);
+        } catch (error) {
+            console.error('Error updating streak record:', error);
+            throw error;
+        }
+    };
+
+    const getWeeklyStreak = async () => {
+        const today = DateTime.now().toISODate();
+        const sevenDaysAgo = DateTime.now().minus({ days: 7 }).toISODate();
+        try {
+            const userResults = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = ?', [1]);
+            if (!userResults) {
+                throw new Error('User not found');
+            }
+            const userLangPair = `${userResults.native_lang}-${userResults.learn_lang}`;
+
+            const results = await db.getAllAsync<StreakRow>(
+                `SELECT * FROM streak WHERE user_id = ? AND lang_pair_code = ? AND date BETWEEN ? AND ? ORDER BY date ASC`,
+                [1, userLangPair, sevenDaysAgo, today]
+            );
+
+            
+            return results;
+        } catch (error) {
+            
+            console.error('Error fetching weekly streak:', error);
+            throw error;
+        }
+    };
+
     const getStreakCount = async () => {
         type Streak = {
             current: number;
-            best?: number; // optional if not always present
+            longest?: number; // optional if not always present
             };
         try {
             
@@ -614,8 +613,7 @@ const useDatabase = () => {
             const result = await db.getFirstAsync<Streak>(
                 `SELECT * FROM streak_counts WHERE user_id = ? AND lang_pair_code = ?`,
                 [1, userLangPair]
-            );
-            console.log('Fetched streak count:', result);
+            )
             
             return result;
         } catch (error) {
@@ -683,7 +681,6 @@ const useDatabase = () => {
                 [accessLevel, 1]
             );
             if (userResults.words_per_day > freeWPDLimit) { 
-                console.log('User words per day exceeds free limit, resetting to free limit.');
                 await setWordsPerDay(freeWPDLimit);
             }
         } catch (error) {
@@ -692,8 +689,20 @@ const useDatabase = () => {
         }
     }
 
+    const setUserWordsTotal = async (totalWords: number) => { 
+        try {
+            await db.runAsync(
+                `UPDATE users SET words_total = ? WHERE id = ?`,
+                [totalWords, 1]
+            );
+        } catch (error) {
+            console.error('Error setting user total words:', error);
+            throw error;
+        }
+    }
+
     
-    return { setUserAccessLevel, setTutorialCompleted, insertDifficultyLevel, saveLastFetchedDate, resetProgressByLanguagePair, getStreakCount, getLearnedWordsByTimeframe, updateStreakCount, getWeeklyStreak, updateStreakRecord, insertStreakRecord, saveLastCard, setLastSet, increaseDifficultyLevel, markAsLearned, deleteAllFromDailyWords, insertIntoLearnedWords, getLearnedWords, getLearnedWordsIds, toggleFavourite, getDailyLearnedCount, setNativeLanguage, setLearningLanguage, setWordsPerDay, getPracticeWords, setDifficultyLevel, setRemindersOn, getDailyWords, saveDailyWords };
+    return { setUserWordsTotal, setUserAccessLevel, setTutorialCompleted, insertDifficultyLevel, saveLastFetchedDate, resetProgressByLanguagePair, getStreakCount, getLearnedWordsByTimeframe, updateStreakCount, getWeeklyStreak, updateStreakRecord, initStreakRecord, saveLastCard, setLastSet, increaseDifficultyLevel, markAsLearned, deleteAllFromDailyWords, insertIntoLearnedWords, getLearnedWords, getLearnedWordsIds, toggleFavourite, getDailyLearnedCount, setNativeLanguage, setLearningLanguage, setWordsPerDay, getPracticeWords, setDifficultyLevel, setRemindersOn, getDailyWords, saveDailyWords };
 }
 
 export default useDatabase;

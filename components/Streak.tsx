@@ -1,4 +1,5 @@
 import useDatabase from '@/db/useDatabase';
+import { StreakRow } from '@/types/types';
 import { useFocusEffect } from 'expo-router';
 import { Check, Flame } from 'lucide-react-native';
 import { DateTime } from 'luxon';
@@ -11,12 +12,12 @@ import ThemedView from './ThemedView';
 const Streak = ({ displayOnly }: {displayOnly: boolean}) => {
     const today = DateTime.now().toISODate();
     const { t } = useTranslation();
-    const [streakData, setStreakData] = useState([]);
+    const [streakData, setStreakData] = useState<StreakRow[]>([]);
     const [streakCounts, setStreakCounts] = useState({
         current: 0,
         longest: 0,
     });
-    const { getWeeklyStreak, getStreakCount } = useDatabase();
+    const { getWeeklyStreak, getStreakCount, initStreakRecord } = useDatabase();
     const days = [
         t("monday_abrv"),
         t("tuesday_abrv"),
@@ -27,7 +28,7 @@ const Streak = ({ displayOnly }: {displayOnly: boolean}) => {
         t("sunday_abrv"),
     ];
 
-    const normalizeStreak = (streakData) => {   
+    const normalizeStreak = (streakData: StreakRow[]) => {   
         const last7Dates = Array.from({ length: 7 }).map((_, i) =>
             DateTime.now().minus({ days: 6 - i }).toISODate()
         );
@@ -38,7 +39,7 @@ const Streak = ({ displayOnly }: {displayOnly: boolean}) => {
         });
     };
 
-    const getWeekdayAbbreviation = (dateString) => { 
+    const getWeekdayAbbreviation = (dateString: string) => { 
         const date = DateTime.fromISO(dateString);
         return days[date.weekday - 1]; 
     }
@@ -46,24 +47,29 @@ const Streak = ({ displayOnly }: {displayOnly: boolean}) => {
     useFocusEffect(
         useCallback(() => {
             let isActive = true;
-            
-            const fetchAndNormalize = async () => {
-                const results = await getWeeklyStreak(); // wait for async data
+
+            const loadStreakData = async () => {
+                const results = await getWeeklyStreak();
                 const streakCountsResults = await getStreakCount();
+
+                if (!isActive) return;
+
                 setStreakCounts({
                     current: streakCountsResults?.current || 0,
-                    longest: Math.max(streakCountsResults?.longest, streakCountsResults?.current),
+                    longest: Math.max(
+                    streakCountsResults?.longest || 0,
+                    streakCountsResults?.current || 0
+                    ),
                 });
+
                 const normalizedResults = normalizeStreak(results);
                 setStreakData(normalizedResults);
             };
-
-            if (isActive) { 
-                fetchAndNormalize();
-            }
+            initStreakRecord()
+            loadStreakData();
 
             return () => {
-                isActive = false;
+            isActive = false;
             };
         }, [])
     );

@@ -6,30 +6,30 @@ import Tutorial from '@/components/Tutorial'
 import useDatabase from '@/db/useDatabase'
 import { useUserStore } from '@/hooks/useGetUser'
 import useGetWords from '@/hooks/useGetWords'
-import useInitStreak from '@/hooks/useInitStreak'
 import { useFocusEffect } from '@react-navigation/native'
 import { useQuery } from '@tanstack/react-query'
 import { useSQLiteContext } from 'expo-sqlite'
 import { useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, View } from 'react-native'
+import { useIAP } from 'react-native-iap'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 
 const learn = () => {
-    const { handleGetWords, setActiveWords, activeWords, handleGetProgessCount, progressToday  } = useGetWords();
-    const { updateStreakRecord, updateStreakCount } = useDatabase();
+    const { handleGetWords, setActiveWords, activeWords, handleGetProgessCount, progressToday } = useGetWords();
+    const [currentStreak, setCurrentStreak] = useState<number>(0);
+    const { updateStreakRecord, initStreakRecord } = useDatabase();
     const { user, loading, fetchUser} = useUserStore();
     const [showTutorial, setShowTutorial] = useState(false);
     const [isInitialised, setIsInitialised] = useState(false)
     const db = useSQLiteContext();
     const [cardsLoading, setCardsLoading] = useState(true)
-    
-    useInitStreak();
+    const { connected } = useIAP();
     
     const { data = [], error, isPending, refetch } = useQuery({
-        queryKey: ['words'],
+        queryKey: ['words', connected],
         queryFn: () => handleGetWords(user!),
-        enabled: !!user,
+        enabled: !!user && connected,
         refetchOnWindowFocus: true,
         retry: ( error: any) => {
             if (error?.message?.includes('401') || error?.response?.status === 401) {
@@ -39,18 +39,13 @@ const learn = () => {
         },
     });
 
-    const handleDayComplete = async () => { 
-        const date = new Date().toLocaleString('en-CA').split(',')[0];
-        await updateStreakCount('increment');
-        await updateStreakRecord(1, date);
-    }
-
     useFocusEffect(
         useCallback(() => {
             const handleFocus = async () => { 
                 setIsInitialised(false)
                 await fetchUser(db);
                 await refetch();
+                await initStreakRecord();
                 await handleGetProgessCount();
                 setIsInitialised(true)
                 
@@ -71,12 +66,6 @@ const learn = () => {
             setShowTutorial(user.tutorial_completed === 0)
         }
     }, [user]);
-
-    useEffect(() => {
-        if (user && (progressToday >= user?.words_per_day && isInitialised)) {
-            handleDayComplete();
-        }
-    }, [progressToday, user]);
 
     if (!user) {
         return (
@@ -99,7 +88,7 @@ const learn = () => {
                     />
                 </View>
                 {isPending || !isInitialised ? (
-                    null
+                    <ActivityIndicator size={"small"} className='flex-1 justify-center items-center'/>
                 ) : (
                     <>
                         <CardStackSwiper
@@ -107,14 +96,15 @@ const learn = () => {
                             setActiveWords={setActiveWords}
                             updateProgress={handleGetProgessCount}
                             progress={progressToday}
-                            isPending={isPending}
                             practice={false}
                             user={user}
-                            cardsLoading={cardsLoading}
+                            setCurrentStreak={setCurrentStreak}
                         />
                         <LearningTracker
                             progress={progressToday || 0}
                             goal={user?.words_per_day || 0}
+                            setCurrentStreak={setCurrentStreak}
+                            currentStreak={currentStreak || 0}
                         />
                     </>
                 )}

@@ -174,6 +174,8 @@
     "determiner": "Artikel / Bestimmungswort",
     "interjection": "Interjektion",
     "exclamation": "Ausruf",
+    "expression": "Ausdruck",
+    "particle": "Partikel",
 
     "pro": "Pro",
     "free": "Kostenlos",
@@ -182,5 +184,7 @@
     "warning_body": "Upgrade auf ein Premium-Konto, um deinen Fortschritt über alle Sprachen hinweg zu behalten.",
     "premium_prompt": "Zu Premium upgraden",
     "confirm": "Bestätigen",
-    "not_found": "Nicht gefunden"
+    "not_found": "Nicht gefunden",
+
+    "level_disclaimer": "Die meisten Wörter in dieser App liegen zwischen den CEFR-Niveaus A1 und B2. Schwierigere Wörter (C1 und C2) werden in zukünftigen Updates nach und nach hinzugefügt."
 }

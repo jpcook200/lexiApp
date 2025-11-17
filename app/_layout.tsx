@@ -48,7 +48,12 @@ export default function RootLayout() {
                 databaseName="userDatabase.db"
                 onInit={async (db) => {
                     await db.execAsync(`
-                       
+                        drop TABLE IF EXISTS users;
+                        drop TABLE IF EXISTS difficulties;
+                        drop TABLE IF EXISTS learned_words;
+                        drop TABLE IF EXISTS daily_words;
+                        drop TABLE IF EXISTS streak;
+                        drop TABLE IF EXISTS streak_counts;
                         CREATE TABLE IF NOT EXISTS users (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             native_lang TEXT,
@@ -60,7 +65,8 @@ export default function RootLayout() {
                             last_set INTEGER DEFAULT 0,
                             last_fetched DATETIME,
                             tutorial_completed BOOLEAN DEFAULT 0,
-                            access_level TEXT DEFAULT 'free'
+                            access_level TEXT DEFAULT 'free',
+                            words_total INTEGER DEFAULT 0
                         );
                         
                         CREATE TABLE IF NOT EXISTS difficulties (

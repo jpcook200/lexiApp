@@ -174,6 +174,8 @@
     "determiner": "Determiner",
     "interjection": "Interjection",
     "exclamation": "Exclamation",
+    "expression": "Expression",
+    "particle": "Particle",
 
     "pro": "Pro",
     "free": "Free",
@@ -182,5 +184,7 @@
     "warning_body": "Upgrade to a premium account to keep your progress across languages.",
     "premium_prompt": "Upgrade to Premium",
     "confirm": "Confirm",
-    "not_found": "Not Found"
+    "not_found": "Not Found",
+
+    "level_disclaimer": "Most words in this app are between CEFR levels A1 and B2. More difficult words (C1 and C2) will be gradually added in future updates."
 }

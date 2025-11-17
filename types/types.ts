@@ -33,6 +33,7 @@ export interface User {
     last_fetched?: string;
     tutorial_completed: 0 | 1;
     access_level: 'free' | 'pro';
+    words_total: number;
 }
 
 export interface CountType { 
@@ -56,9 +57,24 @@ export interface getWordsParams {
     limit: number;
     excludeIds: number[];
     localDatetime: string;
+    transactionId: string | null;
 }
 
 export type FiltersType = {
     sortBy: 'dateAdded' | 'alphabetical' | 'difficulty';
     favouritesOnly: boolean;
+}
+
+export type StreakRow = {
+    id?: number;
+    user_id?: number;
+    date: string;
+    completed: number;
+    lang_pair_code?: string;
+};
+
+export type StreakCount = {
+    longest: number;
+    current: number;
+    langPair: string;
 }

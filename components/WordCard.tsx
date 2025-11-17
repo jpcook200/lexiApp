@@ -1,4 +1,4 @@
-import { textToSpeech } from '@/api/textToSpeech';
+import { useTextToSpeech } from '@/api/textToSpeech';
 import useDatabase from '@/db/useDatabase';
 import { User, Word } from '@/types/types';
 import { Heart, Mars, Venus } from 'lucide-react-native';
@@ -27,7 +27,7 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
     const cardClass = 'overflow-hidden rounded-2xl shadow-sm flex-1 border border-border-light dark:border-border-dark';
     const [isFlipped, setIsFlipped] = useState(false);
     const flipAnimation = useRef(new Animated.Value(0)).current
-
+    const { tts, } = useTextToSpeech();
     const frontInterpolate = flipAnimation.interpolate({
         inputRange: [0, 180],
         outputRange: ['0deg', '180deg'],
@@ -87,11 +87,11 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
         if (ttsDisabled || !user) return;
         try {
             setTtsDisabled(true);
-            await textToSpeech(text, lang);
+            await tts(text, lang);
         } catch (error) {
             alert('Error with text to speech. Please try again.');
         } finally {
-            setTimeout(() => setTtsDisabled(false), 1000);
+            setTimeout(() => setTtsDisabled(false), 1500);
         }   
     }
 
@@ -112,10 +112,12 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
                                         <ThemedText variant='primary' className='text-5xl font-bold'>
                                             { word?.learning_word }
                                         </ThemedText>
+                                        <ThemedText variant='subtext' className='text-xl'>{ word?.learning_pronunciation }</ThemedText>
                                     </View>
                                     <View className='bg-primary w-auto px-5 py-1 rounded-full self-start'>
-                                        <ThemedText className='font-bold capitalize text-white'>{ word?.part_of_speech }</ThemedText>
+                                        <ThemedText className='font-bold capitalize text-white'>{ t(word?.part_of_speech) }</ThemedText>
                                     </View>
+                                    
                                 </View>
                                 <View className="flex-row justify-end">
                                     <TouchableOpacity accessibilityLabel='Toggle Favourite Word' disabled={ displayOnly } onPress={ () => handleFavourite() }>

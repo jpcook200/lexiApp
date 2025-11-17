@@ -6,7 +6,6 @@ import ThemedText from '@/components/ThemedText';
 import ThemedView from '@/components/ThemedView';
 import useDatabase from '@/db/useDatabase';
 import { useUserStore } from '@/hooks/useGetUser';
-import useInitStreak from '@/hooks/useInitStreak';
 import { LearnedCounts, Word } from '@/types/types';
 import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
@@ -27,8 +26,6 @@ export default function HomeScreen() {
         pastWeek: 0,
         allTime: 0
     })
-
-    useInitStreak();
 
     const getLearnedWords = async () => { 
         if (!user) return;

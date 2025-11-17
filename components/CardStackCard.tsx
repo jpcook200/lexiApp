@@ -19,25 +19,31 @@ type CardStackCardProps = {
     activeWords?: Word[];
     updateProgress?: () => void;
     practice?: boolean;
+    progress?: number;
+    setCurrentStreak: React.Dispatch<React.SetStateAction<number>>;
 };
 
-const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWords, activeWords = [], updateProgress, practice = false}: CardStackCardProps) => {
+const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWords, activeWords = [], updateProgress, practice = false, progress, setCurrentStreak}: CardStackCardProps) => {
     const { t } = useTranslation();
     const { setSelectedWordId } = useUserStore();
-    const { markAsLearned, insertIntoLearnedWords} = useDatabase();
+    const { markAsLearned, insertIntoLearnedWords, updateStreakCount, updateStreakRecord} = useDatabase();
     const screenWidth = Dimensions.get('window').width;
     const screenHeight = Dimensions.get('window').height;
     const translationX = useSharedValue(0);
     const translationY = useSharedValue(0);
 
     const handleSwipeUp = async () => {
-        if (!word || !user || !setActiveWords || !updateProgress || practice) return;
+        if (!word || !user || !setActiveWords || !updateProgress || practice || progress === undefined) return;
         try {
             await insertIntoLearnedWords(word);
             await markAsLearned(word.word_id)
             updateProgress();
             setActiveWords((prev: Word[]) => (Array.isArray(prev) ? prev.filter(w => w.id !== word.id) : []));
-
+            if (activeWords.length <= 1) {
+                await updateStreakCount("increment");
+                await updateStreakRecord(1);
+                setCurrentStreak((prev) => prev + 1);
+            }
         } catch (error) {
             console.error('Error marking word as learned:', error);
         }

@@ -24,11 +24,6 @@ const WordsPerDay = () => {
         if (!user) return;
         try {
             await setWordsPerDay(selectedNumber);
-            if (selectedNumber > user.words_per_day) { 
-                const date = new Date().toLocaleString('en-CA').split(',')[0];
-                await updateStreakCount('decrement');
-                await updateStreakRecord(0, date);
-            }
             router.back();
         } catch (error) {
             console.error('Error saving words per day:', error);
@@ -51,7 +46,7 @@ const WordsPerDay = () => {
     return (
         <View className="flex-1 bg-background-light dark:bg-background-dark p-4">
             <ThemedText className="mb-2 text-lg text-text-light dark:text-text-dark">{ t("selected") }: <Text className="font-bold">{selectedNumber}</Text></ThemedText>
-            <View className="border border-border-light dark:border-border-dark rounded-lg w-full overflow-hidden bg-item-light dark:bg-item-dark">                
+            <View className="border border-border-light dark:border-border-dark rounded-lg w-full overflow-hidden bg-item-light dark:bg-item-dark pb-6">                
                 <FlatList
                     data={numbers}
                     keyExtractor={(item) => item.toString()}

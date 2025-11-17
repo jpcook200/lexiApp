@@ -1,7 +1,7 @@
 import useDatabase from '@/db/useDatabase';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from 'expo-router';
 import { Flame } from 'lucide-react-native';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import ThemedText from './ThemedText';
@@ -10,25 +10,27 @@ import ThemedView from './ThemedView';
 type LearningTrackerProps = {
     progress: number;
     goal: number;
+    setCurrentStreak: React.Dispatch<React.SetStateAction<number>>;
+    currentStreak: number;
 };
 
-const LearningTracker = ({ progress, goal }: LearningTrackerProps) => {
+const LearningTracker = ({ progress, goal, setCurrentStreak, currentStreak }: LearningTrackerProps) => {
     const { t } = useTranslation();
-    const { getStreakCount } = useDatabase();
-    const [currentStreak, setCurrentStreak] = useState();
+    const { getStreakCount } = useDatabase()
     const progressPercent = Math.min((progress / goal) * 100, 100);
 
-    const handleGetStreakCount = async () => {
-        const streak = await getStreakCount();
-        setCurrentStreak(streak?.current || 0)
+    const getStreak = async () => {
+        const result = await getStreakCount()
+        setCurrentStreak(result?.current || 0)
     }
 
     useFocusEffect(
         useCallback(() => {
-            handleGetStreakCount()
+            getStreak(); 
         }, [])
     );
 
+    
     return (
         <ThemedView variant='shaded' className='mt-auto overflow-hidden border border-border-light dark:border-border-dark rounded-2xl'>    
             <View className='p-4'>

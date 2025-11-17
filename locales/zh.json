@@ -174,10 +174,14 @@
     "determiner": "限定词",
     "interjection": "感叹词",
     "exclamation": "感叹",
+    "expression": "表达",
+    "particle": "助词",
 
     "warning_title": "如果更改语言，您当前的进度将会丢失。",
     "warning_body": "升级到高级账户即可在不同语言间保留您的进度。",
     "premium_prompt": "升级到高级版",
     "confirm": "确认",
-    "not_found": "未找到"
+    "not_found": "未找到",
+
+    "level_disclaimer": "此应用中的大多数单词处于 CEFR A1 到 B2 级别。更难的单词（C1 和 C2）将在未来的更新中逐步添加。"
 }

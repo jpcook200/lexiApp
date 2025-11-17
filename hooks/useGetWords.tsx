@@ -1,16 +1,16 @@
 import { getWords } from '@/api/getWords';
 import useDatabase from '@/db/useDatabase';
 import { User, Word } from '@/types/types';
+import { createDirectory } from '@/utilities/createDirectory';
 import { DateTime } from 'luxon';
 import { useState } from 'react';
 import { useIAP } from 'react-native-iap';
-
 
 const useGetWords = () => {
     const { setLastSet, increaseDifficultyLevel, deleteAllFromDailyWords, getDailyLearnedCount, getDailyWords, saveDailyWords, getLearnedWordsIds, saveLastFetchedDate } = useDatabase();
     const [progressToday, setProgressToday] = useState(0);
     const [activeWords, setActiveWords] = useState<Word[]>([]);
-    const { getActiveSubscriptions } = useIAP();
+    const { getActiveSubscriptions, connected } = useIAP();
     
     const getHighestDifficultyLevel = (words: Word[]) => {
         const difficulties = ['a1', 'a2', 'b1', 'b2', 'c1', 'c2'];
@@ -39,12 +39,14 @@ const useGetWords = () => {
         return storedDailyWords.filter((word) => word.learned === 0);
     };
 
-    const handleNewDayOrEmptyWords = async ({ user, learnedWordIds, dailyWordIds, localDatetime, deleteWords, transactionId }: {user: User, learnedWordIds: number[], dailyWordIds: number[], localDatetime: string, deleteWords: boolean}) => {
+    const handleNewDayOrEmptyWords = async ({ user, learnedWordIds, dailyWordIds, localDatetime, deleteWords, transactionId }: {user: User, learnedWordIds: number[], dailyWordIds: number[], localDatetime: string, deleteWords: boolean, transactionId: string | null}) => {
         setProgressToday(0);
+        await createDirectory();
+
         if (deleteWords) { 
             await deleteAllFromDailyWords();
         }
-        console.log("Fetching new words for the day");
+
         const { words: newWords, lastSet } = await getWords({
             nativeLang: user.native_lang,
             learningLang: user.learn_lang,
@@ -76,9 +78,8 @@ const useGetWords = () => {
         return filteredResults;
     };
 
-    const handleSameDay = async ({ user, storedDailyWords, learnedWordIds, dailyWordIds, localDatetime, transactionId}: {user: User, storedDailyWords: Word[], learnedWordIds: number[], dailyWordIds: number[], localDatetime: string}) => {
+    const handleSameDay = async ({ user, storedDailyWords, learnedWordIds, dailyWordIds, localDatetime, transactionId}: {user: User, storedDailyWords: Word[], learnedWordIds: number[], dailyWordIds: number[], localDatetime: string, transactionId: string | null}) => {
         if (user.words_per_day! > storedDailyWords.length) {
-            console.log("Fetching additional words for the day");
             const { words: newWords, lastSet } = await getWords({
                 nativeLang: user.native_lang,
                 learningLang: user.learn_lang,
@@ -111,8 +112,7 @@ const useGetWords = () => {
     const handleGetWords = async (user: User) => {
         if (!user) return [];
         try {
-            const activeSubscriptions = await getActiveSubscriptions();
-            const transactionId = activeSubscriptions[0]?.transactionId || null;
+            
             const storedDailyWords = await getDailyWords();
             const dailyWordIds = storedDailyWords.map((word: Word) => word.word_id);
             const learnedWordIds = await getLearnedWordsIds();
@@ -122,6 +122,12 @@ const useGetWords = () => {
 
             const localDate = localDatetime.split('T')[0];
             const storedDate = user.last_fetched?.split(' ')[0] || null;
+
+            if (!connected) { 
+                return storedDailyWords.filter((word) => word.learned === 0)
+            }
+            const activeSubscriptions = await getActiveSubscriptions();
+            const transactionId = activeSubscriptions[0]?.transactionId || null;
 
             if (user.last_set === 1 && user.difficulty_level === 'c2') {
                 return handleCompletedSet(storedDailyWords);
@@ -149,7 +155,6 @@ const useGetWords = () => {
                     transactionId
                 });
             } else if (storedDate === localDate) {
-
                 return handleSameDay({
                     user,
                     storedDailyWords,
@@ -164,7 +169,6 @@ const useGetWords = () => {
 
         } catch (error) {
             console.error('Error fetching daily words:', error);
-
             const errorStoredDailyWords = await getDailyWords();
             const fallbackWords = errorStoredDailyWords.filter((word) => word.learned === 0);
             setActiveWords(fallbackWords);

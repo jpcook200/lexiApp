@@ -17,12 +17,11 @@ type CardStackSwiperProps = {
     updateProgress?: () => void;
     progress?: number;
     practice?: boolean;
-    isPending?: boolean;
     user: User;
-    cardsLoading: boolean;
+    setCurrentStreak: React.Dispatch<React.SetStateAction<number>>;
 };
 
-const CardStackSwiper = ({ activeWords, setActiveWords, updateProgress, progress, practice, isPending, user, cardsLoading }: CardStackSwiperProps) => {
+const CardStackSwiper = ({ activeWords, setActiveWords, updateProgress, progress, practice, user, setCurrentStreak}: CardStackSwiperProps) => {
     const activeIndex = useSharedValue(0);
     const [indexState, setIndexState] = useState(0);
     const { t } = useTranslation();
@@ -59,6 +58,8 @@ const CardStackSwiper = ({ activeWords, setActiveWords, updateProgress, progress
                                 practice={practice}
                                 numOfCards={activeWords?.length}
                                 user={user!}
+                                progress={progress}
+                                setCurrentStreak={setCurrentStreak}
                             />
                         ))}
                 </View>

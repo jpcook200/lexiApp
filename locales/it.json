@@ -174,6 +174,8 @@
     "determiner": "Determinante",
     "interjection": "Interiezione",
     "exclamation": "Esclamazione",
+    "expression": "Espressione",
+    "particle": "Particella",
 
     "pro": "Pro",
     "free": "Gratis",
@@ -182,5 +184,7 @@
     "warning_body": "Passa a un account Premium per mantenere i tuoi progressi tra le lingue.",
     "premium_prompt": "Passa a Premium",
     "confirm": "Conferma",
-    "not_found": "Non trovato"
+    "not_found": "Non trovato",
+
+    "level_disclaimer": "La maggior parte delle parole in questa app si trova tra i livelli CEFR A1 e B2. Parole più difficili (C1 e C2) saranno aggiunte gradualmente nei futuri aggiornamenti."
 }
