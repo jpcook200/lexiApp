@@ -3,7 +3,7 @@ import { useTextToSpeech } from '@/api/textToSpeech';
 import BackButton from '@/components/BackButton';
 import FiltersModal from '@/components/FiltersModal';
 import MainButton from '@/components/MainButton';
-import ProgressBar from '@/components/ProgressBAr';
+import ProgressBar from '@/components/ProgressBar';
 import ThemedIcon from '@/components/ThemedIcon';
 import ThemedText from '@/components/ThemedText';
 import useDatabase from '@/db/useDatabase';

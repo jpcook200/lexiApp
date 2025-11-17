@@ -4,7 +4,7 @@ import { Flame } from 'lucide-react-native';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
-import ProgressBar from './ProgressBAr';
+import ProgressBar from './ProgressBar';
 import ThemedText from './ThemedText';
 import ThemedView from './ThemedView';
 
