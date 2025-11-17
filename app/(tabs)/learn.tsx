@@ -2,29 +2,34 @@ import CardStackSwiper from '@/components/CardStackSwiper'
 import LanguageIndicator from '@/components/LanguageIndicator'
 import LearningTracker from '@/components/LearningTracker'
 import Logo from '@/components/Logo'
+import ThemedIcon from '@/components/ThemedIcon'
+import ThemedText from '@/components/ThemedText'
 import Tutorial from '@/components/Tutorial'
 import useDatabase from '@/db/useDatabase'
 import { useUserStore } from '@/hooks/useGetUser'
 import useGetWords from '@/hooks/useGetWords'
+import { Word } from '@/types/types'
 import { useFocusEffect } from '@react-navigation/native'
 import { useQuery } from '@tanstack/react-query'
 import { useSQLiteContext } from 'expo-sqlite'
 import { useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, View } from 'react-native'
+import { useTranslation } from 'react-i18next'
+import { ActivityIndicator, TouchableOpacity, View } from 'react-native'
 import { useIAP } from 'react-native-iap'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-
 const learn = () => {
     const { handleGetWords, setActiveWords, activeWords, handleGetProgessCount, progressToday } = useGetWords();
-    const [currentStreak, setCurrentStreak] = useState<number>(0);
-    const { updateStreakRecord, initStreakRecord } = useDatabase();
+    const { t } = useTranslation();
+    const { connected } = useIAP();
+    const db = useSQLiteContext();
     const { user, loading, fetchUser} = useUserStore();
+    const { toggleLearned, initStreakRecord, removeFromLearnedWords, updateStreakCount, updateStreakRecord } = useDatabase();
+    
+    const [currentStreak, setCurrentStreak] = useState<number>(0);
     const [showTutorial, setShowTutorial] = useState(false);
     const [isInitialised, setIsInitialised] = useState(false)
-    const db = useSQLiteContext();
-    const [cardsLoading, setCardsLoading] = useState(true)
-    const { connected } = useIAP();
+    const [lastWordLearned, setlastWordLearned] = useState<Word | null>(null);
     
     const { data = [], error, isPending, refetch } = useQuery({
         queryKey: ['words', connected],
@@ -39,6 +44,24 @@ const learn = () => {
         },
     });
 
+    const handleUndoLearned = async () => { 
+        if (lastWordLearned != null && user) {
+            await toggleLearned(lastWordLearned.word_id);
+            await removeFromLearnedWords(lastWordLearned.word_id);
+            setActiveWords((prev) => [lastWordLearned, ...prev]);
+            setlastWordLearned(null);
+            console.log("progressToday before undo:", progressToday);
+            console.log("user.words_per_day:", user.words_per_day);
+            if (progressToday == user?.words_per_day) { 
+                await updateStreakCount("decrement");
+                await updateStreakRecord(0);
+                setCurrentStreak((prev) => Math.max(prev - 1, 0));
+            }
+            await handleGetProgessCount();
+        }
+    };
+
+    //effects ------------------------------------------------------------------------------
     useFocusEffect(
         useCallback(() => {
             const handleFocus = async () => { 
@@ -48,12 +71,10 @@ const learn = () => {
                 await initStreakRecord();
                 await handleGetProgessCount();
                 setIsInitialised(true)
-                
             }
             let isActive = true;
             if (isActive) {
                 handleFocus();
-                
             }
             return async () => {
                 isActive = false;
@@ -87,6 +108,7 @@ const learn = () => {
                         language={user.learn_lang}
                     />
                 </View>
+                
                 {isPending || !isInitialised ? (
                     <ActivityIndicator size={"small"} className='flex-1 justify-center items-center'/>
                 ) : (
@@ -99,7 +121,13 @@ const learn = () => {
                             practice={false}
                             user={user}
                             setCurrentStreak={setCurrentStreak}
+                            setlastWordLearned={setlastWordLearned}
+                            lastWordLearned={lastWordLearned}    
                         />
+                            <TouchableOpacity disabled={!lastWordLearned} accessibilityLabel='Undo learning pervious word' onPress={ () => handleUndoLearned() } className={`${!lastWordLearned && 'opacity-50'} flex-row my-4 items-center self-start rounded-full border border-border-light dark:border-border-dark bg-item-light dark:bg-item-dark pl-3 pr-4 py-1`}>
+                            <ThemedIcon name='Undo' size={ 20 } />
+                            <ThemedText className='text-lg ml-2 font-bold'>{t("undo")}</ThemedText>
+                        </TouchableOpacity>
                         <LearningTracker
                             progress={progressToday || 0}
                             goal={user?.words_per_day || 0}

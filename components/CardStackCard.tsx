@@ -1,6 +1,7 @@
 import useDatabase from '@/db/useDatabase';
 import { useUserStore } from '@/hooks/useGetUser';
 import { User, Word } from '@/types/types';
+import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 import { Dimensions, Text } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -21,12 +22,14 @@ type CardStackCardProps = {
     practice?: boolean;
     progress?: number;
     setCurrentStreak: React.Dispatch<React.SetStateAction<number>>;
+    lastWordLearned: Word | null;
+    setlastWordLearned: React.Dispatch<React.SetStateAction<Word | null>>;
 };
 
-const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWords, activeWords = [], updateProgress, practice = false, progress, setCurrentStreak}: CardStackCardProps) => {
+const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWords, activeWords = [], updateProgress, practice = false, progress, setCurrentStreak, lastWordLearned, setlastWordLearned}: CardStackCardProps) => {
     const { t } = useTranslation();
     const { setSelectedWordId } = useUserStore();
-    const { markAsLearned, insertIntoLearnedWords, updateStreakCount, updateStreakRecord} = useDatabase();
+    const { toggleLearned, insertIntoLearnedWords, updateStreakCount, updateStreakRecord} = useDatabase();
     const screenWidth = Dimensions.get('window').width;
     const screenHeight = Dimensions.get('window').height;
     const translationX = useSharedValue(0);
@@ -36,9 +39,12 @@ const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWo
         if (!word || !user || !setActiveWords || !updateProgress || practice || progress === undefined) return;
         try {
             await insertIntoLearnedWords(word);
-            await markAsLearned(word.word_id)
+            await toggleLearned(word.word_id)
             updateProgress();
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            setlastWordLearned(word);
             setActiveWords((prev: Word[]) => (Array.isArray(prev) ? prev.filter(w => w.id !== word.id) : []));
+            
             if (activeWords.length <= 1) {
                 await updateStreakCount("increment");
                 await updateStreakRecord(1);
@@ -122,7 +128,7 @@ const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWo
                 translateY: interpolate(
                     activeIndex.value,
                     [index - 1, index, index + 1],
-                    [-30, 0, 0]
+                    [-22, 0, 0]
                 )
             },
             {

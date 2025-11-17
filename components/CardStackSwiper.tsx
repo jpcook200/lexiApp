@@ -1,4 +1,4 @@
-import { User } from '@/types/types';
+import { User, Word } from '@/types/types';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,7 +6,6 @@ import { Text, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSharedValue } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
-import { Word } from '../types/types';
 import CardStackCard from './CardStackCard';
 import ThemedIcon from './ThemedIcon';
 import ThemedText from './ThemedText';
@@ -19,9 +18,11 @@ type CardStackSwiperProps = {
     practice?: boolean;
     user: User;
     setCurrentStreak: React.Dispatch<React.SetStateAction<number>>;
+    lastWordLearned: Word | null;
+    setlastWordLearned: React.Dispatch<React.SetStateAction<Word | null>>;
 };
 
-const CardStackSwiper = ({ activeWords, setActiveWords, updateProgress, progress, practice, user, setCurrentStreak}: CardStackSwiperProps) => {
+const CardStackSwiper = ({ activeWords, setActiveWords, updateProgress, progress, practice, user, setCurrentStreak, lastWordLearned, setlastWordLearned}: CardStackSwiperProps) => {
     const activeIndex = useSharedValue(0);
     const [indexState, setIndexState] = useState(0);
     const { t } = useTranslation();
@@ -33,7 +34,7 @@ const CardStackSwiper = ({ activeWords, setActiveWords, updateProgress, progress
     }, [activeWords]);  
 
     return (
-        <GestureHandlerRootView className="w-full h-full px-6 flex justify-center items-center mb-8 mt-14">
+        <GestureHandlerRootView className="w-full h-full px-6 flex justify-center items-center mt-8">
             {(user?.words_per_day && progress) && progress >= user?.words_per_day ? (
                 <View className="w-3/4 h-full flex justify-center items-center">
                     <ThemedIcon name="Rocket" size={32} />
@@ -60,6 +61,8 @@ const CardStackSwiper = ({ activeWords, setActiveWords, updateProgress, progress
                                 user={user!}
                                 progress={progress}
                                 setCurrentStreak={setCurrentStreak}
+                                lastWordLearned={lastWordLearned}
+                                setlastWordLearned={setlastWordLearned}
                             />
                         ))}
                 </View>

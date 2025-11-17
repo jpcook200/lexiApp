@@ -3,6 +3,7 @@ import { useTextToSpeech } from '@/api/textToSpeech';
 import BackButton from '@/components/BackButton';
 import FiltersModal from '@/components/FiltersModal';
 import MainButton from '@/components/MainButton';
+import ProgressBar from '@/components/ProgressBAr';
 import ThemedIcon from '@/components/ThemedIcon';
 import ThemedText from '@/components/ThemedText';
 import useDatabase from '@/db/useDatabase';
@@ -33,7 +34,7 @@ const userWordsList = () => {
         sortBy: 'dateAdded',
         favouritesOnly: false,
     });
-    
+    const progressPercent = Math.min((learnedWords.length / userWordsTotalState) * 100, 100);
     //functions
     const fetchLearnedWords = async (filters: FiltersType) => {
         try {
@@ -94,7 +95,7 @@ const userWordsList = () => {
             <View className='px-4 border-b-2 border-border-light dark:border-border-dark pb-4 '>
                 <BackButton/>
                 <ThemedText className='text-4xl font-bold my-4'>{ t("your_vocabulary") }</ThemedText>
-                <View className='flex-row justify-between items-center'>
+                <View className='flex-row justify-between items-center mb-2'>
                     <View>
                         <ThemedText variant='subtext'>{ t("learned") }</ThemedText>
                         <ThemedText className='text-2xl font-bold'>{learnedWords.length}</ThemedText>
@@ -107,6 +108,7 @@ const userWordsList = () => {
                         <ThemedIcon name='Settings' size={24} />
                     </TouchableOpacity>
                 </View>
+                <ProgressBar progressPercent={progressPercent}/>
             </View>
             <ScrollView className='flex-1'>
                 {learnedWords.length === 0 ? (

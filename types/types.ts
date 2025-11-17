@@ -77,4 +77,5 @@ export type StreakCount = {
     longest: number;
     current: number;
     langPair: string;
+    lang_pair_code: string;
 }

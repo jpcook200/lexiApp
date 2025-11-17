@@ -1,7 +1,6 @@
+import BackButton from '@/components/BackButton'
 import CardStackSwiper from '@/components/CardStackSwiper'
 import DifficultyModal from '@/components/DifficultyModal'
-import LanguageIndicator from '@/components/LanguageIndicator'
-import Logo from '@/components/Logo'
 import ThemedText from '@/components/ThemedText'
 import useDatabase from '@/db/useDatabase'
 import { useUserStore } from '@/hooks/useGetUser'
@@ -58,14 +57,11 @@ const practice = () => {
     return (
         <>
             <SafeAreaView className='flex-1 bg-background-light dark:bg-background-dark px-4'>
-                <View className="mb-14 flex-row justify-between items-center">
-                    <Logo/>
-                    <LanguageIndicator
-                        language={user.learn_lang}
-                    />
+                <View className="">
+                    <BackButton />
                 </View>
                 {activeWords.length === 0 ? (
-                    <View className='flex-1 justify-center items-center mt-20 px-4'>
+                    <View className='flex-1 justify-center items-center mt-60 px-4'>
                         <ThemedText className='text-center text-lg opacity-50'>{ t("no_words") }</ThemedText>
                     </View>
                 ): (
@@ -74,6 +70,9 @@ const practice = () => {
                             setActiveWords={setActiveWords}
                             practice={true}
                             user={user}
+                            setlastWordLearned={() => { }}
+                            setCurrentStreak={() => { }}
+                            lastWordLearned={null}
                         />
                 )}
                 

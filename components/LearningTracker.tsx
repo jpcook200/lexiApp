@@ -4,6 +4,7 @@ import { Flame } from 'lucide-react-native';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
+import ProgressBar from './ProgressBAr';
 import ThemedText from './ThemedText';
 import ThemedView from './ThemedView';
 
@@ -38,12 +39,7 @@ const LearningTracker = ({ progress, goal, setCurrentStreak, currentStreak }: Le
                     <ThemedText className='text-lg font-bold'>{ t("progress_today") }</ThemedText>
                     <ThemedText className='text-xl font-bold mt-1'>{Math.min(progress, goal)}/{goal}</ThemedText>
                 </View>
-                <View className='w-full h-3 bg-background-light dark:bg-background-dark rounded-full mt-2 overflow-hidden border border-border-light dark:border-border-dark'>
-                    <View
-                        style={{ width: `${progressPercent}%` }}
-                        className={`h-full bg-primary`}
-                    />
-                </View>
+                <ProgressBar progressPercent={progressPercent} />
                 <View>
                     {progressPercent >= 100 && <ThemedText className='text-right mt-4 font-bold text-green-500'>{ t("goal_achieved") } 🎉</ThemedText>}
                 </View>
