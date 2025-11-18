@@ -8,7 +8,6 @@ const { apiUrl, apiKey } = Constants.expoConfig!.extra as { apiUrl: string, apiK
 export const useTextToSpeech = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [disabledTimer, setDisabledTimer] = useState<number>(0);
     const player = useAudioPlayer();
     
     const speak = useCallback(async (text: string, lang: string): Promise<string | null> => {
@@ -26,7 +25,8 @@ export const useTextToSpeech = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'api-key': apiKey
+                    'api-key': apiKey,
+                    "installation-id": Constants.installationId || '',
                 },
                 body: JSON.stringify({ text, lang }),
             });

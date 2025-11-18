@@ -1,6 +1,7 @@
 // app/index.tsx
 import i18next from '@/services/i18next';
 import { User } from '@/types/types';
+import { getInstallationId } from '@/utilities/getInstallationId';
 import * as Localization from 'expo-localization';
 import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -42,8 +43,14 @@ const Index = () => {
         }
     };
 
+    const loadInstallationId = async () => { 
+        const id = await getInstallationId();
+        console.log("Installation ID:", id);
+    }
+
     useEffect(() => {
         checkUser();
+        loadInstallationId();
     }, []);
 
     return (

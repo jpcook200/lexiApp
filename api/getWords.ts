@@ -15,7 +15,8 @@ export const getWords = async ({ nativeLang, learningLang, difficulty = 'a1', li
             headers: {
                 'Content-Type': 'application/json',
                 "api-key": apiKey,
-                "transaction-id": transactionId || ''
+                "transaction-id": transactionId || '',
+                "installation-id": Constants.installationId || '',
             },
             body: JSON.stringify({ excludeIds, localDatetime }),
         });
@@ -34,13 +35,15 @@ export const getWords = async ({ nativeLang, learningLang, difficulty = 'a1', li
     }
 }
 
-export const getWordsCount = async (langCode:string, premium:boolean) => {
+export const getWordsCount = async (langCode: string, premium: boolean) => {
+    console.log(Constants)
     try {
         const response = await fetch(`${apiUrl}/api/words/get-count?langCode=${langCode}&premium=${premium}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 "api-key": apiKey,
+                "installation-id": Constants.installationId || '',
             },
         });
         if (!response.ok) {

@@ -12,10 +12,8 @@ export default {
     },
     extra: {
       apiUrl: process.env.API_URL,
-      supabaseKey: process.env.SUPABASE_KEY,
       environment: process.env.NODE_ENV,
       apiKey: process.env.API_KEY,
-      appStoreSharedSecret: process.env.SHARED_SECRET_APP_STORE,
     },
     android: {
       package: 'com.jpcook19.lexigram',
@@ -25,7 +23,8 @@ export default {
       userInterfaceStyle: 'automatic',
     },
     plugins: [
-      'expo-sqlite'
+      'expo-sqlite',
+      'expo-secure-store',
     ]
   },
 };

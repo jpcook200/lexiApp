@@ -46,9 +46,9 @@ const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWo
             setActiveWords((prev: Word[]) => (Array.isArray(prev) ? prev.filter(w => w.id !== word.id) : []));
             
             if (activeWords.length <= 1) {
-                await updateStreakCount("increment");
+                const newCount = await updateStreakCount("increment");
                 await updateStreakRecord(1);
-                setCurrentStreak((prev) => prev + 1);
+                setCurrentStreak(newCount);
             }
         } catch (error) {
             console.error('Error marking word as learned:', error);

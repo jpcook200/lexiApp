@@ -23,18 +23,14 @@ const WordsPerDay = () => {
     const handleSave = async (selectedNumber: number) => {
         if (!user) return;
         try {
+            if (user.access_level === 'free' && selectedNumber > freeWordsAllowance) { 
+                return router.push('../../(onboarding)/Subscribe');
+            }
             await setWordsPerDay(selectedNumber);
             router.back();
         } catch (error) {
             console.error('Error saving words per day:', error);
         }
-    };
-
-    const handleNumberSelect = (number: number) => {
-        if(user && user.access_level === 'free' && number > freeWordsAllowance) {
-            return router.push('../../(onboarding)/Subscribe');
-        }
-        handleSave(number);
     };
 
     if (loading) {
@@ -52,7 +48,7 @@ const WordsPerDay = () => {
                     keyExtractor={(item) => item.toString()}
                     renderItem={({ item }) => (
                         <TouchableOpacity
-                            onPress={() => handleNumberSelect(item)}
+                            onPress={() => handleSave(item)}
                             className={`p-4 border-b border-border-light dark:border-border-dark ${selectedNumber === item ? 'bg-primary/20' : ''}`}
                             accessibilityLabel={`Select ${item} words per day`}
                         >

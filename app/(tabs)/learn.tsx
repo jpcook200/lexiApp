@@ -50,13 +50,11 @@ const learn = () => {
             await removeFromLearnedWords(lastWordLearned.word_id);
             setActiveWords((prev) => [lastWordLearned, ...prev]);
             setlastWordLearned(null);
-            console.log("progressToday before undo:", progressToday);
-            console.log("user.words_per_day:", user.words_per_day);
-            if (progressToday == user?.words_per_day) { 
-                await updateStreakCount("decrement");
-                await updateStreakRecord(0);
-                setCurrentStreak((prev) => Math.max(prev - 1, 0));
-            }
+            // if (progressToday == user?.words_per_day) { 
+            //     const newCount = await updateStreakCount("decrement");
+            //     await updateStreakRecord(0);
+            //     setCurrentStreak(newCount);
+            // }
             await handleGetProgessCount();
         }
     };

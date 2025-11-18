@@ -477,51 +477,76 @@ const useDatabase = () => {
         }
     };
 
-    const updateStreakCount = async (instruction: 'increment' | 'reset' | 'decrement') => {
+    const updateStreakCount = async (instruction: 'increment' | 'reset' | 'decrement'): Promise<number> => {
         const today = DateTime.now().toISODate();
-        
+
         try {
-            const userResults = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = ?', [1]);
-            if (!userResults) {
-                throw new Error('User not found');
-            }
+            const userResults = await db.getFirstAsync<User>(
+                'SELECT * FROM users WHERE id = ?',
+                [1]
+            );
+            if (!userResults) throw new Error('User not found');
+
             const userLangPair = `${userResults.native_lang}-${userResults.learn_lang}`;
-            
-            const results = await db.getFirstAsync<CompletedType>("SELECT completed FROM streak WHERE user_id = ? AND date = ? AND lang_pair_code = ? ORDER BY date DESC", [1, today, userLangPair]);
+
+            const results = await db.getFirstAsync<CompletedType>(
+                `SELECT completed FROM streak 
+                WHERE user_id = ? AND date = ? AND lang_pair_code = ? 
+                ORDER BY date DESC`,
+                [1, today, userLangPair]
+            );
+
             switch (instruction) {
                 case 'increment':
                     if (results?.completed === 0) {
-                        await db.runAsync(`
-                            UPDATE streak_counts SET current = current + 1 WHERE lang_pair_code = ?`,
-                            [userLangPair]);
+                        await db.runAsync(
+                            `UPDATE streak_counts 
+                            SET current = current + 1 
+                            WHERE lang_pair_code = ?`,
+                            [userLangPair]
+                        );
                     }
                     break;
+
                 case 'reset':
                     await db.runAsync(
-                        `UPDATE streak_counts SET current = 0 WHERE lang_pair_code = ?`,
+                        `UPDATE streak_counts 
+                        SET current = 0 
+                        WHERE lang_pair_code = ?`,
                         [userLangPair]
                     );
                     break;
+
                 case 'decrement':
-                    console.log(results)
                     if (results?.completed === 1) {
-                        console.log("Decrementing streak count");
-                        await db.runAsync(`UPDATE streak_counts SET current = CASE WHEN current > 0 THEN current - 1 ELSE 0 END WHERE lang_pair_code = ?`, [userLangPair]);
+                        await db.runAsync(
+                            `UPDATE streak_counts 
+                            SET current = CASE WHEN current > 0 THEN current - 1 ELSE 0 END 
+                            WHERE lang_pair_code = ?`,
+                            [userLangPair]
+                        );
                     }
                     break;
+
                 default:
                     console.log('Invalid instruction for updating streak count.');
-                    return;
+                    return 0;
             }
-            
-            console.log('Streak count increased successfully.');
-            
+
+            // Fetch and return the new streak count
+            const updated = await db.getFirstAsync<{ current: number }>(
+                `SELECT current FROM streak_counts WHERE lang_pair_code = ?`,
+                [userLangPair]
+            );
+
+            return updated?.current ?? 0;
+
         } catch (error) {
-            console.error('Error increasing streak count:', error);
-            
+            console.error('Error updating streak count:', error);
             throw error;
         }
     };
+
 
     const initStreakRecord = async () => {
         const date = DateTime.now().toISODate();
