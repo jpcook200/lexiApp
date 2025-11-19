@@ -81,6 +81,8 @@
     "all_time": "Tutto il tempo",
     "no_words": "Nessuna parola ancora appresa",
     "words_learned": "Parole apprese",
+    "day": "Giorno",
+    "days": "Giorni",
 
     "total": "Totale",
     "your_vocabulary": "Il tuo vocabolario",
@@ -187,5 +189,10 @@
     "confirm": "Conferma",
     "not_found": "Non trovato",
 
-    "level_disclaimer": "La maggior parte delle parole in questa app si trova tra i livelli CEFR A1 e B2. Parole più difficili (C1 e C2) saranno aggiunte gradualmente nei futuri aggiornamenti."
+    "level_disclaimer": "La maggior parte delle parole in questa app si trova tra i livelli CEFR A1 e B2. Parole più difficili (C1 e C2) saranno aggiunte gradualmente nei futuri aggiornamenti.",
+
+    "date": "Data",
+    "limit": "Limite",
+    "yesterday": "Ieri",
+    "unlimited": "Illimitato"
 }

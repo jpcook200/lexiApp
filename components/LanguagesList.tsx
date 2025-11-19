@@ -6,7 +6,7 @@ import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { commonLanguages } from '../constants/languages';
 import ThemedText from './ThemedText';
 
-const LanguagesList = ({ onSelectLanguage, streakData, streakDisplay }: { onSelectLanguage: (itemCode: string) => void, streakData: StreakCount[], streakDisplay: boolean }) => {
+const LanguagesList = ({ onSelectLanguage, streakData, streakDisplay }: { onSelectLanguage: (itemCode: string) => void, streakData?: StreakCount[], streakDisplay?: boolean }) => {
     const { t } = useTranslation();
     const { user } = useUserStore();
 

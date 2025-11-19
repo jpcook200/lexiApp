@@ -3,25 +3,39 @@ import ThemedText from '@/components/ThemedText';
 import ThemedView from '@/components/ThemedView';
 import useDatabase from '@/db/useDatabase';
 import { useUserStore } from '@/hooks/useGetUser';
+import i18next from '@/services/i18next';
 import { router, useLocalSearchParams } from 'expo-router';
 import { CircleAlert } from 'lucide-react-native';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TouchableOpacity, View } from 'react-native';
 
 const changeLangConfirm = () => {
     const { user } = useUserStore();
     const { t } = useTranslation();
-    const { setLearningLanguage, resetProgressByLanguagePair } = useDatabase();
+    const { setLearningLanguage, resetProgressByLanguagePair, setNativeLanguage } = useDatabase();
     const params = useLocalSearchParams<{ lang: string }>();
-    const lang = params.lang;
+    const lang = params.lang.split('-')[0];
+    const type = params.lang.split('-')[1];
 
-    const handleChangeLang = () => {
-        if(!user) return;
-        setLearningLanguage(lang);
-        resetProgressByLanguagePair(user.native_lang, user.learn_lang);
+    const handleChangeLang = async() => {
+        if (!user) return;
         router.back();
         router.replace('/(tabs)/home');
+        if (type === 'learning') { 
+            await setLearningLanguage(lang);
+            await resetProgressByLanguagePair(user.native_lang, user.learn_lang);
+        }
+        else if (type === 'native') {
+            await setNativeLanguage(lang);
+            i18next.changeLanguage(lang);
+            await resetProgressByLanguagePair(user.native_lang, user.learn_lang);
+        }
     }
+
+    useEffect(() => {
+        console.log(type)
+    }, [params]);
 
     return (
         <ThemedView className="flex-1 gap-4 p-6 justify-between">

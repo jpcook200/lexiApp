@@ -81,6 +81,8 @@
     "all_time": "全期間",
     "no_words": "まだ学習した単語はありません",
     "words_learned": "学習した単語",
+    "day": "日",
+    "days": "日間",
 
     "total": "合計",
     "your_vocabulary": "あなたの語彙",
@@ -187,5 +189,10 @@
     "confirm": "確認",
     "not_found": "見つかりません",
 
-    "level_disclaimer": "このアプリのほとんどの単語はCEFRレベルA1からB2の間にあります。より難しい単語（C1およびC2）は、将来のアップデートで徐々に追加される予定です。"
+    "level_disclaimer": "このアプリのほとんどの単語はCEFRレベルA1からB2の間にあります。より難しい単語（C1およびC2）は、将来のアップデートで徐々に追加される予定です。",
+
+    "date": "日付",
+    "limit": "制限",
+    "yesterday": "昨日",
+    "unlimited": "無制限"
 }

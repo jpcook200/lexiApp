@@ -17,7 +17,7 @@ module.exports = {
       colors: {
         background: {
           light: "#f5fbffff", // light theme color
-          dark: "#494949ff",  // dark theme color
+          dark: "#363636ff",  // dark theme color
         },
         secondary: {
           light: "#E5E7EB", // light theme color

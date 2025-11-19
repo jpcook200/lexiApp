@@ -1,15 +1,18 @@
 import BackButton from '@/components/BackButton'
 import CardStackSwiper from '@/components/CardStackSwiper'
+import DatePickerModal from '@/components/DatePickerModal'
 import DifficultyModal from '@/components/DifficultyModal'
+import LimitModal from '@/components/LimitModal'
+import PracticeSettings from '@/components/PracticeSettings'
 import ThemedText from '@/components/ThemedText'
 import useDatabase from '@/db/useDatabase'
 import { useUserStore } from '@/hooks/useGetUser'
-import { Word } from '@/types/types'
+import { PracticeFiltersType, Word } from '@/types/types'
 import { useFocusEffect } from 'expo-router'
 import { useSQLiteContext } from 'expo-sqlite'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { TouchableOpacity, View } from 'react-native'
+import { View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 const practice = () => {
@@ -18,15 +21,20 @@ const practice = () => {
     const { getPracticeWords } = useDatabase();
     const db = useSQLiteContext()
     const [modalVisible, setModalVisible] = useState(false);
-    const [difficultyLevel, setDifficultyLevel] = useState('');
+    const [filters, setFilters] = useState<PracticeFiltersType>({
+        date: null,
+        difficulty: 'All',
+        limit: 0,
+    })
     const [activeWords, setActiveWords] = useState<Word[]>([]);
+    const [showPicker, setShowPicker] = useState(false);
+    const [showLimitPicker, setShowLimitPicker] = useState(false);
 
-    const handleGetPracticeWords = async () => { 
+    const handleGetPracticeWords = async (filters: PracticeFiltersType) => { 
         try {
             if(!user) return;
-            const words = await getPracticeWords(100, difficultyLevel);
+            const words = await getPracticeWords(filters);
             setActiveWords(words);
-
         } catch (error) {
             console.error('Error fetching practice words:', error);
         }
@@ -37,7 +45,7 @@ const practice = () => {
             let isActive = true;
             if (isActive) {
                 fetchUser(db)
-                handleGetPracticeWords();
+                handleGetPracticeWords(filters);
             }
             return () => {
                 isActive = false;
@@ -45,10 +53,9 @@ const practice = () => {
         }, [])
     );
 
-    const handleApply = () => {
-        handleGetPracticeWords();
-        setModalVisible(false);
-    };
+    useEffect(() => {
+        console.log(filters)
+    }, [filters]);
 
     if (!user) { 
         return null;
@@ -57,39 +64,56 @@ const practice = () => {
     return (
         <>
             <SafeAreaView className='flex-1 bg-background-light dark:bg-background-dark px-4'>
-                <View className="">
+                <View className="mb-4">
                     <BackButton />
                 </View>
                 {activeWords.length === 0 ? (
-                    <View className='flex-1 justify-center items-center mt-60 px-4'>
+                    <View className='flex-1 justify-center items-center mt-0 px-4'>
                         <ThemedText className='text-center text-lg opacity-50'>{ t("no_words") }</ThemedText>
                     </View>
-                ): (
-                        <CardStackSwiper
-                            activeWords={activeWords}
-                            setActiveWords={setActiveWords}
-                            practice={true}
-                            user={user}
-                            setlastWordLearned={() => { }}
-                            setCurrentStreak={() => { }}
-                            lastWordLearned={null}
-                        />
+                ) : (
+                    <CardStackSwiper
+                        activeWords={activeWords}
+                        setActiveWords={setActiveWords}
+                        practice={true}
+                        user={user}
+                        setlastWordLearned={() => { }}
+                        setCurrentStreak={() => { }}
+                        lastWordLearned={null}
+                    />
                 )}
-                
-                <View className='px-4 mt-4 flex-row justify-end'>
-                    <TouchableOpacity accessibilityLabel='Open Filters Menu' onPress={() => setModalVisible(!modalVisible)} className='border-2 border-border-light dark:border-border-dark rounded-full w-14 h-14 flex justify-center items-center relative bg-shade-light dark:bg-shade-dark'>
-                        <View className='bg-item-light dark:bg-item-dark absolute w-[90%] h-[90%] top-0 left-0 rounded-full'></View>
-                        <ThemedText className='text-center font-black'>{ t(difficultyLevel) || t("all") }</ThemedText>
-                    </TouchableOpacity>
-                </View>
-                
+                <PracticeSettings
+                    setShowPicker={setShowPicker}
+                    setModalVisible={setModalVisible}
+                    setShowLimitPicker={setShowLimitPicker}
+                    filters={filters}
+                    setFilters={setFilters}
+                    getPracticeWords={handleGetPracticeWords}
+                />
             </SafeAreaView>
+
+            <DatePickerModal
+                modalVisible={showPicker}
+                setModalVisible={setShowPicker}
+                filters={filters}
+                setFilters={setFilters}
+                getPracticeWords={handleGetPracticeWords}
+            />
+            
             <DifficultyModal
                 modalVisible={modalVisible}
                 setModalVisible={setModalVisible}
-                difficultyLevel={difficultyLevel}
-                setDifficultyLevel={setDifficultyLevel}
-                handleApply={handleApply}
+                filters={filters}
+                setFilters={setFilters}
+                getPracticeWords={handleGetPracticeWords}
+            />
+
+            <LimitModal
+                modalVisible={showLimitPicker}
+                setModalVisible={setShowLimitPicker}
+                filters={filters}
+                setFilters={setFilters}
+                getPracticeWords={handleGetPracticeWords}
             />
         </>
     )

@@ -81,6 +81,8 @@
     "all_time": "Depuis le début",
     "no_words": "Aucun mot appris pour le moment",
     "words_learned": "Mots appris",
+    "day": "Jour",
+    "days": "Jours",
 
     "total": "Total",
     "your_vocabulary": "Votre vocabulaire",
@@ -187,5 +189,10 @@
     "confirm": "Confirmer",
     "not_found": "Introuvable",
 
-    "level_disclaimer": "La plupart des mots de cette application se situent entre les niveaux CECR A1 et B2. Des mots plus difficiles (C1 et C2) seront ajoutés progressivement dans les futures mises à jour."
+    "level_disclaimer": "La plupart des mots de cette application se situent entre les niveaux CECR A1 et B2. Des mots plus difficiles (C1 et C2) seront ajoutés progressivement dans les futures mises à jour.",
+
+    "date": "Date",
+    "limit": "Limite",
+    "yesterday": "Hier",
+    "unlimited": "Illimité"
 }

@@ -17,7 +17,7 @@ type CardStackSwiperProps = {
     progress?: number;
     practice?: boolean;
     user: User;
-    setCurrentStreak: React.Dispatch<React.SetStateAction<number>>;
+    setCurrentStreak: React.Dispatch<React.SetStateAction<boolean>>;
     lastWordLearned: Word | null;
     setlastWordLearned: React.Dispatch<React.SetStateAction<Word | null>>;
 };
@@ -34,7 +34,7 @@ const CardStackSwiper = ({ activeWords, setActiveWords, updateProgress, progress
     }, [activeWords]);  
 
     return (
-        <GestureHandlerRootView className="w-full h-full px-6 flex justify-center items-center mt-8">
+        <GestureHandlerRootView className="w-full h-full px-6 flex justify-center items-center my-4">
             {(user?.words_per_day && progress) && progress >= user?.words_per_day ? (
                 <View className="w-3/4 h-full flex justify-center items-center">
                     <ThemedIcon name="Rocket" size={32} />

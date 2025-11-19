@@ -1,6 +1,7 @@
 
 import { Word, getWordsParams } from '@/types/types';
 import Constants from 'expo-constants';
+import { getInstallationId } from '../utilities/getInstallationId';
 const { apiUrl, apiKey } = Constants.expoConfig!.extra as { apiUrl: string, apiKey: string };
 
 type GetWordsResponse = { 
@@ -8,15 +9,19 @@ type GetWordsResponse = {
     lastSet: boolean;
 };
 
+
+
 export const getWords = async ({ nativeLang, learningLang, difficulty = 'a1', limit, excludeIds, localDatetime, transactionId }: getWordsParams): Promise<GetWordsResponse> => {
     try {
+        const installationId = await getInstallationId();
+        console.log("installationId ", installationId)
         const response = await fetch(`${apiUrl}/api/words/get-daily?nativeLang=${nativeLang}&learningLang=${learningLang}&difficulty=${difficulty || 'a1'}&limit=${limit}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 "api-key": apiKey,
                 "transaction-id": transactionId || '',
-                "installation-id": Constants.installationId || '',
+                "installation-id": installationId || '',
             },
             body: JSON.stringify({ excludeIds, localDatetime }),
         });
@@ -36,14 +41,14 @@ export const getWords = async ({ nativeLang, learningLang, difficulty = 'a1', li
 }
 
 export const getWordsCount = async (langCode: string, premium: boolean) => {
-    console.log(Constants)
+    const installationId = await getInstallationId();
     try {
         const response = await fetch(`${apiUrl}/api/words/get-count?langCode=${langCode}&premium=${premium}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 "api-key": apiKey,
-                "installation-id": Constants.installationId || '',
+                "installation-id": installationId || '',
             },
         });
         if (!response.ok) {

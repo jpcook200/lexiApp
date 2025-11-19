@@ -81,6 +81,8 @@
     "all_time": "全部时间",
     "no_words": "尚未学习单词",
     "words_learned": "已学单词",
+    "day": "天",
+    "days": "天数",
 
     "total": "总计",
     "your_vocabulary": "你的词汇量",
@@ -184,5 +186,10 @@
     "confirm": "确认",
     "not_found": "未找到",
 
-    "level_disclaimer": "此应用中的大多数单词处于 CEFR A1 到 B2 级别。更难的单词（C1 和 C2）将在未来的更新中逐步添加。"
+    "level_disclaimer": "此应用中的大多数单词处于 CEFR A1 到 B2 级别。更难的单词（C1 和 C2）将在未来的更新中逐步添加。",
+
+    "date": "日期",
+    "limit": "限制",
+    "yesterday": "昨天",
+    "unlimited": "无限制"
 }

@@ -2,6 +2,7 @@ import { createAudioFile, getAudioFile } from '@/utilities/createDirectory';
 import { useAudioPlayer } from 'expo-audio';
 import Constants from 'expo-constants';
 import { useCallback, useState } from 'react';
+import { getInstallationId } from '../utilities/getInstallationId';
 
 const { apiUrl, apiKey } = Constants.expoConfig!.extra as { apiUrl: string, apiKey: string };
 
@@ -11,6 +12,7 @@ export const useTextToSpeech = () => {
     const player = useAudioPlayer();
     
     const speak = useCallback(async (text: string, lang: string): Promise<string | null> => {
+        const installationId = await getInstallationId();
         setLoading(true);
         setError(null);
         const fileName = `tts_${text.slice(0, 20)}.mp3`;
@@ -26,7 +28,7 @@ export const useTextToSpeech = () => {
                 headers: {
                     'Content-Type': 'application/json',
                     'api-key': apiKey,
-                    "installation-id": Constants.installationId || '',
+                    "installation-id": installationId || '',
                 },
                 body: JSON.stringify({ text, lang }),
             });

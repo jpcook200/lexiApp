@@ -1,9 +1,10 @@
 import useDatabase from '@/db/useDatabase';
 import { Dispatch, SetStateAction, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import GestureIndicator from './GestureIndicator';
 import MainButton from './MainButton';
+import ThemedText from './ThemedText';
 
 const Tutorial = ({ setShowTutorial }: {setShowTutorial: Dispatch<SetStateAction<boolean>>}) => {
     const [page, setPage] = useState(0);
@@ -15,7 +16,7 @@ const Tutorial = ({ setShowTutorial }: {setShowTutorial: Dispatch<SetStateAction
         await setTutorialCompleted();
     }
     return (
-        <View className='w-full h-full absolute bg-white/70 z-10'>
+        <View className='w-full h-full absolute bg-item-light/80 dark:bg-item-dark/80 z-10'>
             {page === 0 && (
                 <View className='w-full h-full px-4'>
                     <View className='h-[80%] flex justify-center items-center'>
@@ -23,8 +24,8 @@ const Tutorial = ({ setShowTutorial }: {setShowTutorial: Dispatch<SetStateAction
                             type='swipeLR'
                             color='#1c95ffff'
                         />
-                        <Text className='text-3xl font-bold text-center mb-4 mt-8'>{ t("swipe_left_right") }</Text>
-                        <Text className='text-xl text-center font-bold text-gray-600'>{t("to_navigate")}</Text>
+                        <ThemedText className='text-3xl font-bold text-center mb-4 mt-8'>{ t("swipe_left_right") }</ThemedText>
+                        <ThemedText className='text-xl text-center font-bold text-gray-600'>{t("to_navigate")}</ThemedText>
                     </View>
                     
                     <MainButton
@@ -42,8 +43,8 @@ const Tutorial = ({ setShowTutorial }: {setShowTutorial: Dispatch<SetStateAction
                             type='tap'
                             color='#1c95ffff'
                         />
-                        <Text className='text-3xl font-bold text-center mb-4 mt-8'>{t("tap_on_word")}</Text>
-                        <Text className='text-xl text-center font-bold text-gray-600'>{ t("to_see_translation") }</Text>
+                        <ThemedText className='text-3xl font-bold text-center mb-4 mt-8'>{t("tap_on_word")}</ThemedText>
+                        <ThemedText className='text-xl text-center font-bold text-gray-600'>{ t("to_see_translation") }</ThemedText>
                     </View>
                     <MainButton
                         text='Next'
@@ -59,9 +60,9 @@ const Tutorial = ({ setShowTutorial }: {setShowTutorial: Dispatch<SetStateAction
                             type='swipeUp'
                             color='#1c95ffff'
                         />
-                        <Text className='text-3xl font-bold text-center mb-4 mt-8'>{ t("mark_words") }</Text>
-                        <Text className='text-xl text-center font-bold mb-4'>{ t("swiping_up") }</Text>
-                        <Text className='text-center font-medium text-lg text-gray-600'>{t("swipe_up_info")}</Text>
+                        <ThemedText className='text-3xl font-bold text-center mb-4 mt-8'>{ t("mark_words") }</ThemedText>
+                        <ThemedText className='text-xl text-center font-bold mb-4'>{ t("swiping_up") }</ThemedText>
+                        <ThemedText className='text-center font-medium text-lg text-gray-600'>{t("swipe_up_info")}</ThemedText>
                     </View>
                         <MainButton
                         text='Next'

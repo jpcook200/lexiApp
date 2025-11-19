@@ -21,7 +21,7 @@ type CardStackCardProps = {
     updateProgress?: () => void;
     practice?: boolean;
     progress?: number;
-    setCurrentStreak: React.Dispatch<React.SetStateAction<number>>;
+    setCurrentStreak: React.Dispatch<React.SetStateAction<boolean>>;
     lastWordLearned: Word | null;
     setlastWordLearned: React.Dispatch<React.SetStateAction<Word | null>>;
 };
@@ -46,9 +46,10 @@ const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWo
             setActiveWords((prev: Word[]) => (Array.isArray(prev) ? prev.filter(w => w.id !== word.id) : []));
             
             if (activeWords.length <= 1) {
-                const newCount = await updateStreakCount("increment");
-                await updateStreakRecord(1);
-                setCurrentStreak(newCount);
+                await updateStreakCount("increment");
+                const newValue = await updateStreakRecord(1);
+                console.log('New streak value after marking learned:', newValue);
+                setCurrentStreak(newValue);
             }
         } catch (error) {
             console.error('Error marking word as learned:', error);

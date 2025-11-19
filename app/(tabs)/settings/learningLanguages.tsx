@@ -21,7 +21,7 @@ const LearningLanguages = () => {
             if (user?.access_level === 'free') {
                 router.back();
                 return router.push({
-                    pathname: `/(tabs)/settings/changeLangConfirm/${languageCode}`,
+                    pathname: `/(tabs)/settings/changeLangConfirm/${languageCode}-learning`,
                 });
             }
             await setLearningLanguage(languageCode);

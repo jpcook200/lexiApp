@@ -81,6 +81,8 @@
     "all_time": "Gesamt",
     "no_words": "Noch keine Wörter gelernt",
     "words_learned": "Gelernte Wörter",
+    "day": "Tag",
+    "days": "Tage",
 
     "total": "Gesamt",
     "your_vocabulary": "Dein Wortschatz",
@@ -187,5 +189,10 @@
     "confirm": "Bestätigen",
     "not_found": "Nicht gefunden",
 
-    "level_disclaimer": "Die meisten Wörter in dieser App liegen zwischen den CEFR-Niveaus A1 und B2. Schwierigere Wörter (C1 und C2) werden in zukünftigen Updates nach und nach hinzugefügt."
+    "level_disclaimer": "Die meisten Wörter in dieser App liegen zwischen den CEFR-Niveaus A1 und B2. Schwierigere Wörter (C1 und C2) werden in zukünftigen Updates nach und nach hinzugefügt.",
+
+    "date": "Datum",
+    "limit": "Limit",
+    "yesterday": "Gestern",
+    "unlimited": "Unbegrenzt"
 }

@@ -79,3 +79,26 @@ export type StreakCount = {
     langPair: string;
     lang_pair_code: string;
 }
+
+export type PracticeFiltersType = {
+    date: string | null;
+    difficulty: string | null;
+    limit: number;
+}
+
+export type ModalProps = {
+    modalVisible: boolean;
+    setModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+    filters: PracticeFiltersType
+    setFilters: React.Dispatch<React.SetStateAction<PracticeFiltersType>>;
+    getPracticeWords: (filters: PracticeFiltersType) => void;
+};
+
+export type PracticeSettingsProps = {
+    setShowPicker: React.Dispatch<React.SetStateAction<boolean>>;
+    setModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+    setShowLimitPicker: React.Dispatch<React.SetStateAction<boolean>>;
+    filters: PracticeFiltersType;
+    setFilters: React.Dispatch<React.SetStateAction<PracticeFiltersType>>;
+    getPracticeWords: (filters: PracticeFiltersType) => Promise<void>;
+};

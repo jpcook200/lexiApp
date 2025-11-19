@@ -13,9 +13,19 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { appStoreSharedSecret } = Constants.expoConfig!.extra as { appStoreSharedSecret: string };
 
+type Plan = {
+  id: string | undefined;
+  name: string;
+  price: string | undefined;
+  billingCycle: string;
+  per: string;
+  caption: string;
+};
+
+
 const Subscribe = () => {
   const { setUserAccessLevel } = useDatabase();
-  const [selectedPlan, setSelectedPlan] = useState<string>('lexigramproyearly');
+  const [selectedPlan, setSelectedPlan] = useState<string | undefined>('lexigramproweekly');
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [purchaseLoading, setPurchaseLoading] = useState(false);
@@ -41,7 +51,11 @@ const Subscribe = () => {
             Alert.alert('Purchase Failed', error.message);
         }
      },
-    });
+   });
+  
+  const [plans, setPlans] = useState<Plan[]>([
+
+  ])
 
   const subscriptionSkus = Platform.select({
     ios: ['lexigramproweekly', 'lexigramproyearly'],
@@ -50,10 +64,8 @@ const Subscribe = () => {
 
   const [redirected, setRedirected] = useState(false);
 
-  useEffect(() => {
-    const loadProducts = async () => {
+  const initProducts = async () => { 
       if (!connected || redirected) return;
-
       try {
         const activeSubs = await getActiveSubscriptions();
         if (activeSubs.length > 0) {
@@ -66,14 +78,24 @@ const Subscribe = () => {
         }
         fetchProducts({ skus: subscriptionSkus, type: 'subs' });
       } catch (error) {
-        console.error('Error fetching products:', error);
+        Alert.alert('Error', '');
+          console.error('Error fetching products:', error);
       } finally { 
         setLoading(false);
       }
-    };
+  }
 
-    loadProducts();
+  useEffect(() => {
+    initProducts();
   }, [connected, redirected]);
+
+  useEffect(() => {
+    if(subscriptions.length == 0) return;
+    setPlans([
+      { id: subscriptions.find(item => item.id === 'lexigramproweekly')?.id, name: t("weekly_plan"), price: subscriptions.find(item => item.id === 'lexigramproweekly')?.displayPrice, billingCycle: t("weekly"), per: t("per_week"), caption: "per week after 7 day free trial"  },
+      { id: subscriptions.find(item => item.id === 'lexigramproyearly')?.id, name: t("yearly_plan"), price: subscriptions.find(item => item.id === 'lexigramproyearly')?.displayPrice, billingCycle: t("yearly"), per: t("per_year"), caption: "per year after 7 day free trial" },
+    ]);
+   }, [subscriptions]);
 
 
   // Move these inside the component
@@ -83,15 +105,14 @@ const Subscribe = () => {
     { icon: 'Globe', title: t("benefit_three_title"), desc: t("benefit_three_desc") },
   ];
 
-  const plans = [
-    { id: subscriptions[0]?.id || 'lexigramproweekly', name: t("weekly_plan"), price: subscriptions[0]?.displayPrice, billingCycle: t("weekly"), per: t("per_week"), caption: "per week after 7 day free trial"  },
-    { id: subscriptions[1]?.id || 'lexigramproyearly', name: t("yearly_plan"), price: subscriptions[1]?.displayPrice, billingCycle: t("yearly"), per: t("per_year"), caption: "per year after 7 day free trial" },
-  ];
-
-  const buySubscriptionWithOffer = async (subscriptionId: string) => {
+  const buySubscriptionWithOffer = async (subscriptionId: string | undefined) => {
+    if (!subscriptionId) {
+      Alert.alert('Error', 'Subscription ID is undefined.');
+      return;
+    }
     try {
       setPurchaseLoading(true);
-
+      console.log('Requesting purchase for subscription ID:', subscriptionId);
       await requestPurchase({
         request: {
           ios: { sku: subscriptionId },
@@ -100,7 +121,6 @@ const Subscribe = () => {
         type: 'subs',
       });
       const activeSubs = await getActiveSubscriptions();
-      console.log('Active subscriptions after purchase:', activeSubs);
       if (activeSubs.length > 0) {
         await setUserAccessLevel('pro');
         router.replace('/(tabs)/home');
@@ -113,7 +133,7 @@ const Subscribe = () => {
     }
   };
 
-  if (loading) { 
+  if (loading || subscriptions.length === 0) { 
     return (
       <ActivityIndicator size="small" className="flex-1 justify-center items-center bg-background-light dark:bg-background-dark" />
     );

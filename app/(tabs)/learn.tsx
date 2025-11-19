@@ -26,7 +26,7 @@ const learn = () => {
     const { user, loading, fetchUser} = useUserStore();
     const { toggleLearned, initStreakRecord, removeFromLearnedWords, updateStreakCount, updateStreakRecord } = useDatabase();
     
-    const [currentStreak, setCurrentStreak] = useState<number>(0);
+    const [currentStreak, setCurrentStreak] = useState <boolean>(false);
     const [showTutorial, setShowTutorial] = useState(false);
     const [isInitialised, setIsInitialised] = useState(false)
     const [lastWordLearned, setlastWordLearned] = useState<Word | null>(null);
@@ -106,6 +106,10 @@ const learn = () => {
                         language={user.learn_lang}
                     />
                 </View>
+                <TouchableOpacity disabled={!lastWordLearned} accessibilityLabel='Undo learning pervious word' onPress={ () => handleUndoLearned() } className={`${!lastWordLearned && 'opacity-50'} my-3 flex-row items-center self-start rounded-full border border-border-light dark:border-border-dark bg-item-light dark:bg-item-dark pl-3 pr-4 py-1`}>
+                        <ThemedIcon name='Undo' size={ 20 } />
+                        <ThemedText className='text-lg ml-2 font-bold'>{t("undo")}</ThemedText>
+                    </TouchableOpacity>
                 
                 {isPending || !isInitialised ? (
                     <ActivityIndicator size={"small"} className='flex-1 justify-center items-center'/>
@@ -122,15 +126,12 @@ const learn = () => {
                             setlastWordLearned={setlastWordLearned}
                             lastWordLearned={lastWordLearned}    
                         />
-                            <TouchableOpacity disabled={!lastWordLearned} accessibilityLabel='Undo learning pervious word' onPress={ () => handleUndoLearned() } className={`${!lastWordLearned && 'opacity-50'} flex-row my-4 items-center self-start rounded-full border border-border-light dark:border-border-dark bg-item-light dark:bg-item-dark pl-3 pr-4 py-1`}>
-                            <ThemedIcon name='Undo' size={ 20 } />
-                            <ThemedText className='text-lg ml-2 font-bold'>{t("undo")}</ThemedText>
-                        </TouchableOpacity>
+                            
                         <LearningTracker
                             progress={progressToday || 0}
                             goal={user?.words_per_day || 0}
                             setCurrentStreak={setCurrentStreak}
-                            currentStreak={currentStreak || 0}
+                            currentStreak={currentStreak || false}
                         />
                     </>
                 )}

@@ -171,41 +171,50 @@ const useDatabase = () => {
         }
     };
 
-    const getPracticeWords = async (limit = 100, difficultyLevel = '') => {
+    const getPracticeWords = async (filters: { date: string | null; limit: number; difficulty?: string | null }) => {
         try {
-            
-            const userResults = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = ?', [1]);
-            if (!userResults) {
-                throw new Error('User not found');
-            }
+            const userResults = await db.getFirstAsync<User>(
+                'SELECT * FROM users WHERE id = ?',
+                [1]
+            );
+            if (!userResults) throw new Error('User not found');
 
             let query = `
-                SELECT * FROM learned_words 
-                WHERE user_id = ? 
-                AND learn_lang = ? 
+                SELECT * FROM learned_words
+                WHERE user_id = ?
+                AND learn_lang = ?
                 AND native_lang = ?
-                `;
+            `;
+            const params: any[] = [1, userResults.learn_lang, userResults.native_lang];
 
-            const params = [1, userResults.learn_lang, userResults.native_lang];
-            if (difficultyLevel && difficultyLevel !== '') {
+            // Filter by date if provided
+            if (filters.date) {
+                query += ` AND DATE(learned_at) = ?`;
+                params.push(filters.date);
+            }
+            // Filter by difficulty if provided and not "all"
+            if (filters.difficulty && filters.difficulty.toLowerCase() !== 'all') {
+                console.log('Applying difficulty filter:', filters.difficulty);
                 query += ` AND learning_difficulty = ?`;
-                params.push(difficultyLevel.toLowerCase());
+                params.push(filters.difficulty.toLowerCase());
             }
 
-            // Add ordering and limit
-            query += ` ORDER BY RANDOM() LIMIT ?`;
-            params.push(Number(limit) || 100);
+            // Random order and limit
+            if (filters.limit && filters.limit > 0) {
+                query += ` ORDER BY RANDOM() LIMIT ?`;
+                params.push(filters.limit);
+            } else {
+                query += ` ORDER BY RANDOM()`;
+            }
 
-            // Execute query
             const results = await db.getAllAsync<Word>(query, params);
-            
             return results || [];
         } catch (error) {
-            
             console.error('Error fetching practice words:', error);
             throw error;
         }
     };
+
 
     const getDailyLearnedCount = async () => {
         try {
@@ -223,7 +232,6 @@ const useDatabase = () => {
             console.error('Error fetching daily learned count:', error);
             throw error;
         }
-        
     };
 
     const toggleFavourite = async (wordId: number, isFavourite: 0 | 1) => {
@@ -604,25 +612,35 @@ const useDatabase = () => {
         }
     };
 
-    const updateStreakRecord = async (completed: 0 | 1) => {
+    const updateStreakRecord = async (completed: 0 | 1): Promise<boolean> => {
         const date = DateTime.now().toISODate();
+
         try {
-            const userResults = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = ?', [1]);
+            const userResults = await db.getFirstAsync<User>(
+                'SELECT * FROM users WHERE id = ?',
+                [1]
+            );
+
             if (!userResults) {
                 throw new Error('User not found');
             }
+
             const userLangPair = `${userResults.native_lang}-${userResults.learn_lang}`;
-            
-            await db.runAsync(
+
+            const result = await db.runAsync(
                 `UPDATE streak SET completed = ? WHERE user_id = ? AND date = ? AND lang_pair_code = ?`,
                 [completed, 1, date, userLangPair]
             );
+
             console.log('Streak record updated successfully for date:', date);
+
+            return completed === 1;
         } catch (error) {
             console.error('Error updating streak record:', error);
-            throw error;
+            return false;
         }
-    };
+        };
+
 
     const getWeeklyStreak = async () => {
         const today = DateTime.now().toISODate();
@@ -638,8 +656,7 @@ const useDatabase = () => {
                 `SELECT * FROM streak WHERE user_id = ? AND lang_pair_code = ? AND date BETWEEN ? AND ? ORDER BY date ASC`,
                 [1, userLangPair, sevenDaysAgo, today]
             );
-
-            
+            console.log(results)
             return results;
         } catch (error) {
             
@@ -740,11 +757,26 @@ const useDatabase = () => {
             if (!userResults) {
                 throw new Error('User not found');
             }
+
             await db.runAsync(
                 `UPDATE users SET access_level = ? WHERE id = ?`,
                 [accessLevel, 1]
             );
+            
             if (userResults.words_per_day > freeWordsAllowance) {
+                const userLearnedWordsCount = await db.getFirstAsync<CountType>(
+                    `SELECT COUNT(*) as count FROM daily_words WHERE user_id = ? AND learn_lang = ? AND native_lang = ? AND learned = 1`,
+                    [1, userResults.learn_lang, userResults.native_lang]
+                );
+
+                if (!userLearnedWordsCount || userLearnedWordsCount.count === undefined) { 
+                    throw new Error('Could not retrieve learned words count');
+                }
+
+                if (userLearnedWordsCount.count >= freeWordsAllowance) { 
+                    await updateStreakCount('increment');
+                    await updateStreakRecord(1);
+                }
                 await setWordsPerDay(freeWordsAllowance);
             }
         } catch (error) {

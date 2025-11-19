@@ -1,6 +1,7 @@
 import useDatabase from '@/db/useDatabase';
 import { useFocusEffect } from 'expo-router';
-import { Flame } from 'lucide-react-native';
+import { Check, Flame, Hourglass } from 'lucide-react-native';
+import { DateTime } from 'luxon';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
@@ -11,19 +12,32 @@ import ThemedView from './ThemedView';
 type LearningTrackerProps = {
     progress: number;
     goal: number;
-    setCurrentStreak: React.Dispatch<React.SetStateAction<number>>;
-    currentStreak: number;
+    setCurrentStreak: React.Dispatch<React.SetStateAction<boolean>>;
+    currentStreak: boolean;
 };
 
 const LearningTracker = ({ progress, goal, setCurrentStreak, currentStreak }: LearningTrackerProps) => {
     const { t } = useTranslation();
-    const { getStreakCount } = useDatabase()
+    const { getWeeklyStreak } = useDatabase()
     const progressPercent = Math.min((progress / goal) * 100, 100);
 
     const getStreak = async () => {
-        const result = await getStreakCount()
-        setCurrentStreak(result?.current || 0)
-    }
+        const result = await getWeeklyStreak();
+
+        if (!result) {
+            setCurrentStreak(false);
+            return;
+        }
+
+        const today = DateTime.now().toISODate();
+
+        const todayEntry = result.find(
+            (item) => item.date === today && item.completed === 1
+        );
+
+        setCurrentStreak(!!todayEntry);
+    };
+
 
     useFocusEffect(
         useCallback(() => {
@@ -44,10 +58,16 @@ const LearningTracker = ({ progress, goal, setCurrentStreak, currentStreak }: Le
                     {progressPercent >= 100 && <ThemedText className='text-right mt-4 font-bold text-green-500'>{ t("goal_achieved") } 🎉</ThemedText>}
                 </View>
                 <View className='mt-4 flex-row justify-start items-center'>
-                    
-                    <ThemedText variant='subtext'>{ t("daily_streak") }</ThemedText>
-                    <ThemedText className='text-2xl font-bold ml-auto'>{ currentStreak }</ThemedText>
                     <Flame size={20} color='#fc6a03' strokeWidth={3} />
+                    <ThemedText className='ml-2' variant='subtext'>{t("daily_streak")}</ThemedText>
+                    <View className='ml-auto'>
+                        {currentStreak === true ? (
+                            <Check size={20} color='green' strokeWidth={5} />  
+                        ) : (
+                            <Hourglass size={15} color='grey' strokeWidth={5} />   
+                        ) }
+                                    
+                    </View>
                 </View>
             </View>
             

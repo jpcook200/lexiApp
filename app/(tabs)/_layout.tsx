@@ -12,7 +12,7 @@ export default function TabLayout() {
                 screenOptions={{
                     headerShown: false,
                     tabBarStyle: {
-                    backgroundColor: colorScheme === 'dark' ? '#494949' : '#f5fbff',
+                    backgroundColor: colorScheme === 'dark' ? '#363636ff' : '#f5fbff',
                     elevation: 0,        // Android shadow
                     shadowOpacity: 0,    // iOS shadow
                     borderTopWidth: 0,   // remove border

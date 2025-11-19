@@ -4,13 +4,16 @@ import ThemedText from '@/components/ThemedText';
 import ThemedView from '@/components/ThemedView';
 import useDatabase from '@/db/useDatabase';
 import { useUserStore } from '@/hooks/useGetUser';
+import { getInstallationId } from '@/utilities/getInstallationId';
 import { getLanguageFlag } from '@/utilities/helpers';
 import { scheduleDailyReminder } from '@/utilities/notifications';
+import * as Clipboard from 'expo-clipboard';
 import * as Notifications from 'expo-notifications';
 import { router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { Copy } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Linking, ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { useIAP } from 'react-native-iap';
@@ -24,6 +27,7 @@ export default function Settings() {
     const { setRemindersOn, resetProgressByLanguagePair } = useDatabase();
     const { setUserAccessLevel } = useDatabase();
     const { connected, hasActiveSubscriptions, getActiveSubscriptions } = useIAP();
+    const [installationId, setInstallationId] = useState('');
 
     const sendEmail = () => {
         const email = 'lexigramapp@outlook.com';
@@ -98,12 +102,24 @@ export default function Settings() {
             console.error('Error checking subscription status:', error);
         } 
     }
+
+    const copy = async (word: string) => {
+        await Clipboard.setStringAsync(word); 
+    };
+
     useFocusEffect(
         useCallback(() => {
             handleCheckSubscription();
           
         }, [connected])
     );
+
+    useEffect(() => {
+        (async () => {
+            const id = await getInstallationId();
+            setInstallationId(id);
+        })();
+    }, []);
 
     if (!user) {
         return (
@@ -112,7 +128,6 @@ export default function Settings() {
             </SafeAreaView>
         );
     }
-
     return (
         <SafeAreaView edges={['top']} className='flex-1 h-full bg-background-light dark:bg-background-dark px-4'>
             <ScrollView
@@ -231,8 +246,15 @@ export default function Settings() {
                         </ThemedView>
                     </View>
                     <View>
-                        <TouchableOpacity accessibilityLabel='Reset Progress' className='h-16 bg-red-500 flex items-center justify-center rounded-md border-red-400 border-2 mb-2' onPress={() => showResetPopUp()}>
+                        <TouchableOpacity accessibilityLabel='Reset Progress' className='h-16 bg-red-500 flex items-center justify-center rounded-md border-red-400 border-2' onPress={() => showResetPopUp()}>
                             <Text className='text-center font-bold text-white'>{ t("reset_progress") }</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View className='mb-6'>
+                        <ThemedText className='text-center text-sm text-gray-500'>Installation Id:</ThemedText>
+                        <TouchableOpacity onPress={() => copy(installationId)} className='flex-row text-center gap-2 items-center justify-center mt-2'>
+                            <ThemedText className='text-center text-sm text-gray-500'>{installationId}</ThemedText>
+                            <Copy size={ 12 } color={'grey'}/>
                         </TouchableOpacity>
                     </View>
                 </View>
