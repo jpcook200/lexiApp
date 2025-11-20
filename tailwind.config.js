@@ -21,7 +21,7 @@ module.exports = {
         },
         secondary: {
           light: "#E5E7EB", // light theme color
-          dark: "#3A3A3A",  // dark theme color
+          dark: "#262626ff",  // dark theme color
         },
         item: {
           light: "#e8e8e8ff", // light theme color

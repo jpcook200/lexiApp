@@ -106,15 +106,14 @@ const learn = () => {
                         language={user.learn_lang}
                     />
                 </View>
-                <TouchableOpacity disabled={!lastWordLearned} accessibilityLabel='Undo learning pervious word' onPress={ () => handleUndoLearned() } className={`${!lastWordLearned && 'opacity-50'} my-3 flex-row items-center self-start rounded-full border border-border-light dark:border-border-dark bg-item-light dark:bg-item-dark pl-3 pr-4 py-1`}>
-                        <ThemedIcon name='Undo' size={ 20 } />
-                        <ThemedText className='text-lg ml-2 font-bold'>{t("undo")}</ThemedText>
-                    </TouchableOpacity>
-                
                 {isPending || !isInitialised ? (
                     <ActivityIndicator size={"small"} className='flex-1 justify-center items-center'/>
                 ) : (
                     <>
+                        <TouchableOpacity disabled={!lastWordLearned} accessibilityLabel='Undo learning pervious word' onPress={ () => handleUndoLearned() } className={`${!lastWordLearned && 'opacity-50'} my-3 flex-row items-center self-start rounded-full border border-border-light dark:border-border-dark bg-item-light dark:bg-item-dark pl-3 pr-4 py-1`}>
+                            <ThemedIcon name='Undo' size={ 20 } />
+                            <ThemedText className='text-lg ml-2 font-bold'>{t("undo")}</ThemedText>
+                        </TouchableOpacity>
                         <CardStackSwiper
                             activeWords={activeWords}
                             setActiveWords={setActiveWords}

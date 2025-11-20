@@ -14,7 +14,7 @@ import { Heart } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const userWordsList = () => {
@@ -134,10 +134,16 @@ const userWordsList = () => {
                                 <ThemedText variant="subtext" className="mt-2 flex-wrap">{word?.native_definition}</ThemedText>
                             </View>
 
-                        </View>
-                        <TouchableOpacity accessibilityLabel='Toggle Word Favourite' className='ml-auto p-2' onPress={ () => handleFavourite(word?.id, word?.favourite) }>
-                            <Heart size={ 24 } color={word?.favourite === 1 ? '#fc69b4' : colorScheme === 'dark' ? '#ffffff' : '#000000' } pointerEvents='none' />
-                        </TouchableOpacity>
+                            </View>
+                            <View className='flex-row items-center mt-4'>
+                                <View className='w-8 h-8 bg-primaryDark rounded-full flex justify-center items-center relative overflow-hidden'>
+                                    <View className='absolute bg-primary w-[92%] h-[92%] left-0 top-0 rounded-full'></View>
+                                    <Text className='text-white text-sm font-bold capitalize'>{ word?.learning_difficulty }</Text>
+                                </View>
+                                <TouchableOpacity accessibilityLabel='Toggle Word Favourite' className='ml-auto p-2' onPress={ () => handleFavourite(word?.id, word?.favourite) }>
+                                    <Heart size={ 24 } color={word?.favourite === 1 ? '#fc69b4' : colorScheme === 'dark' ? '#ffffff' : '#000000' } pointerEvents='none' />
+                                </TouchableOpacity>
+                            </View>
                     </View>
                     ))
                 )}

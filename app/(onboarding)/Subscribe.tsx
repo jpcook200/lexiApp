@@ -3,15 +3,12 @@ import MainButton from '@/components/MainButton';
 import ThemedIcon from '@/components/ThemedIcon';
 import ThemedText from '@/components/ThemedText';
 import useDatabase from '@/db/useDatabase';
-import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { ErrorCode, useIAP } from 'react-native-iap';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-const { appStoreSharedSecret } = Constants.expoConfig!.extra as { appStoreSharedSecret: string };
 
 type Plan = {
   id: string | undefined;

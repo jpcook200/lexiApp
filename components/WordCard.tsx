@@ -5,7 +5,7 @@ import { Heart, Mars, Venus } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Animated, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { Animated, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import ThemedIcon from './ThemedIcon';
 import ThemedText from './ThemedText';
 import ThemedView from './ThemedView';
@@ -119,7 +119,11 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
                                     </View>
                                     
                                 </View>
-                                <View className="flex-row justify-end">
+                                <View className="flex-row justify-between items-center">
+                                    <View className='w-10 h-10 bg-primaryDark rounded-full flex justify-center items-center relative overflow-hidden'>
+                                        <View className='absolute bg-primary w-[92%] h-[92%] left-0 top-0 rounded-full'></View>
+                                        <Text className='text-white font-black capitalize'>{ word?.learning_difficulty }</Text>
+                                    </View>
                                     <TouchableOpacity accessibilityLabel='Toggle Favourite Word' disabled={ displayOnly } onPress={ () => handleFavourite() }>
                                         <Heart size={ 28 } color={word?.favourite === true || word?.favourite === 1 ? '#fc69b4' : colorScheme === 'dark' ? '#ffffff' : '#000000' } pointerEvents='none' />
                                     </TouchableOpacity>
@@ -156,7 +160,11 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
                                         <ThemedText variant='subtext' className='text-lg italic'>{ word?.learning_sentence }</ThemedText>
                                     </View>
                                 </View>
-                                <View className="flex-row justify-end">
+                                <View className="flex-row items-center justify-between">
+                                    <View className='w-10 h-10 bg-primaryDark rounded-full flex justify-center items-center relative overflow-hidden'>
+                                        <View className='absolute bg-primary w-[92%] h-[92%] left-0 top-0 rounded-full'></View>
+                                        <Text className='text-white font-black capitalize'>{ word?.learning_difficulty }</Text>
+                                    </View>
                                     <TouchableOpacity accessibilityLabel='Toggle Favourite word' disabled={ displayOnly } onPress={ () => handleFavourite() }>
                                         <Heart size={ 28 } color={word?.favourite === true || word?.favourite === 1 ? '#fc69b4' : colorScheme === 'dark' ? '#ffffff' : '#000000' } pointerEvents='none' />
                                     </TouchableOpacity>
