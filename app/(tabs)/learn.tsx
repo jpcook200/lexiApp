@@ -99,7 +99,7 @@ const learn = () => {
             {showTutorial && <Tutorial
                 setShowTutorial={setShowTutorial}
             />}
-            <SafeAreaView className='flex-1 bg-background-light dark:bg-background-dark px-4'>
+            <SafeAreaView className='flex-1 bg-background-light dark:bg-background-dark px-4 pb-0'>
                 <View className=" flex-row justify-between items-center">
                     <Logo/>
                     <LanguageIndicator
@@ -112,7 +112,7 @@ const learn = () => {
                     <>
                         <TouchableOpacity disabled={!lastWordLearned} accessibilityLabel='Undo learning pervious word' onPress={ () => handleUndoLearned() } className={`${!lastWordLearned && 'opacity-50'} my-3 flex-row items-center self-start rounded-full border border-border-light dark:border-border-dark bg-item-light dark:bg-item-dark pl-3 pr-4 py-1`}>
                             <ThemedIcon name='Undo' size={ 20 } />
-                            <ThemedText className='text-lg ml-2 font-bold'>{t("undo")}</ThemedText>
+                            <ThemedText className='text-md ml-2 font-bold'>{t("undo")}</ThemedText>
                         </TouchableOpacity>
                         <CardStackSwiper
                             activeWords={activeWords}

@@ -50,21 +50,21 @@ const LearningTracker = ({ progress, goal, setCurrentStreak, currentStreak }: Le
         <ThemedView variant='shaded' className='mt-auto overflow-hidden border border-border-light dark:border-border-dark rounded-2xl'>    
             <View className='p-4'>
                 <View className='flex-row justify-between items-center'>
-                    <ThemedText className='text-lg font-bold'>{ t("progress_today") }</ThemedText>
-                    <ThemedText className='text-xl font-bold mt-1'>{Math.min(progress, goal)}/{goal}</ThemedText>
+                    <ThemedText className='text-lg font-bold sm:text-md'>{ t("progress_today") }</ThemedText>
+                    <ThemedText className='text-xl font-bold mt-1 sm:text-md'>{Math.min(progress, goal)}/{goal}</ThemedText>
                 </View>
                 <ProgressBar progressPercent={progressPercent} />
                 <View>
-                    {progressPercent >= 100 && <ThemedText className='text-right mt-4 font-bold text-green-500'>{ t("goal_achieved") } 🎉</ThemedText>}
+                    {progressPercent >= 100 && <ThemedText className='text-right mt-4 sm:mt-2 sm:text-sm font-bold text-green-500'>{ t("goal_achieved") } 🎉</ThemedText>}
                 </View>
-                <View className='mt-4 flex-row justify-start items-center'>
+                <View className='mt-4 sm:mt-2 flex-row justify-start items-center'>
                     <Flame size={20} color='#fc6a03' strokeWidth={3} />
-                    <ThemedText className='ml-2' variant='subtext'>{t("daily_streak")}</ThemedText>
+                    <ThemedText className='ml-2 sm:text-sm' variant='subtext'>{t("daily_streak")}</ThemedText>
                     <View className='ml-auto'>
                         {currentStreak === true ? (
-                            <Check size={20} color='green' strokeWidth={5} />  
+                            <Check size={16} color='green' strokeWidth={5} />  
                         ) : (
-                            <Hourglass size={15} color='grey' strokeWidth={5} />   
+                            <Hourglass size={14} color='grey' strokeWidth={5} />   
                         ) }
                                     
                     </View>

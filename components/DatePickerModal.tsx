@@ -44,7 +44,7 @@ const DatePickerModal = ({ modalVisible, setModalVisible, setFilters, filters, g
                 <TouchableOpacity onPress={() => handleClose()} className='flex-1'>
                 </TouchableOpacity>
             </View>
-            <View className='w-full h-1/3 bg-background-light dark:bg-background-dark p-4 rounded-t-3xl shadow-md'>
+            <View className='w-full h-1/3 sm:h-[45%] bg-item-light dark:bg-item-dark p-4 rounded-t-3xl shadow-md'>
                 <View className='flex-col mb-4'>
                     <ThemedText className='text-lg font-medium'>{ t("date") }</ThemedText>
                     <View style={{height: 150}} className='border-2 border-border-light dark:border-border-dark rounded-lg mt-2 overflow-hidden bg-item-light dark:bg-item-dark'>

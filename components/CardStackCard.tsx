@@ -173,8 +173,8 @@ const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWo
                     user={user}
                 />
                 {!practice &&
-                    <Animated.View style={[learnedAnimatedStyle]} className='absolute bottom-10 left-10 p-2 border-2 border-green-400 rounded-md flex justify-center items-center'>
-                        <Text className='text-green-400 text-md uppercase'>{ t("learned") }</Text>
+                    <Animated.View style={[learnedAnimatedStyle]} className='absolute bottom-10 left-[50%] -translate-x-[50%] bg-green-400 rounded-md flex justify-center items-center overflow-hidden p-2 shadow-sm'>
+                        <Text className='text-white font-black text-md uppercase'>{ t("learned") }</Text>
                     </Animated.View>
                 }
             </Animated.View>

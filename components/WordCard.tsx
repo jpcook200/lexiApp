@@ -102,7 +102,7 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
                     <Animated.View style={[styles.card, flipToFrontStyle]} className='flex-1'>
                         <ThemedView variant='shaded' className={cardClass}>
                             <View className='p-8 sm:p-4 flex-1'>
-                                <View className='gap-4 flex-1'>
+                                <View className=' flex-1'>
                                     <View className='w-full flex-row justify-end'>
                                         <TouchableOpacity accessibilityLabel='Text to Speech for Word' onPress={user ? (() => handleTextToSpeech(word?.learning_word, user.learn_lang)) : () => {}} disabled={displayOnly || ttsDisabled} className={`p-2 ${ttsDisabled ? 'opacity-50' : ''}`}>
                                             <ThemedIcon name={ ttsDisabled ? 'VolumeOff' : 'Volume2' } size={24} />
@@ -112,7 +112,7 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
                                         <ThemedText variant='primary' className='text-5xl sm:text-4xl font-bold'>
                                             { word?.learning_word }
                                         </ThemedText>
-                                        <ThemedText variant='subtext' className='text-xl'>{ word?.learning_pronunciation }</ThemedText>
+                                        <ThemedText variant='subtext' className='text-xl py-2'>{ word?.learning_pronunciation }</ThemedText>
                                     </View>
                                     <View className='bg-primary w-auto px-5 py-1 rounded-full self-start'>
                                         <ThemedText className='font-bold capitalize text-white'>{ t(word?.part_of_speech) }</ThemedText>
@@ -135,8 +135,8 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
                     <Animated.View pointerEvents={isFlipped ? 'auto' : 'none'} style={[styles.card, StyleSheet.absoluteFill, flipToBackStyle]} className='flex-1'>
                         <ThemedView variant='shaded' className={cardClass}>
                             <View className='p-8 sm:p-4 flex-1'>
-                                <View className='gap-4 sm:gap-2 flex-1'>
-                                    <View className='w-full flex-row justify-between'>
+                                <View className='gap-4 flex-1'>
+                                    <View className='w-full flex-row justify-between items-center'>
                                         <View>
                                             { (word?.learning_gender && word?.learning_gender !== 'n') && word?.learning_gender === 'm' ?
                                                 <Mars size={ 24 } color='#1c95ffff' />
