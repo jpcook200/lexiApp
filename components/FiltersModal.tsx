@@ -26,7 +26,7 @@ const FiltersModal = ({ modalVisible, setModalVisible, filters, setFilters, appl
                     className="absolute inset-0"
                 />
 
-                <View className="w-full bg-background-light dark:bg-background-dark p-4 rounded-t-3xl shadow-md">
+                <View className="w-full bg-background-light dark:bg--dark p-4 rounded-t-3xl shadow-md">
                 <ThemedText className="text-2xl font-bold mb-4">{t("filters")}</ThemedText>
 
                 <View className="flex-row justify-between items-center mb-4">
@@ -62,7 +62,7 @@ const FiltersModal = ({ modalVisible, setModalVisible, filters, setFilters, appl
                     text={t("apply")}
                     onPress={applyFilters}
                     accessibilityLabel="Apply filters"
-                    className="mt-2"
+                    className="mt-2 mb-8"
                 />
                 </View>
             </View>
