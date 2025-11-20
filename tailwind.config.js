@@ -51,6 +51,9 @@ module.exports = {
           dark: "#686f79ff",  // dark theme color
         }
       },
+      screens: {
+        sm: { max: "420px" },
+      }
     },
   },
   plugins: [],

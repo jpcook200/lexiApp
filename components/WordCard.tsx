@@ -101,15 +101,15 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
                 <View className='w-full h-full'>
                     <Animated.View style={[styles.card, flipToFrontStyle]} className='flex-1'>
                         <ThemedView variant='shaded' className={cardClass}>
-                            <View className='p-8 flex-1'>
+                            <View className='p-8 sm:p-4 flex-1'>
                                 <View className='gap-4 flex-1'>
                                     <View className='w-full flex-row justify-end'>
                                         <TouchableOpacity accessibilityLabel='Text to Speech for Word' onPress={user ? (() => handleTextToSpeech(word?.learning_word, user.learn_lang)) : () => {}} disabled={displayOnly || ttsDisabled} className={`p-2 ${ttsDisabled ? 'opacity-50' : ''}`}>
-                                            <ThemedIcon name={ ttsDisabled ? 'VolumeOff' : 'Volume2' } size={28} />
+                                            <ThemedIcon name={ ttsDisabled ? 'VolumeOff' : 'Volume2' } size={24} />
                                         </TouchableOpacity>
                                     </View>
                                     <View>
-                                        <ThemedText variant='primary' className='text-5xl font-bold'>
+                                        <ThemedText variant='primary' className='text-5xl sm:text-4xl font-bold'>
                                             { word?.learning_word }
                                         </ThemedText>
                                         <ThemedText variant='subtext' className='text-xl'>{ word?.learning_pronunciation }</ThemedText>
@@ -120,12 +120,12 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
                                     
                                 </View>
                                 <View className="flex-row justify-between items-center">
-                                    <View className='w-10 h-10 bg-primaryDark rounded-full flex justify-center items-center relative overflow-hidden'>
+                                    <View className='w-10 h-10 sm:w-8 sm:h-8 bg-primaryDark rounded-full flex justify-center items-center relative overflow-hidden'>
                                         <View className='absolute bg-primary w-[92%] h-[92%] left-0 top-0 rounded-full'></View>
-                                        <Text className='text-white font-black capitalize'>{ word?.learning_difficulty }</Text>
+                                        <Text className='text-white font-black capitalize sm:text-sm'>{ word?.learning_difficulty }</Text>
                                     </View>
                                     <TouchableOpacity accessibilityLabel='Toggle Favourite Word' disabled={ displayOnly } onPress={ () => handleFavourite() }>
-                                        <Heart size={ 28 } color={word?.favourite === true || word?.favourite === 1 ? '#fc69b4' : colorScheme === 'dark' ? '#ffffff' : '#000000' } pointerEvents='none' />
+                                        <Heart size={ 24 } color={word?.favourite === true || word?.favourite === 1 ? '#fc69b4' : colorScheme === 'dark' ? '#ffffff' : '#000000' } pointerEvents='none' />
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -134,24 +134,24 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
                     </Animated.View>
                     <Animated.View pointerEvents={isFlipped ? 'auto' : 'none'} style={[styles.card, StyleSheet.absoluteFill, flipToBackStyle]} className='flex-1'>
                         <ThemedView variant='shaded' className={cardClass}>
-                            <View className='p-8 flex-1'>
-                                <View className='gap-4 flex-1'>
+                            <View className='p-8 sm:p-4 flex-1'>
+                                <View className='gap-4 sm:gap-2 flex-1'>
                                     <View className='w-full flex-row justify-between'>
                                         <View>
                                             { (word?.learning_gender && word?.learning_gender !== 'n') && word?.learning_gender === 'm' ?
-                                                <Mars size={ 28 } color='#1c95ffff' />
+                                                <Mars size={ 24 } color='#1c95ffff' />
                                                     : word?.learning_gender === 'f' ?
-                                                <Venus size={ 28 } color='#1c95ffff'/>
+                                                <Venus size={ 24 } color='#1c95ffff'/>
                                                 : null
                                         }
                                         </View>
                                         <TouchableOpacity accessibilityLabel='Text to Speech for Example Sentence' onPress={() => handleTextToSpeech(word?.learning_sentence, user?.learn_lang || 'en')} disabled={displayOnly || ttsDisabled} className={`p-2 ${ttsDisabled ? 'opacity-50' : ''}`}>
-                                            <ThemedIcon name={ ttsDisabled ? 'VolumeOff' : 'Volume2' } size={28}/>
+                                            <ThemedIcon name={ ttsDisabled ? 'VolumeOff' : 'Volume2' } size={24}/>
                                         </TouchableOpacity>
                                     </View>
                                     <View>
                                         <View>
-                                            <ThemedText variant='primary' className='text-5xl font-bold'>{ word?.native_word }</ThemedText>
+                                            <ThemedText variant='primary' className='text-5xl font-bold sm:text-4xl'>{ word?.native_word }</ThemedText>
                                         </View>
                                         <ThemedText variant='subtext' className='text-lg'>{ word?.native_definition }</ThemedText>
                                     </View>
@@ -161,12 +161,12 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
                                     </View>
                                 </View>
                                 <View className="flex-row items-center justify-between">
-                                    <View className='w-10 h-10 bg-primaryDark rounded-full flex justify-center items-center relative overflow-hidden'>
+                                    <View className='w-10 h-10 sm:w-8 sm:h-8 bg-primaryDark rounded-full flex justify-center items-center relative overflow-hidden'>
                                         <View className='absolute bg-primary w-[92%] h-[92%] left-0 top-0 rounded-full'></View>
-                                        <Text className='text-white font-black capitalize'>{ word?.learning_difficulty }</Text>
+                                        <Text className='text-white font-black capitalize sm:text-sm'>{ word?.learning_difficulty }</Text>
                                     </View>
                                     <TouchableOpacity accessibilityLabel='Toggle Favourite word' disabled={ displayOnly } onPress={ () => handleFavourite() }>
-                                        <Heart size={ 28 } color={word?.favourite === true || word?.favourite === 1 ? '#fc69b4' : colorScheme === 'dark' ? '#ffffff' : '#000000' } pointerEvents='none' />
+                                        <Heart size={ 24 } color={word?.favourite === true || word?.favourite === 1 ? '#fc69b4' : colorScheme === 'dark' ? '#ffffff' : '#000000' } pointerEvents='none' />
                                     </TouchableOpacity>
                                 </View>
                             </View>
