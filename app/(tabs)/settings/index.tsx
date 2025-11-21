@@ -98,7 +98,6 @@ export default function Settings() {
                     await fetchUser(db);
                 }
             }
-            
         } catch (error) {
             console.error('Error checking subscription status:', error);
         } 
@@ -180,7 +179,7 @@ export default function Settings() {
                                 <View className='ml-auto'>
                                     <Switch
                                         onChange={() => { handleToggleMuted()}}
-                                        value={ mutedSwitchValue }
+                                        value={ !mutedSwitchValue }
                                     />
                                 </View>
                                 

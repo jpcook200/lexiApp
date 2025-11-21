@@ -779,7 +779,7 @@ const useDatabase = () => {
         }
     }
 
-    const getUserLearnedWordsCount = async (): Promise<number> => {
+    const getUserLearnedWordsCount = async () =>{
         try {
             const userResults = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = ?', [1]);
             if (!userResults) {
@@ -817,11 +817,11 @@ const useDatabase = () => {
             if (userResults.words_per_day > freeWordsAllowance) {
                 const userLearnedWordsCount = await getUserLearnedWordsCount();
 
-                if (!userLearnedWordsCount || userLearnedWordsCount.count === undefined) { 
+                if (!userLearnedWordsCount || userLearnedWordsCount === undefined) { 
                     throw new Error('Could not retrieve learned words count');
                 }
 
-                if (userLearnedWordsCount.count >= freeWordsAllowance) { 
+                if (userLearnedWordsCount >= freeWordsAllowance) { 
                     await updateStreakCount('increment');
                     await updateStreakRecord(1);
                 }

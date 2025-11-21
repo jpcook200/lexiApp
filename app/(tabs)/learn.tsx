@@ -82,6 +82,7 @@ const learn = () => {
 
     useEffect(() => {
         if (user) { 
+            console.log(user)
             setShowTutorial(user.tutorial_completed === 0)
         }
     }, [user]);
