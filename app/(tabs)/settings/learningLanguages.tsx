@@ -52,7 +52,7 @@ const LearningLanguages = () => {
             <LanguagesList
                 onSelectLanguage={handleSelectLanguage}
                 streakData={streakCounts}
-                streakDisplay={ user?.access_level === 'free' }
+                streakDisplay={ user?.access_level === 'pro' }
             />
         </ThemedView>
     );
