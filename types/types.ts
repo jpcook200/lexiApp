@@ -18,6 +18,7 @@ export interface Word {
     native_lang: string;
     time_sent?: string;
     learned?: 0 | 1;
+    hidden?: 0 | 1;
 }
 
 export interface User { 
@@ -34,6 +35,7 @@ export interface User {
     tutorial_completed: 0 | 1;
     access_level: 'free' | 'pro';
     words_total: number;
+    muted?: 0 | 1;
 }
 
 export interface CountType { 

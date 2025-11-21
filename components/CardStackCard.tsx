@@ -1,6 +1,7 @@
 import useDatabase from '@/db/useDatabase';
 import { useUserStore } from '@/hooks/useGetUser';
 import { User, Word } from '@/types/types';
+import { useAudioPlayer } from 'expo-audio';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 import { Dimensions, Text } from 'react-native';
@@ -28,6 +29,7 @@ type CardStackCardProps = {
 
 const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWords, activeWords = [], updateProgress, practice = false, progress, setCurrentStreak, lastWordLearned, setlastWordLearned}: CardStackCardProps) => {
     const { t } = useTranslation();
+    const player = useAudioPlayer(require("@/assets/sounds/cardswipe.mp3"));
     const { setSelectedWordId } = useUserStore();
     const { toggleLearned, insertIntoLearnedWords, updateStreakCount, updateStreakRecord} = useDatabase();
     const screenWidth = Dimensions.get('window').width;
@@ -75,6 +77,11 @@ const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWo
         }, 150);
     };
 
+    const playSwipe = () => { 
+        if(user.muted === 1) return;
+        player.play()
+    }
+
     const gesture = Gesture.Pan()
         .onChange((event) => {
             translationX.value = event.translationX;
@@ -92,6 +99,7 @@ const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWo
                     Math.sign(event.velocityX) * (screenWidth * 1.5),
                     { velocity: event.velocityX },
                 );
+                scheduleOnRN(playSwipe);
                 scheduleOnRN(loopCards, index);
                 activeIndex.value = withSpring(index + 1);
             } else if (event.velocityY < -300) {

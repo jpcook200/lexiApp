@@ -27,6 +27,21 @@ const CardStackSwiper = ({ activeWords, setActiveWords, updateProgress, progress
     const [indexState, setIndexState] = useState(0);
     const { t } = useTranslation();
 
+    const hasReachedDailyGoal = (user: User | undefined, progress: number | undefined, activeWords: Word[] | undefined): boolean => {
+        if (!user || !activeWords) return false;
+
+        // If last_set is true and there are no active words
+        if (user.last_set && activeWords.length === 0) return true;
+
+        // Otherwise, check if daily goal is reached
+        if (user.words_per_day && progress !== undefined) {
+            return progress >= user.words_per_day;
+        }
+
+        return false;
+    };
+
+
     useEffect(() => {
         scheduleOnRN(() => {
             activeIndex.value = 0;
@@ -35,7 +50,7 @@ const CardStackSwiper = ({ activeWords, setActiveWords, updateProgress, progress
 
     return (
         <GestureHandlerRootView className="w-full h-full px-6 flex justify-center items-center my-4">
-            {(user?.words_per_day && progress) && progress >= user?.words_per_day ? (
+            {hasReachedDailyGoal(user, progress, activeWords) ? (
                 <View className="w-3/4 h-full flex justify-center items-center">
                     <ThemedIcon name="Rocket" size={32} />
                     <ThemedText className="font-bold text-center my-3">{t("goal_reached")}</ThemedText>

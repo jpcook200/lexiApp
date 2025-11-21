@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { useIAP } from 'react-native-iap';
 
 const useGetWords = () => {
-    const { setLastSet, increaseDifficultyLevel, deleteAllFromDailyWords, getDailyLearnedCount, getDailyWords, saveDailyWords, getLearnedWordsIds, saveLastFetchedDate } = useDatabase();
+    const { setLastSet, increaseDifficultyLevel, deleteAllFromDailyWords, getDailyLearnedCount, getDailyWords, saveDailyWords, getLearnedWordsIds, saveLastFetchedDate, toggleRandomDailyWords } = useDatabase();
     const [progressToday, setProgressToday] = useState(0);
     const [activeWords, setActiveWords] = useState<Word[]>([]);
     const { getActiveSubscriptions, connected } = useIAP();
@@ -36,7 +36,7 @@ const useGetWords = () => {
     };
 
     const handleCompletedSet = (storedDailyWords: Word[]) => {
-        return storedDailyWords.filter((word) => word.learned === 0);
+        return storedDailyWords.filter((word) => word.learned === 0 && word.hidden === 0);
     };
 
     const handleNewDayOrEmptyWords = async ({ user, learnedWordIds, dailyWordIds, localDatetime, deleteWords, transactionId }: {user: User, learnedWordIds: number[], dailyWordIds: number[], localDatetime: string, deleteWords: boolean, transactionId: string | null}) => {
@@ -60,7 +60,7 @@ const useGetWords = () => {
         await saveLastFetchedDate();
 
         const newData = await saveDailyWords(newWords);
-        const filteredResults = newData.filter((word: Word) => word.learned === 0);
+        const filteredResults = newData.filter((word: Word) => word.learned === 0 && word.hidden === 0);
         
         const highestWordDifficulty = getHighestDifficultyLevel(filteredResults);
         const allSameAsHighest = filteredResults.length > 0 && filteredResults.every(word => (word.learning_difficulty ?? '').toLowerCase() === highestWordDifficulty);
@@ -79,12 +79,23 @@ const useGetWords = () => {
     };
 
     const handleSameDay = async ({ user, storedDailyWords, learnedWordIds, dailyWordIds, localDatetime, transactionId}: {user: User, storedDailyWords: Word[], learnedWordIds: number[], dailyWordIds: number[], localDatetime: string, transactionId: string | null}) => {
-        if (user.words_per_day! > storedDailyWords.length) {
+        let newStoredWords = storedDailyWords;
+        const unhiddenWords = newStoredWords.filter((word) => word.hidden === 0);
+
+        if (unhiddenWords.length < user.words_per_day!) {
+            const wordsNeeded = user.words_per_day! - unhiddenWords.length;
+            console.log("Needing to unhide words:", wordsNeeded);
+            await toggleRandomDailyWords(wordsNeeded, 'show');
+        }
+
+        newStoredWords = await getDailyWords();
+
+        if (user.words_per_day! > newStoredWords.length) {
             const { words: newWords, lastSet } = await getWords({
                 nativeLang: user.native_lang,
                 learningLang: user.learn_lang,
                 difficulty: user.difficulty_level,
-                limit: user.words_per_day! - storedDailyWords.length,
+                limit: user.words_per_day! - newStoredWords.length,
                 excludeIds: [...learnedWordIds, ...dailyWordIds],
                 localDatetime,
                 transactionId
@@ -96,14 +107,15 @@ const useGetWords = () => {
                 alert('Well Done You Have Completed the course, these are your last words to learn!');
                 await setLastSet();
             }
-
+        
             const newData = await saveDailyWords(newWords);
-            const filteredResults = newData.filter((word) => word.learned === 0);
+            console.log(newData.length, "----- new data length after fetching more words");
+            const filteredResults = newData.filter((word) => word.learned === 0  && word.hidden === 0)
 
             setActiveWords(filteredResults);
             return filteredResults;
         } else {
-            const filteredResults = storedDailyWords.filter((word) => word.learned === 0);
+            const filteredResults = newStoredWords.filter((word) => word.learned === 0 && word.hidden === 0);
             setActiveWords(filteredResults);
             return filteredResults;
         }
@@ -124,7 +136,7 @@ const useGetWords = () => {
             const storedDate = user.last_fetched?.split(' ')[0] || null;
 
             if (!connected) { 
-                return storedDailyWords.filter((word) => word.learned === 0)
+                return storedDailyWords.filter((word) => word.learned === 0 && word.hidden === 0);
             }
             const activeSubscriptions = await getActiveSubscriptions();
             const transactionId = activeSubscriptions[0]?.transactionId || null;
@@ -165,12 +177,12 @@ const useGetWords = () => {
                 });
             }
 
-            return storedDailyWords.filter((word) => word.learned === 0);
+            return storedDailyWords.filter((word) => word.learned === 0 && word.hidden === 0);
 
         } catch (error) {
             console.error('Error fetching daily words:', error);
             const errorStoredDailyWords = await getDailyWords();
-            const fallbackWords = errorStoredDailyWords.filter((word) => word.learned === 0);
+            const fallbackWords = errorStoredDailyWords.filter((word) => word.learned === 0 && word.hidden === 0);
             setActiveWords(fallbackWords);
             return fallbackWords;
         }

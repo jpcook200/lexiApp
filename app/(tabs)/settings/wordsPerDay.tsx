@@ -9,7 +9,7 @@ import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react
 
 const WordsPerDay = () => {
     const { t } = useTranslation();
-    const { setWordsPerDay, updateStreakRecord, updateStreakCount} = useDatabase();
+    const { setWordsPerDay, updateStreakRecord, updateStreakCount, getUserLearnedWordsCount, getDailyWords, toggleRandomDailyWords} = useDatabase();
     const { user, loading } = useUserStore();
     const [selectedNumber, setSelectedNumber] = useState<number>(10);
     const numbers = Array.from({ length: 30 }, (_, i) => i + 1);
@@ -22,9 +22,24 @@ const WordsPerDay = () => {
 
     const handleSave = async (selectedNumber: number) => {
         if (!user) return;
+        const userProgress = await getUserLearnedWordsCount();
+        const storedWords = await getDailyWords();
+        const currentDailyWords = storedWords.length;
+        console.log('User progress:', userProgress);
+        console.log('Current daily words:', currentDailyWords);
         try {
             if (user.access_level === 'free' && selectedNumber > freeWordsAllowance) { 
                 return router.push('../../(onboarding)/Subscribe');
+            }
+            if (selectedNumber < currentDailyWords) { 
+                const wordsToRemove = currentDailyWords - selectedNumber;
+                console.log("needing to remove words:", wordsToRemove);
+                await toggleRandomDailyWords(wordsToRemove, 'hide');
+            }
+            
+            if(userProgress >= selectedNumber) {
+                await updateStreakCount("increment");
+                await updateStreakRecord(1);
             }
             await setWordsPerDay(selectedNumber);
             router.back();

@@ -24,10 +24,11 @@ export default function Settings() {
     const db = useSQLiteContext()
     const { user, loading, fetchUser, setUser } = useUserStore();
     const { colorScheme, toggleColorScheme } = useColorScheme();
-    const { setRemindersOn, resetProgressByLanguagePair } = useDatabase();
+    const { setRemindersOn, resetProgressByLanguagePair, toggleMuted } = useDatabase();
     const { setUserAccessLevel } = useDatabase();
     const { connected, hasActiveSubscriptions, getActiveSubscriptions } = useIAP();
     const [installationId, setInstallationId] = useState('');
+    const [mutedSwitchValue, setMutedSwitchValue] = useState(user?.muted === 1);
 
     const sendEmail = () => {
         const email = 'lexigramapp@outlook.com';
@@ -103,6 +104,15 @@ export default function Settings() {
         } 
     }
 
+    const handleToggleMuted = async () => {
+        try {
+            const newMuted = await toggleMuted();
+            setMutedSwitchValue(newMuted);
+        } catch (error) {
+            console.error('Error toggling muted status:', error);
+        }
+    }
+
     const copy = async (word: string) => {
         await Clipboard.setStringAsync(word); 
     };
@@ -153,13 +163,24 @@ export default function Settings() {
                     <View>
                         <ThemedText>{ t("notifications") }</ThemedText>
                         <ThemedView variant='item' className='border border-border-light dark:border-border-dark rounded-lg mt-2 px-4'>
-                            <View className='flex-row items-center gap-4 h-20'>
+                            <View className='flex-row items-center gap-4 h-20 border-b border-border-light dark:border-border-dark'>
                                 <ThemedIcon name={'Bell'} size={20} />
                                 <ThemedText className='text-lg font-medium'>{ t("reminders") }</ThemedText>
                                 <View className='ml-auto'>
                                     <Switch
                                         onChange={() => handleScheduleReminders()}
                                         value={ user?.reminders_on === 1}
+                                    />
+                                </View>
+                                
+                            </View>
+                            <View className='flex-row items-center gap-4 h-20 '>
+                                <ThemedIcon name={'Speaker'} size={20} />
+                                <ThemedText className='text-lg font-medium'>{ t("sounds") }</ThemedText>
+                                <View className='ml-auto'>
+                                    <Switch
+                                        onChange={() => { handleToggleMuted()}}
+                                        value={ mutedSwitchValue }
                                     />
                                 </View>
                                 

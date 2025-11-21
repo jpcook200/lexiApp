@@ -246,6 +246,34 @@ const useDatabase = () => {
         }
     };
 
+    const toggleMuted = async (): Promise<boolean> => { 
+        try {
+            // Toggle the muted value
+            await db.runAsync(`
+                UPDATE users
+                SET muted = CASE muted
+                    WHEN 1 THEN 0
+                    ELSE 1
+                END
+                WHERE id = ?
+            `, [1]);
+
+            // Get the new muted value
+            const result = await db.getFirstAsync<{ muted: number }>(
+                'SELECT muted FROM users WHERE id = ?',
+                [1]
+            );
+
+            if (!result) throw new Error('User not found');
+
+            return result.muted === 1;
+        } catch (error) {
+            console.error('Error toggling muted status:', error);
+            throw error;
+        }
+    };
+
+
     const setNativeLanguage = async (languageCode: string) => {
         try {
             await db.runAsync(
@@ -751,6 +779,29 @@ const useDatabase = () => {
         }
     }
 
+    const getUserLearnedWordsCount = async (): Promise<number> => {
+        try {
+            const userResults = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = ?', [1]);
+            if (!userResults) {
+                throw new Error('User not found');
+            }
+
+            const userLearnedWordsCount = await db.getFirstAsync<CountType>(
+                `SELECT COUNT(*) as count FROM daily_words WHERE user_id = ? AND learn_lang = ? AND native_lang = ? AND learned = 1`,
+                [1, userResults.learn_lang, userResults.native_lang]
+            );
+
+            if(!userLearnedWordsCount || userLearnedWordsCount.count === undefined) { 
+                throw new Error('Could not retrieve learned words count');
+            }
+
+            return userLearnedWordsCount.count;
+        } catch (error) {
+            console.error('Error getting user learned words count:', error);
+            throw error;
+        }
+    }
+
     const setUserAccessLevel = async (accessLevel: string) => {
         try {
             const userResults = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = ?', [1]);
@@ -764,10 +815,7 @@ const useDatabase = () => {
             );
             
             if (userResults.words_per_day > freeWordsAllowance) {
-                const userLearnedWordsCount = await db.getFirstAsync<CountType>(
-                    `SELECT COUNT(*) as count FROM daily_words WHERE user_id = ? AND learn_lang = ? AND native_lang = ? AND learned = 1`,
-                    [1, userResults.learn_lang, userResults.native_lang]
-                );
+                const userLearnedWordsCount = await getUserLearnedWordsCount();
 
                 if (!userLearnedWordsCount || userLearnedWordsCount.count === undefined) { 
                     throw new Error('Could not retrieve learned words count');
@@ -793,6 +841,46 @@ const useDatabase = () => {
             );
         } catch (error) {
             console.error('Error setting user total words:', error);
+            throw error;
+        }
+    }
+
+    const toggleRandomDailyWords = async (amount: number, operation: string) => { 
+        let newHiddenStatus: number;
+        let whereClause: number;
+        if (operation === 'hide') {
+            newHiddenStatus = 1;
+            whereClause = 0
+        } else if (operation === 'show') {
+            newHiddenStatus = 0;
+            whereClause = 1
+        } else {
+            throw new Error("Invalid operation passed");
+        }
+        try {
+            const userResults = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = ?', [1])
+            if (!userResults) {
+                throw new Error('User not found');
+            }
+            await db.runAsync(
+                `UPDATE daily_words
+                    SET hidden = ?
+                    WHERE id IN (
+                        SELECT id
+                        FROM daily_words
+                        WHERE user_id = ?
+                        AND learn_lang = ?
+                        AND native_lang = ?
+                        AND learned = 0
+                        AND hidden = ?
+                        ORDER BY RANDOM()
+                        LIMIT ?
+                    );
+                    `,
+                [newHiddenStatus, 1, userResults.learn_lang, userResults.native_lang, whereClause, amount]
+            );
+        } catch (error) {
+            console.error('Error hiding daily words:', error);
             throw error;
         }
     }
@@ -830,7 +918,10 @@ const useDatabase = () => {
         getDailyWords,
         saveDailyWords,
         removeFromLearnedWords,
-        getAllStreakCounts
+        getAllStreakCounts,
+        getUserLearnedWordsCount,
+        toggleRandomDailyWords,
+        toggleMuted,
     };
 
 }

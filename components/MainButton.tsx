@@ -16,10 +16,11 @@ const MainButton = ({ onPress, next, text, className = '', accessibilityHint, ac
     return (
         <TouchableOpacity
             onPress={onPress}
-            className={`bg-primary h-16 w-full flex-row justify-center items-center rounded-lg shadow-sm px-6 ${className}`}
+            className={`bg-primary h-16 w-full flex-row justify-center items-center rounded-lg px-6 ${className}`}
             accessibilityHint={accessibilityHint}
             accessibilityLabel={accessibilityLabel}
             accessibilityRole="button"
+            style={{ boxShadow: '0 4px 0 #2889e3ff' }}
         >
             <Text className="font-bold text-lg text-white">{text}</Text>
             {next && (

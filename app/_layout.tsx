@@ -47,7 +47,6 @@ export default function RootLayout() {
                 databaseName="userDatabase.db"
                 onInit={async (db) => {
                     await db.execAsync(`
-
                         CREATE TABLE IF NOT EXISTS users (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             native_lang TEXT,
@@ -60,7 +59,8 @@ export default function RootLayout() {
                             last_fetched DATETIME,
                             tutorial_completed BOOLEAN DEFAULT 0,
                             access_level TEXT DEFAULT 'free',
-                            words_total INTEGER DEFAULT 0
+                            words_total INTEGER DEFAULT 0,
+                            muted BOOLEAN DEFAULT 0
                         );
                         
                         CREATE TABLE IF NOT EXISTS difficulties (
@@ -108,6 +108,7 @@ export default function RootLayout() {
                             time_sent TEXT DEFAULT (datetime('now', 'localtime')),
                             favourite BOOLEAN DEFAULT 0,
                             learned BOOLEAN DEFAULT 0,
+                            hidden BOOLEAN DEFAULT 0,
                             FOREIGN KEY (user_id) REFERENCES users(id)
                         );
                         
