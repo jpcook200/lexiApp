@@ -25,7 +25,6 @@ const userWordsList = () => {
     const { colorScheme } = useColorScheme();
     const { getLearnedWords } = useDatabase();
     const { tts } = useTextToSpeech();
-    const [userWordsTotalState, setUserWordsTotalState] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
     
     //state
@@ -35,7 +34,7 @@ const userWordsList = () => {
         sortBy: 'dateAdded',
         favouritesOnly: false,
     });
-    const progressPercent = userWordsTotalState ? Math.min((learnedWords.length / userWordsTotalState) * 100, 100) : 0;
+    const progressPercent = user?.words_total ? Math.min((learnedWords.length / user?.words_total) * 100, 100) : 0;
     //functions
     const fetchLearnedWords = async (filters: FiltersType) => {
         try {
@@ -76,9 +75,8 @@ const userWordsList = () => {
     const handleGetWordsCount = async () => {
         try {
             const wordsCount = await getWordsCount(user!.learn_lang, user!.access_level === 'pro');
-            if (wordsCount !== userWordsTotalState) { 
+            if (wordsCount !== user?.words_total) { 
                 await setUserWordsTotal(wordsCount);
-                setUserWordsTotalState(wordsCount);
             }  
         } catch (error) {
             console.error('Error getting words count:', error);
@@ -88,9 +86,7 @@ const userWordsList = () => {
     const handleFocusEffect = async () => {
         if (!user) return;
         try {
-            setUserWordsTotalState(user.words_total);
             await fetchLearnedWords(filters);
-            await handleGetWordsCount();
         } catch (error) {
             console.error('Error fetching data on focus:', error);
         } finally {
@@ -100,6 +96,7 @@ const userWordsList = () => {
 
     useFocusEffect(
         useCallback(() => {
+            handleGetWordsCount();
             handleFocusEffect();
         }, [user])
     );
@@ -119,7 +116,7 @@ const userWordsList = () => {
                     </View>
                     <View>
                         <ThemedText variant='subtext'>{ t("total") }</ThemedText>
-                        <ThemedText className='text-2xl font-bold'>{userWordsTotalState}</ThemedText>
+                        <ThemedText className='text-2xl font-bold'>{user.words_total}</ThemedText>
                     </View>
                     <TouchableOpacity accessibilityLabel='Open Filters Menu' onPress={() => setModalVisible(!modalVisible)}>
                         <ThemedIcon name='Settings' size={24} />
