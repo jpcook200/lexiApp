@@ -136,7 +136,6 @@ const useGetWords = () => {
     };
 
     const handleGetWords = async (user: User) => {
-        if (!user) return [];
         try {
             
             const storedDailyWords = await getDailyWords();
@@ -149,7 +148,7 @@ const useGetWords = () => {
             const localDate = localDatetime.split('T')[0];
             const storedDate = user.last_fetched?.split(' ')[0] || null;
 
-            if (!connected) { 
+            if (!connected || !user) { 
                 return storedDailyWords.filter((word) => word.learned === 0 && word.hidden === 0);
             }
             const activeSubscriptions = await getActiveSubscriptions();

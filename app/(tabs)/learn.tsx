@@ -32,7 +32,7 @@ const learn = () => {
     const [lastWordLearned, setlastWordLearned] = useState<Word | null>(null);
     
     const { data = [], error, isPending, refetch } = useQuery({
-        queryKey: ['words', connected],
+        queryKey: ['words', connected, user],
         queryFn: () => handleGetWords(user!),
         enabled: !!user && connected,
         refetchOnWindowFocus: true,
