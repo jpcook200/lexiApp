@@ -45,7 +45,6 @@ const Index = () => {
 
     const loadInstallationId = async () => { 
         const id = await getInstallationId();
-        console.log("Installation ID:", id);
     }
 
     useEffect(() => {

@@ -64,7 +64,7 @@ const DifficultySelection = () => {
                 <ScrollView className='flex-1 bg-background-light dark:bg-background-dark border-t border-border-light dark:border-border-dark pt-4'>
                     <View className="flex-row flex-wrap px-4 gap-4 justify-center">
                         {levels.map((level, index) => (
-                            <Pressable disabled={ index > 2 } key={ level.code } onPress={() => setActiveLevel(level.code)} className={`${index > 2 && 'opacity-50'} shadow-sm w-36 h-36 border-2 ${activeLevel === level.code ? 'border-yellow-500' : 'border-border-light dark:border-border-dark'} rounded-2xl p-2 justify-center items-center ${activeLevel === level.code ? 'bg-orange-400' : 'bg-item-light dark:bg-item-dark'}`}>
+                            <Pressable disabled={ index > 2 } key={ level.code } onPress={() => setActiveLevel(level.code)} className={`${index > 2 && 'opacity-50'} shadow-sm w-36 h-36 border ${activeLevel === level.code ? 'border-yellow-500' : 'border-border-light dark:border-border-dark'} rounded-2xl p-2 justify-center items-center ${activeLevel === level.code ? 'bg-orange-400' : 'bg-item-light dark:bg-item-dark'}`}>
                                 <Text className='text-2xl w-full text-center uppercase font-bold text-primary'>{t(level.code)}</Text>
                                 <ThemedText className='text-sm font-medium font-bold text-center'>{t(level.label.replace(' ', '_').toLowerCase())}</ThemedText>
                             </Pressable>

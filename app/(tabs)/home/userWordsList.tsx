@@ -14,7 +14,7 @@ import { Heart } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const userWordsList = () => {
@@ -22,10 +22,11 @@ const userWordsList = () => {
     const { t } = useTranslation();
     const { user } = useUserStore();
     const { toggleFavourite, setUserWordsTotal } = useDatabase();
-    const { colorScheme } = useColorScheme(); // "light" | "dark"
+    const { colorScheme } = useColorScheme();
     const { getLearnedWords } = useDatabase();
     const { tts } = useTextToSpeech();
-    const [ userWordsTotalState, setUserWordsTotalState ] = useState(0);
+    const [userWordsTotalState, setUserWordsTotalState] = useState<number | null>(null);
+    const [loading, setLoading] = useState(true);
     
     //state
     const [learnedWords, setLearnedWords] = useState<Word[]>([]);
@@ -34,7 +35,7 @@ const userWordsList = () => {
         sortBy: 'dateAdded',
         favouritesOnly: false,
     });
-    const progressPercent = Math.min((learnedWords.length / userWordsTotalState) * 100, 100);
+    const progressPercent = userWordsTotalState ? Math.min((learnedWords.length / userWordsTotalState) * 100, 100) : 0;
     //functions
     const fetchLearnedWords = async (filters: FiltersType) => {
         try {
@@ -73,29 +74,45 @@ const userWordsList = () => {
     }
 
     const handleGetWordsCount = async () => {
-        if(!user) return;
         try {
             const wordsCount = await getWordsCount(user!.learn_lang, user!.access_level === 'pro');
-            await setUserWordsTotal(wordsCount);
-            setUserWordsTotalState(wordsCount);
-        }catch (error) {
+            if (wordsCount !== userWordsTotalState) { 
+                await setUserWordsTotal(wordsCount);
+                setUserWordsTotalState(wordsCount);
+            }  
+        } catch (error) {
             console.error('Error getting words count:', error);
         }
     }
 
+    const handleFocusEffect = async () => {
+        if (!user) return;
+        try {
+            setUserWordsTotalState(user.words_total);
+            await fetchLearnedWords(filters);
+            await handleGetWordsCount();
+        } catch (error) {
+            console.error('Error fetching data on focus:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useFocusEffect(
         useCallback(() => {
-            fetchLearnedWords(filters);
-            handleGetWordsCount()
+            handleFocusEffect();
         }, [user])
     );
+
+    if(!user || loading) {
+        return <ActivityIndicator className='flex-1 justify-center items-center bg-background-light dark:bg-background-dark' size={'small'}  />;
+    }
     
     return (
         <SafeAreaView edges={['top']} className='h-full bg-item-light dark:bg-item-dark'>
             <View className='px-4 border-b-2 border-border-light dark:border-border-dark pb-4 '>
                 <BackButton/>
-                <ThemedText className='text-4xl font-bold my-4'>{ t("your_vocabulary") }</ThemedText>
-                <View className='flex-row justify-between items-center mb-2'>
+                <View className='flex-row justify-between items-center my-2'>
                     <View>
                         <ThemedText variant='subtext'>{ t("learned") }</ThemedText>
                         <ThemedText className='text-2xl font-bold'>{learnedWords.length}</ThemedText>
@@ -152,7 +169,7 @@ const userWordsList = () => {
             <View className="mt-auto w-full px-4 py-4 bg-background-light dark:bg-background-dark border-t border-border-light dark:border-border-dark justify-start">
                 <MainButton
                     text={t("practice")}
-                    onPress={() => router.push('/(tabs)/home/practice')}
+                    onPress={() => router.push('/(tabs)/home/Practice')}
                     accessibilityLabel='Start Practicing Words'
                     accessibilityHint='Start a practice session with your learned words'
                 />

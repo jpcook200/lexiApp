@@ -47,11 +47,10 @@ const Streak = ({ displayOnly }: {displayOnly: boolean}) => {
     useFocusEffect(
         useCallback(() => {
             let isActive = true;
-
             const loadStreakData = async () => {
+                await initStreakRecord()
                 const results = await getWeeklyStreak();
                 const streakCountsResults = await getStreakCount();
-
                 if (!isActive) return;
 
                 setStreakCounts({
@@ -65,7 +64,7 @@ const Streak = ({ displayOnly }: {displayOnly: boolean}) => {
                 const normalizedResults = normalizeStreak(results);
                 setStreakData(normalizedResults);
             };
-            initStreakRecord()
+            
             loadStreakData();
 
             return () => {
@@ -86,7 +85,6 @@ const Streak = ({ displayOnly }: {displayOnly: boolean}) => {
                                         <View className='absolute bg-primary w-[92%] h-[92%] left-0 top-0 rounded-full'></View>
                                         <Check color='#FFFFFF' size={20} strokeWidth={3} />
                                     </View>
-                                    
                             ) : (
                                 <View className={`w-10 h-10 rounded-full border-4 ${day.date === today ? 'border-primary' : 'border-background-light dark:border-background-dark'}`}></View>    
                             ) }

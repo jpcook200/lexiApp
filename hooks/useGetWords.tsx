@@ -84,7 +84,6 @@ const useGetWords = () => {
 
         if (unhiddenWords.length < user.words_per_day!) {
             const wordsNeeded = user.words_per_day! - unhiddenWords.length;
-            console.log("Needing to unhide words:", wordsNeeded);
             await toggleRandomDailyWords(wordsNeeded, 'show');
         }
 
@@ -109,7 +108,6 @@ const useGetWords = () => {
             }
         
             const newData = await saveDailyWords(newWords);
-            console.log(newData.length, "----- new data length after fetching more words");
             const filteredResults = newData.filter((word) => word.learned === 0  && word.hidden === 0)
 
             setActiveWords(filteredResults);

@@ -1,7 +1,6 @@
 import CardStackSwiper from '@/components/CardStackSwiper'
-import LanguageIndicator from '@/components/LanguageIndicator'
+import CardSwitcherButton from '@/components/CardSwitcherButton'
 import LearningTracker from '@/components/LearningTracker'
-import Logo from '@/components/Logo'
 import ThemedIcon from '@/components/ThemedIcon'
 import ThemedText from '@/components/ThemedText'
 import Tutorial from '@/components/Tutorial'
@@ -12,6 +11,7 @@ import { Word } from '@/types/types'
 import { useFocusEffect } from '@react-navigation/native'
 import { useQuery } from '@tanstack/react-query'
 import { useSQLiteContext } from 'expo-sqlite'
+import { DateTime } from 'luxon'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, TouchableOpacity, View } from 'react-native'
@@ -24,8 +24,8 @@ const learn = () => {
     const { connected } = useIAP();
     const db = useSQLiteContext();
     const { user, loading, fetchUser} = useUserStore();
-    const { toggleLearned, initStreakRecord, removeFromLearnedWords, updateStreakCount, updateStreakRecord } = useDatabase();
-    
+    const { toggleLearned, initStreakRecord, removeFromLearnedWords, switchCardFace } = useDatabase();
+    const [switchCardFaceState, setSwitchCardFaceState] = useState(false);
     const [currentStreak, setCurrentStreak] = useState <boolean>(false);
     const [showTutorial, setShowTutorial] = useState(false);
     const [isInitialised, setIsInitialised] = useState(false)
@@ -44,7 +44,12 @@ const learn = () => {
         },
     });
 
-    const handleUndoLearned = async () => { 
+    const handleUndoLearned = async () => {
+        const today = DateTime.now().toISODate();
+        const lastWordLearnedDate = lastWordLearned?.time_sent?.slice(0, 10)
+        if (lastWordLearnedDate !== today) {
+            return;
+        }
         if (lastWordLearned != null && user) {
             await toggleLearned(lastWordLearned.word_id);
             await removeFromLearnedWords(lastWordLearned.word_id);
@@ -63,7 +68,12 @@ const learn = () => {
     useFocusEffect(
         useCallback(() => {
             const handleFocus = async () => { 
+                const today = DateTime.now().toISODate();
                 setIsInitialised(false)
+                const lastWordLearnedDate = lastWordLearned?.time_sent?.slice(0, 10)
+                if (lastWordLearnedDate !== today) {
+                    setlastWordLearned(null);
+                }
                 await fetchUser(db);
                 await refetch();
                 await initStreakRecord();
@@ -82,7 +92,6 @@ const learn = () => {
 
     useEffect(() => {
         if (user) { 
-            console.log(user)
             setShowTutorial(user.tutorial_completed === 0)
         }
     }, [user]);
@@ -100,21 +109,24 @@ const learn = () => {
             {showTutorial && <Tutorial
                 setShowTutorial={setShowTutorial}
             />}
-            <SafeAreaView className='flex-1 bg-background-light dark:bg-background-dark px-4 pb-0'>
-                <View className=" flex-row justify-between items-center">
-                    <Logo/>
-                    <LanguageIndicator
-                        language={user.learn_lang}
+            <SafeAreaView edges={["top"]} className='flex-1 bg-background-light dark:bg-background-dark'>
+                <View className=" flex-row justify-between items-center mt-1 mb-4 px-4 gap-4">
+                    <TouchableOpacity disabled={!lastWordLearned} accessibilityLabel='Undo learning previous word' onPress={ () => handleUndoLearned() } className={`${!lastWordLearned && 'opacity-50'} flex-row items-center self-start rounded-full border border-border-light dark:border-border-dark bg-item-light dark:bg-item-dark pl-3 pr-4 h-10`}>
+                        <ThemedIcon name='Undo' size={20} />
+                        <ThemedText className='text-md ml-2 font-bold'>{t("undo")}</ThemedText>
+                    </TouchableOpacity>
+                 
+                    <CardSwitcherButton
+                        learnLang={user.learn_lang}
+                        nativeLang={user.native_lang}
+                        setSwitchCardFaceState={setSwitchCardFaceState}
+                        switchFaceState={switchCardFaceState}
                     />
                 </View>
                 {isPending || !isInitialised ? (
                     <ActivityIndicator size={"small"} className='flex-1 justify-center items-center'/>
                 ) : (
                     <>
-                        <TouchableOpacity disabled={!lastWordLearned} accessibilityLabel='Undo learning pervious word' onPress={ () => handleUndoLearned() } className={`${!lastWordLearned && 'opacity-50'} my-3 flex-row items-center self-start rounded-full border border-border-light dark:border-border-dark bg-item-light dark:bg-item-dark pl-3 pr-4 py-1`}>
-                            <ThemedIcon name='Undo' size={ 20 } />
-                            <ThemedText className='text-md ml-2 font-bold'>{t("undo")}</ThemedText>
-                        </TouchableOpacity>
                         <CardStackSwiper
                             activeWords={activeWords}
                             setActiveWords={setActiveWords}
@@ -124,17 +136,17 @@ const learn = () => {
                             user={user}
                             setCurrentStreak={setCurrentStreak}
                             setlastWordLearned={setlastWordLearned}
-                            lastWordLearned={lastWordLearned}    
-                        />
-                            
-                        <LearningTracker
-                            progress={progressToday || 0}
-                            goal={user?.words_per_day || 0}
-                            setCurrentStreak={setCurrentStreak}
-                            currentStreak={currentStreak || false}
+                            lastWordLearned={lastWordLearned}
+                            switchFace={switchCardFaceState}    
                         />
                     </>
                 )}
+                <LearningTracker
+                    progress={progressToday || 0}
+                    goal={user?.words_per_day || 0}
+                    setCurrentStreak={setCurrentStreak}
+                    currentStreak={currentStreak || false}
+                />
                 
             </SafeAreaView>
         </>

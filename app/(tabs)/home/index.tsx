@@ -47,7 +47,6 @@ export default function HomeScreen() {
     useFocusEffect(
         useCallback(() => {
             getLearnedWords();
-
         }, [user])
     );
 

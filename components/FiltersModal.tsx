@@ -42,7 +42,7 @@ const FiltersModal = ({ modalVisible, setModalVisible, filters, setFilters, appl
 
                 <View className="flex-col mb-4">
                     <ThemedText className="text-lg font-medium mb-2">{t("sort_by")}</ThemedText>
-                    <View className="border border-gray-300 rounded-lg overflow-hidden">
+                    <View className="border border-border-light dark:border-border-dark rounded-lg overflow-hidden">
                     <Picker
                         selectedValue={filters.sortBy}
                         onValueChange={(value) =>

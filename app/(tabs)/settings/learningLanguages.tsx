@@ -36,7 +36,6 @@ const LearningLanguages = () => {
         const fetchStreakCounts = async () => {
             try {
                 const streakCounts = await getAllStreakCounts();
-                console.log('Streak Counts:', streakCounts);
                 setStreakCounts(streakCounts);
 
             } catch (error) {

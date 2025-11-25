@@ -28,7 +28,7 @@ export default function ThemedView({ children, variant = 'primary', className = 
     }
 
     return (
-        <View className={`${bgClass} ${className} ${(variant === 'shaded' || variant === 'item') &&  'border-2'}`} {...props}>
+        <View className={`${bgClass} ${className}`} {...props}>
             {variant === 'shaded' && <View className='absolute bg-item-light dark:bg-item-dark w-full h-full rounded-br-full flex-1 right-0 left-0'></View>}
             {children}
         </View>

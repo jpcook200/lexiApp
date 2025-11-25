@@ -6,7 +6,6 @@ import { useUserStore } from '@/hooks/useGetUser';
 import i18next from '@/services/i18next';
 import { router, useLocalSearchParams } from 'expo-router';
 import { CircleAlert } from 'lucide-react-native';
-import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TouchableOpacity, View } from 'react-native';
 
@@ -32,11 +31,7 @@ const changeLangConfirm = () => {
             await resetProgressByLanguagePair(user.native_lang, user.learn_lang);
         }
     }
-
-    useEffect(() => {
-        console.log(type)
-    }, [params]);
-
+    
     return (
         <ThemedView className="flex-1 gap-4 p-6 justify-between">
             <View>

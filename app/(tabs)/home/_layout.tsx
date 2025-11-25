@@ -16,14 +16,22 @@ export default function SettingsLayout() {
         }}>
             <Stack.Screen
                 name="index"
-                options={{ title: 'Settings' }}
+                options={{ title: 'Home' }}
             />
             <Stack.Screen
                 name="userWordsList"
                 options={{
                     presentation: 'card',
                     headerShown: false,
-                    title: 'Native Language',
+                    title: 'Your Vocabulary',
+                }}
+            />
+            <Stack.Screen
+                name="Practice"
+                options={{
+                    presentation: 'card',
+                    headerShown: false,
+                    title: 'Practice',
                 }}
             />
 

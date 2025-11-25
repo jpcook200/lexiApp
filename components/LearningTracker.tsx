@@ -2,6 +2,7 @@ import useDatabase from '@/db/useDatabase';
 import { useFocusEffect } from 'expo-router';
 import { Check, Flame, Hourglass } from 'lucide-react-native';
 import { DateTime } from 'luxon';
+import { useColorScheme } from 'nativewind';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
@@ -20,6 +21,7 @@ const LearningTracker = ({ progress, goal, setCurrentStreak, currentStreak }: Le
     const { t } = useTranslation();
     const { getWeeklyStreak } = useDatabase()
     const progressPercent = Math.min((progress / goal) * 100, 100);
+    const { colorScheme } = useColorScheme();
 
     const getStreak = async () => {
         const result = await getWeeklyStreak();
@@ -47,22 +49,19 @@ const LearningTracker = ({ progress, goal, setCurrentStreak, currentStreak }: Le
 
     
     return (
-        <ThemedView variant='shaded' className='mt-auto overflow-hidden border border-border-light dark:border-border-dark rounded-2xl'>    
+        <ThemedView variant='item' className='mt-auto overflow-hidden border-t border-border-light dark:border-border-dark'>    
             <View className='p-4'>
-                <View className='flex-row justify-between items-center'>
+                <View className='flex-row justify-between items-center mb-2'>
                     <ThemedText className='text-lg font-bold sm:text-md'>{ t("progress_today") }</ThemedText>
-                    <ThemedText className='text-xl font-bold mt-1 sm:text-md'>{Math.min(progress, goal)}/{goal}</ThemedText>
+                    <ThemedText className='text-xl font-bold sm:text-md'>{Math.min(progress, goal)}/{goal}</ThemedText>
                 </View>
                 <ProgressBar progressPercent={progressPercent} />
-                <View>
-                    {progressPercent >= 100 && <ThemedText className='text-right mt-4 sm:mt-2 sm:text-sm font-bold text-green-500'>{ t("goal_achieved") } 🎉</ThemedText>}
-                </View>
                 <View className='mt-4 sm:mt-2 flex-row justify-start items-center'>
                     <Flame size={20} color='#fc6a03' strokeWidth={3} />
                     <ThemedText className='ml-2 sm:text-sm' variant='subtext'>{t("daily_streak")}</ThemedText>
                     <View className='ml-auto'>
                         {currentStreak === true ? (
-                            <Check size={16} color='green' strokeWidth={5} />  
+                            <Check size={18} color='green' strokeWidth={5} />  
                         ) : (
                             <Hourglass size={14} color='grey' strokeWidth={5} />   
                         ) }

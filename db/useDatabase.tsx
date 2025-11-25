@@ -92,9 +92,9 @@ const useDatabase = () => {
                 `INSERT into learned_words (
                     user_id, word_id, native_word, learning_word, learning_pronunciation,
                     native_pronunciation, part_of_speech, native_definition,
-                    learning_definition, learning_difficulty, learning_sentence, learning_gender,
+                    learning_definition, learning_difficulty, learning_sentence, native_sentence, learning_gender,
                     favourite, learn_lang, native_lang
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
                     1,
                     word.word_id,
@@ -107,10 +107,11 @@ const useDatabase = () => {
                     word.learning_definition,
                     word.learning_difficulty,
                     word.learning_sentence,
+                    word.native_sentence,
                     word.learning_gender,
                     word.favourite,
                     word.learn_lang,
-                    word.native_lang
+                    word.native_lang,
                 ]
             )
 
@@ -194,7 +195,6 @@ const useDatabase = () => {
             }
             // Filter by difficulty if provided and not "all"
             if (filters.difficulty && filters.difficulty.toLowerCase() !== 'all') {
-                console.log('Applying difficulty filter:', filters.difficulty);
                 query += ` AND learning_difficulty = ?`;
                 params.push(filters.difficulty.toLowerCase());
             }
@@ -377,7 +377,6 @@ const useDatabase = () => {
                 [1, userResults.learn_lang, userResults.native_lang]
             );
             
-            console.log('All daily words deleted successfully.');
         } catch (error) {
             console.error('Error deleting all from daily words:', error);
             throw error;
@@ -393,7 +392,7 @@ const useDatabase = () => {
 
             const insertPromises = words.map((word) => {
                 return db.runAsync(
-                    `INSERT OR IGNORE INTO daily_words (word_id, user_id, learn_lang, native_lang, native_word, learning_word, learning_pronunciation, native_pronunciation, part_of_speech, native_definition, learning_definition, learning_difficulty, learning_sentence, learning_gender) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    `INSERT OR IGNORE INTO daily_words (word_id, user_id, learn_lang, native_lang, native_word, learning_word, learning_pronunciation, native_pronunciation, part_of_speech, native_definition, learning_definition, learning_difficulty, learning_sentence, learning_gender, native_sentence) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         word.id,
                         1,
@@ -408,14 +407,14 @@ const useDatabase = () => {
                         word.learning_definition,
                         word.learning_difficulty,
                         word.learning_sentence,
-                        word.learning_gender
+                        word.learning_gender,
+                        word.native_sentence
                     ]
                 );
             });
             await Promise.all(insertPromises);
 
             const newData = await getDailyWords();
-            console.log('Daily words saved successfully. Total words saved:', newData.length);
             
             return newData;
         } catch (error) {
@@ -458,7 +457,6 @@ const useDatabase = () => {
         const currentIndex = difficulties.indexOf(difficultyLevel.toLowerCase())
         
         if (currentIndex === -1 || currentIndex === difficulties.length - 1 || currentIndex === 0) {
-            console.log('Difficulty level is already at maximum or invalid.');
             return;
         }
         const newDifficultyLevel = difficulties[currentIndex - 1];
@@ -526,11 +524,15 @@ const useDatabase = () => {
             const userLangPair = `${userResults.native_lang}-${userResults.learn_lang}`;
 
             const results = await db.getFirstAsync<CompletedType>(
-                `SELECT completed FROM streak 
+                `SELECT completed, reset_today FROM streak 
                 WHERE user_id = ? AND date = ? AND lang_pair_code = ? 
                 ORDER BY date DESC`,
                 [1, today, userLangPair]
             );
+
+            if(!results) {
+                throw new Error('Streak record for today not found');
+            }
 
             switch (instruction) {
                 case 'increment':
@@ -541,18 +543,35 @@ const useDatabase = () => {
                             WHERE lang_pair_code = ?`,
                             [userLangPair]
                         );
+                        const getNewStreakCount = await db.getFirstAsync<{ current: number }>(
+                            `SELECT * FROM streak_counts WHERE lang_pair_code = ?`,
+                            [userLangPair]
+                        );
                     }
                     break;
 
                 case 'reset':
-                    await db.runAsync(
-                        `UPDATE streak_counts 
-                        SET current = 0 
-                        WHERE lang_pair_code = ?`,
-                        [userLangPair]
-                    );
+                    if(results?.reset_today === 0) {
+                        await db.runAsync(
+                            `UPDATE streak_counts
+                            SET 
+                                longest = CASE 
+                                    WHEN current > longest THEN current 
+                                    ELSE longest 
+                                END,
+                                current = 0
+                            WHERE lang_pair_code = ?`,
+                            [userLangPair]
+                        );
+                        await db.runAsync(
+                            `UPDATE streak 
+                            SET reset_today = 1
+                            WHERE user_id = ? AND date = ? AND lang_pair_code = ?`,
+                            [1, today, userLangPair]
+                        );
+                    }
                     break;
-
+                
                 case 'decrement':
                     if (results?.completed === 1) {
                         await db.runAsync(
@@ -565,7 +584,6 @@ const useDatabase = () => {
                     break;
 
                 default:
-                    console.log('Invalid instruction for updating streak count.');
                     return 0;
             }
 
@@ -632,8 +650,6 @@ const useDatabase = () => {
                 [1, userLangPair, 0, 0]
             );
 
-            console.log('Streak record initialized successfully:', date);
-
         } catch (error) {
             console.error('Error inserting streak record:', error);
             throw error;
@@ -660,14 +676,12 @@ const useDatabase = () => {
                 [completed, 1, date, userLangPair]
             );
 
-            console.log('Streak record updated successfully for date:', date);
-
             return completed === 1;
         } catch (error) {
             console.error('Error updating streak record:', error);
             return false;
         }
-        };
+    };
 
 
     const getWeeklyStreak = async () => {
@@ -684,7 +698,7 @@ const useDatabase = () => {
                 `SELECT * FROM streak WHERE user_id = ? AND lang_pair_code = ? AND date BETWEEN ? AND ? ORDER BY date ASC`,
                 [1, userLangPair, sevenDaysAgo, today]
             );
-            console.log(results)
+
             return results;
         } catch (error) {
             
@@ -779,7 +793,7 @@ const useDatabase = () => {
         }
     }
 
-    const getUserLearnedWordsCount = async () =>{
+    const getUserLearnedWordsCount = async (): Promise<number> =>{
         try {
             const userResults = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = ?', [1]);
             if (!userResults) {
@@ -798,49 +812,6 @@ const useDatabase = () => {
             return userLearnedWordsCount.count;
         } catch (error) {
             console.error('Error getting user learned words count:', error);
-            throw error;
-        }
-    }
-
-    const setUserAccessLevel = async (accessLevel: string) => {
-        try {
-            const userResults = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = ?', [1]);
-            if (!userResults) {
-                throw new Error('User not found');
-            }
-
-            await db.runAsync(
-                `UPDATE users SET access_level = ? WHERE id = ?`,
-                [accessLevel, 1]
-            );
-            
-            if (userResults.words_per_day > freeWordsAllowance) {
-                const userLearnedWordsCount = await getUserLearnedWordsCount();
-
-                if (!userLearnedWordsCount || userLearnedWordsCount === undefined) { 
-                    throw new Error('Could not retrieve learned words count');
-                }
-
-                if (userLearnedWordsCount >= freeWordsAllowance) { 
-                    await updateStreakCount('increment');
-                    await updateStreakRecord(1);
-                }
-                await setWordsPerDay(freeWordsAllowance);
-            }
-        } catch (error) {
-            console.error('Error setting user access level:', error);
-            throw error;
-        }
-    }
-
-    const setUserWordsTotal = async (totalWords: number) => {
-        try {
-            await db.runAsync(
-                `UPDATE users SET words_total = ? WHERE id = ?`,
-                [totalWords, 1]
-            );
-        } catch (error) {
-            console.error('Error setting user total words:', error);
             throw error;
         }
     }
@@ -885,7 +856,69 @@ const useDatabase = () => {
         }
     }
 
-   
+    const setUserAccessLevel = async (accessLevel: string) => {
+        try {
+            const userResults = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = ?', [1]);
+            if (!userResults) {
+                throw new Error('User not found');
+            }
+
+            await db.runAsync(
+                `UPDATE users SET access_level = ? WHERE id = ?`,
+                [accessLevel, 1]
+            );
+            
+            if ((userResults.words_per_day > freeWordsAllowance) && accessLevel === 'free') {
+                const userLearnedWordsCount = await getUserLearnedWordsCount();
+                if (userLearnedWordsCount === undefined) { 
+                    throw new Error('Could not retrieve learned words count');
+                }
+
+                const storedDailyWords = await getDailyWords();
+
+                if (userLearnedWordsCount >= freeWordsAllowance) { 
+                    await updateStreakCount('increment');
+                    await updateStreakRecord(1);
+                }
+                await setWordsPerDay(freeWordsAllowance);
+                
+                const wordsToHide = storedDailyWords.length - freeWordsAllowance;
+                
+                if (wordsToHide > 0) {
+                    await toggleRandomDailyWords(wordsToHide, 'hide');
+                }
+            }
+        } catch (error) {
+            console.error('Error setting user access level:', error);
+            throw error;
+        }
+    }
+
+    const setUserWordsTotal = async (totalWords: number) => {
+        try {
+            await db.runAsync(
+                `UPDATE users SET words_total = ? WHERE id = ?`,
+                [totalWords, 1]
+            );
+        } catch (error) {
+            console.error('Error setting user total words:', error);
+            throw error;
+        }
+    }
+
+    const switchCardFace = async () => { 
+        try {
+            await db.runAsync(
+                `UPDATE users SET switch_card_face = CASE switch_card_face WHEN 0 THEN 1 ELSE 0 END WHERE id = ?`,
+                [1]
+            );
+
+        } catch (error) {
+            console.error('Error switching card face:', error);
+            throw error;
+        }
+    }
+
     return {
         setUserWordsTotal,
         setUserAccessLevel,
@@ -922,6 +955,7 @@ const useDatabase = () => {
         getUserLearnedWordsCount,
         toggleRandomDailyWords,
         toggleMuted,
+        switchCardFace  
     };
 
 }

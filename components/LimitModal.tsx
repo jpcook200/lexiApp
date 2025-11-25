@@ -43,7 +43,7 @@ const LimitModal = ({ modalVisible, setModalVisible, filters, setFilters, getPra
                         <ThemedText className="text-lg font-medium">{t("limit")}</ThemedText>
 
                         <View
-                            className="border-2 border-border-light dark:border-border-dark rounded-lg mt-2 overflow-hidden bg-item-light dark:bg-item-dark"
+                            className="border border-border-light dark:border-border-dark rounded-lg mt-2 overflow-hidden bg-item-light dark:bg-item-dark"
                             style={{ height: 150 }}
                         >
                             <Picker

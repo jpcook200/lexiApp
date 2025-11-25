@@ -25,11 +25,13 @@ type CardStackCardProps = {
     setCurrentStreak: React.Dispatch<React.SetStateAction<boolean>>;
     lastWordLearned: Word | null;
     setlastWordLearned: React.Dispatch<React.SetStateAction<Word | null>>;
+    switchFace: boolean;
 };
 
-const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWords, activeWords = [], updateProgress, practice = false, progress, setCurrentStreak, lastWordLearned, setlastWordLearned}: CardStackCardProps) => {
+const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWords, activeWords = [], updateProgress, practice = false, progress, setCurrentStreak, lastWordLearned, setlastWordLearned, switchFace}: CardStackCardProps) => {
     const { t } = useTranslation();
     const player = useAudioPlayer(require("@/assets/sounds/cardswipe.mp3"));
+    const learnedPlayer = useAudioPlayer(require("@/assets/sounds/learned.mp3"));
     const { setSelectedWordId } = useUserStore();
     const { toggleLearned, insertIntoLearnedWords, updateStreakCount, updateStreakRecord} = useDatabase();
     const screenWidth = Dimensions.get('window').width;
@@ -50,14 +52,13 @@ const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWo
             if (activeWords.length <= 1) {
                 await updateStreakCount("increment");
                 const newValue = await updateStreakRecord(1);
-                console.log('New streak value after marking learned:', newValue);
                 setCurrentStreak(newValue);
             }
         } catch (error) {
             console.error('Error marking word as learned:', error);
         }
-    };
-
+    }
+    
     const loopCards = (index: number) => {
         if (!setActiveWords) return;
         setSelectedWordId(activeWords[index + 1].word_id)
@@ -179,6 +180,7 @@ const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWo
                     setActiveWords={setActiveWords}
                     practice={practice}
                     user={user}
+                    switchFace={switchFace}
                 />
                 {!practice &&
                     <Animated.View style={[learnedAnimatedStyle]} className='absolute bottom-10 left-[50%] -translate-x-[50%] bg-green-400 rounded-md flex justify-center items-center overflow-hidden p-2 shadow-sm'>

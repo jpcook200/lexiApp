@@ -40,7 +40,7 @@ const DifficultyModal = ({ modalVisible, setModalVisible, filters, setFilters, g
                     <View className="flex-col mb-4">
                         <ThemedText className="text-lg font-medium">{t("proficiency_level")}</ThemedText>
                         
-                        <View className="border-2 border-border-light dark:border-border-dark rounded-lg mt-2 overflow-hidden bg-item-light dark:bg-item-dark">
+                        <View className="border border-border-light dark:border-border-dark rounded-lg mt-2 overflow-hidden bg-item-light dark:bg-item-dark">
                             <Picker
                                 dropdownIconColor="#888"
                                 style={{ height: 150 }}

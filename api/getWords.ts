@@ -14,7 +14,6 @@ type GetWordsResponse = {
 export const getWords = async ({ nativeLang, learningLang, difficulty = 'a1', limit, excludeIds, localDatetime, transactionId }: getWordsParams): Promise<GetWordsResponse> => {
     try {
         const installationId = await getInstallationId();
-        console.log('Fetching words with params:', { nativeLang, learningLang, difficulty, limit, excludeIdsLength: excludeIds.length, localDatetime, transactionId });
         const response = await fetch(`${apiUrl}/api/words/get-daily?nativeLang=${nativeLang}&learningLang=${learningLang}&difficulty=${difficulty || 'a1'}&limit=${limit}`, {
             method: 'POST',
             headers: {

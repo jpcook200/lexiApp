@@ -109,7 +109,6 @@ const Subscribe = () => {
     }
     try {
       setPurchaseLoading(true);
-      console.log('Requesting purchase for subscription ID:', subscriptionId);
       await requestPurchase({
         request: {
           ios: { sku: subscriptionId },
@@ -141,8 +140,8 @@ const Subscribe = () => {
       <View className='absolute -top-10 -left-60 h-[100%] aspect-[1/1] rounded-br-full bg-background-light dark:bg-background-dark'></View>
       <View className='flex-row items-center justify-between'>
         <BackButton />
-        <TouchableOpacity onPress={() => router.push('/(tabs)/home')} className='flex-row items-center self-start rounded-full border border-border-light dark:border-border-dark bg-item-light dark:bg-item-dark pl-3 pr-4 py-1'>
-          <ThemedText className='text-lg ml-2 font-bold'>{t("skip")}</ThemedText>
+        <TouchableOpacity onPress={() => router.push('/(tabs)/home')} className='flex-row items-center self-start rounded-full border border-border-light dark:border-border-dark bg-item-light dark:bg-item-dark pl-4 pr-3 h-9'>
+          <ThemedText className='text-lg mr-2 font-bold'>{t("skip")}</ThemedText>
           <ThemedIcon name='ArrowRight' size={20} />
         </TouchableOpacity>
       </View>

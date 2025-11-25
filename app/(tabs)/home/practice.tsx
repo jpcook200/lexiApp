@@ -1,5 +1,6 @@
 import BackButton from '@/components/BackButton'
 import CardStackSwiper from '@/components/CardStackSwiper'
+import CardSwitcherButton from '@/components/CardSwitcherButton'
 import DatePickerModal from '@/components/DatePickerModal'
 import DifficultyModal from '@/components/DifficultyModal'
 import LimitModal from '@/components/LimitModal'
@@ -10,16 +11,17 @@ import { useUserStore } from '@/hooks/useGetUser'
 import { PracticeFiltersType, Word } from '@/types/types'
 import { useFocusEffect } from 'expo-router'
 import { useSQLiteContext } from 'expo-sqlite'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-const practice = () => {
+const Practice = () => {
     const { t } = useTranslation();
     const { user, fetchUser } = useUserStore();
     const { getPracticeWords } = useDatabase();
     const db = useSQLiteContext()
+    const [switchCardFaceState, setSwitchCardFaceState] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [filters, setFilters] = useState<PracticeFiltersType>({
         date: null,
@@ -53,19 +55,21 @@ const practice = () => {
         }, [])
     );
 
-    useEffect(() => {
-        console.log(filters)
-    }, [filters]);
-
     if (!user) { 
         return null;
     }
     
     return (
         <>
-            <SafeAreaView className='flex-1 bg-background-light dark:bg-background-dark px-4'>
-                <View className="mb-4">
+            <SafeAreaView edges={["top"]} className='flex-1 bg-background-light dark:bg-background-dark'>
+                <View className="mt-1 mb-4 flex-row items-center justify-between px-4">
                     <BackButton />
+                    <CardSwitcherButton
+                        learnLang={user.learn_lang}
+                        nativeLang={user.native_lang}
+                        setSwitchCardFaceState={setSwitchCardFaceState}
+                        switchFaceState={switchCardFaceState}
+                    />
                 </View>
                 {activeWords.length === 0 ? (
                     <View className='flex-1 justify-center items-center mt-0 px-4'>
@@ -80,6 +84,7 @@ const practice = () => {
                         setlastWordLearned={() => { }}
                         setCurrentStreak={() => { }}
                         lastWordLearned={null}
+                        switchFace={switchCardFaceState}
                     />
                 )}
                 <PracticeSettings
@@ -119,4 +124,4 @@ const practice = () => {
     )
 }
 
-export default practice
+export default Practice

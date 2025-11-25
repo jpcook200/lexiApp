@@ -60,7 +60,8 @@ export default function RootLayout() {
                             tutorial_completed BOOLEAN DEFAULT 0,
                             access_level TEXT DEFAULT 'free',
                             words_total INTEGER DEFAULT 0,
-                            muted BOOLEAN DEFAULT 0
+                            muted BOOLEAN DEFAULT 0,
+                            switch_card_face BOOLEAN DEFAULT 0
                         );
                         
                         CREATE TABLE IF NOT EXISTS difficulties (
@@ -83,6 +84,7 @@ export default function RootLayout() {
                             learning_definition TEXT,
                             learning_difficulty TEXT,
                             learning_sentence TEXT,
+                            native_sentence TEXT,
                             learning_gender TEXT,
                             learned_at DATETIME DEFAULT (datetime('now', 'localtime')),
                             favourite BOOLEAN DEFAULT 0,
@@ -104,6 +106,7 @@ export default function RootLayout() {
                             learning_definition TEXT,
                             learning_difficulty TEXT,
                             learning_sentence TEXT,
+                            native_sentence TEXT,
                             learning_gender TEXT,
                             time_sent TEXT DEFAULT (datetime('now', 'localtime')),
                             favourite BOOLEAN DEFAULT 0,
@@ -118,6 +121,7 @@ export default function RootLayout() {
                             date TEXT,
                             lang_pair_code TEXT,
                             completed BOOLEAN DEFAULT 0,
+                            reset_today BOOLEAN DEFAULT 0,
                             UNIQUE(user_id, date, lang_pair_code),
                             FOREIGN KEY (user_id) REFERENCES users(id)
                         );
@@ -125,7 +129,7 @@ export default function RootLayout() {
                         CREATE TABLE IF NOT EXISTS streak_counts (
                             user_id INTEGER,
                             lang_pair_code TEXT UNIQUE,
-                            current INT,
+                            current INT default 0,
                             longest INT,
                             FOREIGN KEY (user_id) REFERENCES users(id)
                         );

@@ -25,15 +25,13 @@ const WordsPerDay = () => {
         const userProgress = await getUserLearnedWordsCount();
         const storedWords = await getDailyWords();
         const currentDailyWords = storedWords.length;
-        console.log('User progress:', userProgress);
-        console.log('Current daily words:', currentDailyWords);
+
         try {
             if (user.access_level === 'free' && selectedNumber > freeWordsAllowance) { 
                 return router.push('../../(onboarding)/Subscribe');
             }
             if (selectedNumber < currentDailyWords) { 
                 const wordsToRemove = currentDailyWords - selectedNumber;
-                console.log("needing to remove words:", wordsToRemove);
                 await toggleRandomDailyWords(wordsToRemove, 'hide');
             }
             
@@ -72,7 +70,7 @@ const WordsPerDay = () => {
                                     {item}
                                 </ThemedText>
                                 {user && user.access_level === 'free' && item > freeWordsAllowance && 
-                                    <Text className="absolute right-4 border border-primary text-primary rounded-full font-bold px-3 py-0.5 text-sm">Pro</Text>
+                                    <Text className="absolute right-4 border border-primary text-white bg-primary rounded-full font-bold px-3 py-0.5 text-sm shadow-sm">Pro</Text>
                                 }
                             </View>
                             

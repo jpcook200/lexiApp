@@ -24,12 +24,13 @@ const LearningLanguages = () => {
     
     return (
         <ThemedView className="flex-1 p-4">
-            { levels.map((level) => (
+            {levels.map((level) => (
                 <TouchableOpacity
-                    key={ level.code }
+                    key={level.code}
                     onPress={() => handleSelectLevel(level.code)}
-                    className="p-6 border-b border-border-light dark:border-border-dark"
+                    className={`p-6 border-b border-border-light dark:border-border-dark ${level.code === 'c1' || level.code === 'c2' || level.code === 'b2' ? 'opacity-50' : ''}`}
                     accessibilityLabel={`Select Difficulty Level ${level.code}`}
+                    disabled={ level.code === 'c1' || level.code === 'c2' || level.code === 'b2' }
                 >
                     <ThemedText className="text-lg font-medium">{t(level.label.replace(' ', '_').toLowerCase())} ({t(level.code)})</ThemedText>
                 </TouchableOpacity>

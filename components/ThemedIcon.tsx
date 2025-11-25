@@ -4,12 +4,13 @@ import { View, ViewProps } from 'react-native';
 
 interface ThemedIconProps extends ViewProps {
   name: keyof typeof LucideIcons | string;
-  size?: number;
+    size?: number;
+    strokeWidth?: number;
   variant?: 'primary' | 'accent' | 'default';
   className?: string;
 }
 
-export default function ThemedIcon({name, size = 24, variant = 'primary', className, ...props}: ThemedIconProps) {
+export default function ThemedIcon({name, size = 24, strokeWidth = 2.2, variant = 'primary', className, ...props}: ThemedIconProps) {
     const { colorScheme } = useColorScheme();
 
     let iconColor = '';
@@ -30,7 +31,7 @@ export default function ThemedIcon({name, size = 24, variant = 'primary', classN
 
     return (
         <View className={className} pointerEvents="none" {...props}>
-            <IconComponent size={size} color={iconColor} strokeWidth={2.2} />
+            <IconComponent size={size} color={iconColor} strokeWidth={strokeWidth} />
         </View>
     );
 }

@@ -20,9 +20,10 @@ type CardStackSwiperProps = {
     setCurrentStreak: React.Dispatch<React.SetStateAction<boolean>>;
     lastWordLearned: Word | null;
     setlastWordLearned: React.Dispatch<React.SetStateAction<Word | null>>;
+    switchFace: boolean;
 };
 
-const CardStackSwiper = ({ activeWords, setActiveWords, updateProgress, progress, practice, user, setCurrentStreak, lastWordLearned, setlastWordLearned}: CardStackSwiperProps) => {
+const CardStackSwiper = ({ activeWords, setActiveWords, updateProgress, progress, practice, user, setCurrentStreak, lastWordLearned, setlastWordLearned, switchFace}: CardStackSwiperProps) => {
     const activeIndex = useSharedValue(0);
     const [indexState, setIndexState] = useState(0);
     const { t } = useTranslation();
@@ -54,7 +55,7 @@ const CardStackSwiper = ({ activeWords, setActiveWords, updateProgress, progress
                 <View className="w-3/4 h-full flex justify-center items-center">
                     <ThemedIcon name="Rocket" size={32} />
                     <ThemedText className="font-bold text-center my-3">{t("goal_reached")}</ThemedText>
-                    <TouchableOpacity accessibilityLabel='Go to Practice Words' style={{ boxShadow: '0 4px 0 #2889e3ff' }} onPress={() => router.push('/(tabs)/home/practice')} className="bg-primary p-4 rounded-lg mt-4 w-full flex-row justify-center items-center">
+                    <TouchableOpacity accessibilityLabel='Go to Practice Words' style={{ boxShadow: '0 4px 0 #2889e3ff' }} onPress={() => router.push('/(tabs)/home/Practice')} className="bg-primary p-4 rounded-lg mt-4 w-full flex-row justify-center items-center">
                         <Text className="font-bold text-text-dark">{t("practice")}</Text>
                     </TouchableOpacity>
                 </View>
@@ -78,6 +79,7 @@ const CardStackSwiper = ({ activeWords, setActiveWords, updateProgress, progress
                                 setCurrentStreak={setCurrentStreak}
                                 lastWordLearned={lastWordLearned}
                                 setlastWordLearned={setlastWordLearned}
+                                switchFace={switchFace}
                             />
                         ))}
                 </View>

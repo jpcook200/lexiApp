@@ -3,7 +3,7 @@ import useDatabase from '@/db/useDatabase';
 import { User, Word } from '@/types/types';
 import { Heart, Mars, Venus } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Animated, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import ThemedIcon from './ThemedIcon';
@@ -16,18 +16,34 @@ type WordCardProps = {
     displayOnly?: boolean;
     practice?: boolean;
     user?: User;
+    switchFace: boolean;
 };
 
 
-export default function WordCard({ word, setActiveWords, displayOnly, practice, user }: WordCardProps) {
+export default function WordCard({ word, setActiveWords, displayOnly, practice, user, switchFace }: WordCardProps) {
     const { t } = useTranslation();
     const { toggleFavourite } = useDatabase();
     const [ttsDisabled, setTtsDisabled] = useState(false);
     const { colorScheme } = useColorScheme();
     const cardClass = 'overflow-hidden rounded-2xl shadow-sm flex-1 border border-border-light dark:border-border-dark';
-    const [isFlipped, setIsFlipped] = useState(false);
-    const flipAnimation = useRef(new Animated.Value(0)).current
+    const [isFlipped, setIsFlipped] = useState(switchFace);
+    const flipAnimation = useRef(new Animated.Value(switchFace ? 180 : 0)).current
     const { tts, } = useTextToSpeech();
+    const [showTranslation, setShowTranslation] = useState(false);
+
+    useEffect(() => {
+    // update local state
+    setIsFlipped(switchFace);
+
+    // animate the card to the new face
+    Animated.spring(flipAnimation, {
+        toValue: switchFace ? 180 : 0,
+        friction: 8,
+        tension: 10,
+        useNativeDriver: true,
+    }).start();
+}, [switchFace]); // runs whenever switchFace prop changes
+
     const frontInterpolate = flipAnimation.interpolate({
         inputRange: [0, 180],
         outputRange: ['0deg', '180deg'],
@@ -112,9 +128,9 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
                                         <ThemedText variant='primary' className='text-5xl sm:text-4xl font-bold'>
                                             { word?.learning_word }
                                         </ThemedText>
-                                        <ThemedText variant='subtext' className='text-xl py-2'>{ word?.learning_pronunciation }</ThemedText>
+                                        <ThemedText variant='subtext' className='text-xl'>{ word?.learning_pronunciation }</ThemedText>
                                     </View>
-                                    <View className='bg-primary w-auto px-5 py-1 rounded-full self-start'>
+                                    <View className='bg-primary w-auto px-5 py-1 rounded-full self-start mt-3'>
                                         <ThemedText className='font-bold capitalize text-white'>{ t(word?.part_of_speech) }</ThemedText>
                                     </View>
                                     
@@ -151,13 +167,23 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
                                     </View>
                                     <View>
                                         <View>
-                                            <ThemedText variant='primary' className='text-5xl font-bold sm:text-4xl'>{ word?.native_word }</ThemedText>
+                                            <ThemedText variant='primary' className='text-5xl mb-1 font-bold sm:text-4xl'>{ word?.native_word }</ThemedText>
                                         </View>
                                         <ThemedText variant='subtext' className='text-lg'>{ word?.native_definition }</ThemedText>
                                     </View>
                                     <View>
-                                        <ThemedText className='text-lg font-bold'>{ t("example") }</ThemedText>
-                                        <ThemedText variant='subtext' className='text-lg italic'>{ word?.learning_sentence }</ThemedText>
+                                        <View className='flex-row items-center justify-between'>
+                                            <ThemedText className='text-lg font-bold'>{t("example")}</ThemedText>
+                                            <TouchableOpacity className='p-2' accessibilityLabel='Toggle Translation' onPress={() => setShowTranslation(!showTranslation)}>
+                                                <ThemedIcon name="Repeat" size={17} className=''/>
+                                            </TouchableOpacity>
+                                        </View>
+                                        
+                                        {showTranslation ? (<ThemedText variant='subtext' className='text-lg italic'>{word?.native_sentence}</ThemedText>)
+                                            :
+                                            (<ThemedText variant='subtext' className='text-lg italic'>{word?.learning_sentence}</ThemedText>
+                                        )}
+                                        
                                     </View>
                                 </View>
                                 <View className="flex-row items-center justify-between">

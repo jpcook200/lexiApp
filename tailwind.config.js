@@ -24,11 +24,11 @@ module.exports = {
           dark: "#262626ff",  // dark theme color
         },
         item: {
-          light: "#e8e8e8ff", // light theme color
+          light: "#F2F0EF", // light theme color
           dark: "#2C2C2C",  // dark theme color
         },
         shade: {
-          light: "#dadadaff", // light theme color
+          light: "#e8e8e8ff", // light theme color
           dark: "#222020",  // dark theme color
         },
         text: {
