@@ -17,10 +17,11 @@ type WordCardProps = {
     practice?: boolean;
     user?: User;
     switchFace: boolean;
+    cardsMoving: boolean;
 };
 
 
-export default function WordCard({ word, setActiveWords, displayOnly, practice, user, switchFace }: WordCardProps) {
+export default function WordCard({ word, setActiveWords, displayOnly, practice, user, switchFace, cardsMoving }: WordCardProps) {
     const { t } = useTranslation();
     const { toggleFavourite } = useDatabase();
     const [ttsDisabled, setTtsDisabled] = useState(false);

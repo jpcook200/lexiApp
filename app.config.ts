@@ -6,7 +6,7 @@ export default {
     slug: 'lexigram',
     version: '1.0.0',
     scheme: 'lexigram',
-
+    orientation: "portrait",
     // Fallback icon for platforms that don't support appearance
     icon: './assets/images/app-icon.png',
 

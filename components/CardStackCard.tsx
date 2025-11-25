@@ -3,6 +3,7 @@ import { useUserStore } from '@/hooks/useGetUser';
 import { User, Word } from '@/types/types';
 import { useAudioPlayer } from 'expo-audio';
 import * as Haptics from 'expo-haptics';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dimensions, Text } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -31,7 +32,8 @@ type CardStackCardProps = {
 const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWords, activeWords = [], updateProgress, practice = false, progress, setCurrentStreak, lastWordLearned, setlastWordLearned, switchFace}: CardStackCardProps) => {
     const { t } = useTranslation();
     const player = useAudioPlayer(require("@/assets/sounds/cardswipe.mp3"));
-    const learnedPlayer = useAudioPlayer(require("@/assets/sounds/learned.mp3"));
+    const completedPlayer = useAudioPlayer(require("@/assets/sounds/goal-complete.mp3"));
+    const [cardsMoving, setCardsMoving] = useState(false);
     const { setSelectedWordId } = useUserStore();
     const { toggleLearned, insertIntoLearnedWords, updateStreakCount, updateStreakRecord} = useDatabase();
     const screenWidth = Dimensions.get('window').width;
@@ -83,8 +85,21 @@ const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWo
         player.play()
     }
 
+    const handleSetCardsMoving = (moving: boolean) => {
+        if (moving === cardsMoving) return;
+        if (moving === false) { 
+            setTimeout(() => {
+                setCardsMoving(moving);
+            }, 1000);
+        }
+        else {
+            setCardsMoving(moving);
+        }
+    }
+
     const gesture = Gesture.Pan()
         .onChange((event) => {
+            scheduleOnRN(handleSetCardsMoving, true);
             translationX.value = event.translationX;
             translationY.value = event.translationY;
             activeIndex.value = interpolate(
@@ -113,8 +128,8 @@ const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWo
             } else {
                 translationY.value = withSpring(0);
                 translationX.value = withSpring(0);
-            }
-
+            }   
+            scheduleOnRN(handleSetCardsMoving, false);
         });
 
     
@@ -181,6 +196,7 @@ const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWo
                     practice={practice}
                     user={user}
                     switchFace={switchFace}
+                    cardsMoving={cardsMoving}
                 />
                 {!practice &&
                     <Animated.View style={[learnedAnimatedStyle]} className='absolute bottom-10 left-[50%] -translate-x-[50%] bg-green-400 rounded-md flex justify-center items-center overflow-hidden p-2 shadow-sm'>

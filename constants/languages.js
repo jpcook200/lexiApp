@@ -21,4 +21,4 @@ export const levels = [
     { label: 'Proficient', code: 'c2' },
 ];
 
-export const freeWordsAllowance = 15;
+export const freeWordsAllowance = 10;
