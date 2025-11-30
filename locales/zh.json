@@ -192,5 +192,14 @@
     "date": "日期",
     "limit": "限制",
     "yesterday": "昨天",
-    "unlimited": "无限制"
+    "unlimited": "无限制",
+
+    "wpd_change_error": "更改每日单词数时出错。请重试。",
+    "fetch_words_error": "获取单词时出错。请稍后再试。",
+    "error": "错误",
+    "check_connection": "请检查您的网络连接。",
+    "not_avail": "此商品无法购买。",
+    "no_words_available": "没有可用的单词",
+    "lang_change_limit": "您每天只能更改一次学习语言或母语。",
+    "could_not_change_language": "无法更改语言。请稍后再试。"
 }

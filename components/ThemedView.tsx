@@ -21,15 +21,14 @@ export default function ThemedView({ children, variant = 'primary', className = 
             bgClass = colorScheme === 'dark' ? 'shadow-sm bg-item-dark' : 'shadow-sm bg-item-light';
             break;
         case 'shaded':
-            bgClass = colorScheme === 'dark' ? 'bg-shade-dark overflow-hidden' : 'bg-shade-light overflow-hidden';
+            bgClass = colorScheme === 'dark' ? 'bg-item-dark' : 'bg-item-light';
             break;
         default:
             bgClass = colorScheme === 'dark' ? 'bg-gray-900' : 'bg-gray-100';
     }
 
     return (
-        <View className={`${bgClass} ${className}`} {...props}>
-            {variant === 'shaded' && <View className='absolute bg-item-light dark:bg-item-dark w-full h-full rounded-br-full flex-1 right-0 left-0'></View>}
+        <View style={variant === 'shaded' ? { boxShadow: `inset -3px -3px 0 0 ${colorScheme === 'dark' ? '#0000002c' : '#b7b7b727'}` } : {}} className={`${bgClass} ${className}`} {...props}>
             {children}
         </View>
     );

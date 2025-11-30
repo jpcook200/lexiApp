@@ -16,17 +16,18 @@ import { useColorScheme } from 'nativewind';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Linking, ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
-import { useIAP } from 'react-native-iap';
+import { initConnection, useIAP } from 'react-native-iap';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Settings() {
     const { t } = useTranslation();
     const db = useSQLiteContext()
-    const { user, loading, fetchUser, setUser } = useUserStore();
+    const { user, loading, fetchUser, setUser, setActiveWordsStore } = useUserStore();
     const { colorScheme, toggleColorScheme } = useColorScheme();
     const { setRemindersOn, resetProgressByLanguagePair, toggleMuted } = useDatabase();
     const { setUserAccessLevel } = useDatabase();
     const { connected, hasActiveSubscriptions, getActiveSubscriptions } = useIAP();
+    const [checkingConnection, setCheckingConnection] = useState(true);
     const [installationId, setInstallationId] = useState('');
     const [mutedSwitchValue, setMutedSwitchValue] = useState(user?.muted === 1);
 
@@ -49,7 +50,7 @@ export default function Settings() {
 
             const newValue = user?.reminders_on === 1 ? 0 : 1;
             await setRemindersOn(newValue);
-
+            console.log('Reminders toggled to:', newValue);
             // Notify user
             if (newValue === 1) {
                 await scheduleDailyReminder();
@@ -68,6 +69,7 @@ export default function Settings() {
         try {
             if (!user) return;
             await resetProgressByLanguagePair(user.native_lang, user.learn_lang);
+            setActiveWordsStore([]);
             router.replace('/');
         } catch (error) {
             console.error('Error resetting progress:', error);
@@ -88,6 +90,8 @@ export default function Settings() {
 
     const handleCheckSubscription = async () => {
         try {
+            await initConnection();
+            await fetchUser(db);
             if (connected) {
                 const activeSubs = await getActiveSubscriptions()
                 if (user) {
@@ -95,12 +99,15 @@ export default function Settings() {
                     if (user.access_level !== newAccessLevel) {
                         await setUserAccessLevel(newAccessLevel);
                     }
-                    await fetchUser(db);
+                    
                 }
             }
+            
         } catch (error) {
             console.error('Error checking subscription status:', error);
-        } 
+        } finally { 
+            setCheckingConnection(false);
+        }
     }
 
     const handleToggleMuted = async () => {
@@ -193,14 +200,15 @@ export default function Settings() {
                             <TouchableOpacity onPress={() => router.push('../../(onboarding)/Subscribe')} className='flex-row items-center gap-4 h-20' disabled={ user.access_level === 'pro' }>
                                 <ThemedIcon name={'CreditCard'} size={20} />
                                 <ThemedText className='text-lg font-medium'>{t("subscription")}</ThemedText>
-                                {user.access_level === 'pro' ? (
+                                { checkingConnection ? (
+                                    <ActivityIndicator size='small' className='ml-auto' />
+                                ) : (
+                                    user.access_level === 'pro' ? (
                                     <Text className='ml-auto text-primary font-black text-primary'>{ t(user.access_level) }</Text>
                                 ) : (
                                     <ThemedText className='ml-auto text-secondary font-medium'>{ t(user.access_level) }</ThemedText>
-                                ) }
-
-                                
-                                
+                                )
+                                )}
                                 <ThemedIcon name='ChevronRight' size={20} />
                             </TouchableOpacity>
                             

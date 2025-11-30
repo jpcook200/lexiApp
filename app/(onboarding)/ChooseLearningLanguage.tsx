@@ -36,41 +36,40 @@ const ChooseLearningLanguage = () => {
     };
     
     return (
-        <SafeAreaView className="flex-1 h-full bg-secondary-light dark:bg-secondary-dark">
-            <View className='w-full h-52 bg-secondary-light dark:bg-secondary-dark'>
+        <SafeAreaView className="flex-1 h-full bg-item-light dark:bg-item-dark">
+            <View className='w-full h-52 bg-item-light dark:bg-item-dark'>
                 <View className='flex-1 justify-center items-center px-4'>
-                    <BackButton/>
-                    <View className='w-20 h-20 bg-item-light dark:bg-item-dark rounded-full flex items-center justify-center border border-border-light dark:border-border-dark'>
+                    <BackButton
+                        white
+                    />
+                    <View className='w-20 h-20 bg-background-light dark:bg-background-dark rounded-full flex items-center justify-center border border-border-light dark:border-border-dark'>
                         <ThemedIcon name='Languages' />
                     </View>
                     <ThemedText className='text-2xl font-bold mt-4'>{ t("whats_your_learning_language") }</ThemedText>
                 </View>
             </View>
-            <View  className='flex-1'>
-                <ScrollView className='flex-1 bg-background-light dark:bg-background-dark border-t border-border-light dark:border-border-dark pt-4'>
-                    <View className="flex-row flex-wrap px-4 gap-4 justify-center">
-                        {commonLanguages.map((lang) => (
-                            <LanguageCard
-                                key={lang.code}
-                                icon={lang.flag}
-                                name={t(lang.code)}
-                                code={lang.code}
-                                active={activeLang === lang.code}
-                                onPress={() => setActiveLang(lang.code)}
-
-                            />
-                        ))}
-                    </View>
-                </ScrollView>
-                <View className='p-4 mb-4 border-t border-border-light dark:border-border-dark'>
-                    <MainButton
-                        text={ t("next") }
-                        onPress={handleNext}
-                        next
-                        accessibilityLabel="Proceed to Difficulty Selection"
-                        accessibilityHint="Navigates to the difficulty selection screen"
-                    />
+            <ScrollView className='flex-1 bg-background-light dark:bg-background-dark border-t border-border-light dark:border-border-dark pt-4'>
+                <View className="flex-row flex-wrap px-4 gap-4 justify-center">
+                    {commonLanguages.map((lang) => (
+                        <LanguageCard
+                            key={lang.code}
+                            icon={lang.flag}
+                            name={t(lang.code)}
+                            code={lang.code}
+                            active={activeLang === lang.code}
+                            onPress={() => setActiveLang(lang.code)}
+                        />
+                    ))}
                 </View>
+            </ScrollView>
+            <View className='p-4 mb-4 border-t border-border-light dark:border-border-dark bg-item-light dark:bg-item-dark' >
+                <MainButton
+                    text={ t("next") }
+                    onPress={handleNext}
+                    next
+                    accessibilityLabel="Proceed to Learning Language Selection"
+                    accessibilityHint="Navigates to the learning language selection screen"
+                />
             </View>
         </SafeAreaView>
     );

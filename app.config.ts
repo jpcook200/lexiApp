@@ -40,7 +40,7 @@ export default {
       icon: {
         light: './assets/images/app-icon.png',
         dark: './assets/images/app-icon-dark.png',
-      },
+      }
     },
 
     plugins: [

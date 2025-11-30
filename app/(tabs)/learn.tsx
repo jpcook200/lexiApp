@@ -8,41 +8,27 @@ import useDatabase from '@/db/useDatabase'
 import { useUserStore } from '@/hooks/useGetUser'
 import useGetWords from '@/hooks/useGetWords'
 import { Word } from '@/types/types'
-import { useFocusEffect } from '@react-navigation/native'
-import { useQuery } from '@tanstack/react-query'
+import { useFocusEffect } from 'expo-router'
 import { useSQLiteContext } from 'expo-sqlite'
 import { DateTime } from 'luxon'
+import { useColorScheme } from 'nativewind'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, TouchableOpacity, View } from 'react-native'
-import { useIAP } from 'react-native-iap'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 const learn = () => {
-    const { handleGetWords, setActiveWords, activeWords, handleGetProgessCount, progressToday } = useGetWords();
+    const { handleGetWords, handleGetProgessCount, progressToday, wordsLoading, error } = useGetWords();
     const { t } = useTranslation();
-    const { connected } = useIAP();
     const db = useSQLiteContext();
-    const { user, loading, fetchUser} = useUserStore();
-    const { toggleLearned, initStreakRecord, removeFromLearnedWords, switchCardFace } = useDatabase();
+    const { user, loading, fetchUser, activeWordsStore, setActiveWordsStore, prependActiveWordStore, filterActiveWordsStore } = useUserStore();
+    const { toggleLearned, initStreakRecord, removeFromLearnedWords, switchCardFace, getDailyWords } = useDatabase();
     const [switchCardFaceState, setSwitchCardFaceState] = useState(false);
     const [currentStreak, setCurrentStreak] = useState <boolean>(false);
     const [showTutorial, setShowTutorial] = useState(false);
-    const [isInitialised, setIsInitialised] = useState(false)
     const [lastWordLearned, setlastWordLearned] = useState<Word | null>(null);
     
-    const { data = [], error, isPending, refetch } = useQuery({
-        queryKey: ['words', connected, user],
-        queryFn: () => handleGetWords(user!),
-        enabled: !!user && connected,
-        refetchOnWindowFocus: true,
-        retry: ( error: any) => {
-            if (error?.message?.includes('401') || error?.response?.status === 401) {
-                return false;
-            }
-            return false; 
-        },
-    });
+    const { colorScheme } = useColorScheme();
 
     const handleUndoLearned = async () => {
         const today = DateTime.now().toISODate();
@@ -53,42 +39,31 @@ const learn = () => {
         if (lastWordLearned != null && user) {
             await toggleLearned(lastWordLearned.word_id);
             await removeFromLearnedWords(lastWordLearned.word_id);
-            setActiveWords((prev) => [lastWordLearned, ...prev]);
+            prependActiveWordStore(lastWordLearned);
             setlastWordLearned(null);
-            // if (progressToday == user?.words_per_day) { 
-            //     const newCount = await updateStreakCount("decrement");
-            //     await updateStreakRecord(0);
-            //     setCurrentStreak(newCount);
-            // }
             await handleGetProgessCount();
         }
     };
 
+    const handleFocus = async () => {
+        await fetchUser(db);
+        const updatedUser = useUserStore.getState().user;
+        const todayDate = DateTime.now().setZone(updatedUser!.timezone).toString();
+        const wordsToReturn = await handleGetWords(updatedUser!, todayDate);
+
+        if (wordsToReturn) { 
+            setActiveWordsStore(wordsToReturn);
+        }
+        filterActiveWordsStore();
+
+    }
+
     //effects ------------------------------------------------------------------------------
     useFocusEffect(
-        useCallback(() => {
-            const handleFocus = async () => { 
-                const today = DateTime.now().toISODate();
-                setIsInitialised(false)
-                const lastWordLearnedDate = lastWordLearned?.time_sent?.slice(0, 10)
-                if (lastWordLearnedDate !== today) {
-                    setlastWordLearned(null);
-                }
-                await fetchUser(db);
-                await refetch();
-                await initStreakRecord();
-                await handleGetProgessCount();
-                setIsInitialised(true)
-            }
-            let isActive = true;
-            if (isActive) {
-                handleFocus();
-            }
-            return async () => {
-                isActive = false;
-            };
+        useCallback(() => { 
+            handleFocus();
         }, [])
-    );
+    ); 
 
     useEffect(() => {
         if (user) { 
@@ -111,7 +86,7 @@ const learn = () => {
             />}
             <SafeAreaView edges={["top"]} className='flex-1 bg-background-light dark:bg-background-dark'>
                 <View className=" flex-row justify-between items-center mt-1 mb-4 px-4 gap-4">
-                    <TouchableOpacity disabled={!lastWordLearned} accessibilityLabel='Undo learning previous word' onPress={ () => handleUndoLearned() } className={`${!lastWordLearned && 'opacity-50'} flex-row items-center self-start rounded-full border border-border-light dark:border-border-dark bg-item-light dark:bg-item-dark pl-3 pr-4 h-10`}>
+                    <TouchableOpacity style={{ boxShadow: `inset -3px -3px 0 0 ${colorScheme === 'dark' ? '#0000002c' : '#b7b7b727'}` }} disabled={!lastWordLearned} accessibilityLabel='Undo learning previous word' onPress={ () => handleUndoLearned() } className={`${!lastWordLearned && 'opacity-50'} flex-row items-center self-start rounded-full border border-border-light dark:border-border-dark bg-item-light dark:bg-item-dark pl-3 pr-4 h-10`}>
                         <ThemedIcon name='Undo' size={20} />
                         <ThemedText className='text-md ml-2 font-bold'>{t("undo")}</ThemedText>
                     </TouchableOpacity>
@@ -123,21 +98,22 @@ const learn = () => {
                         switchFaceState={switchCardFaceState}
                     />
                 </View>
-                {isPending || !isInitialised ? (
+                {wordsLoading ? (
                     <ActivityIndicator size={"small"} className='flex-1 justify-center items-center'/>
                 ) : (
                     <>
                         <CardStackSwiper
-                            activeWords={activeWords}
-                            setActiveWords={setActiveWords}
-                            updateProgress={handleGetProgessCount}
-                            progress={progressToday}
-                            practice={false}
-                            user={user}
-                            setCurrentStreak={setCurrentStreak}
-                            setlastWordLearned={setlastWordLearned}
-                            lastWordLearned={lastWordLearned}
-                            switchFace={switchCardFaceState}    
+                                activeWords={activeWordsStore}
+                                updateProgress={handleGetProgessCount}
+                                progress={progressToday}
+                                practice={false}
+                                user={user}
+                                setCurrentStreak={setCurrentStreak}
+                                setlastWordLearned={setlastWordLearned}
+                                lastWordLearned={lastWordLearned}
+                                switchFace={switchCardFaceState}
+                                error={error}
+                                wordsLoading={wordsLoading}
                         />
                     </>
                 )}

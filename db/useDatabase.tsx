@@ -1,5 +1,5 @@
 import { freeWordsAllowance } from "@/constants/languages";
-import { CompletedType, CountType, StreakRow, User, Word } from "@/types/types";
+import { CompletedType, CountType, StreakRow, Translation, User, Word } from "@/types/types";
 import { useSQLiteContext } from "expo-sqlite";
 import { DateTime } from "luxon";
 
@@ -150,7 +150,7 @@ const useDatabase = () => {
         }
     }
 
-    const getLearnedWordsIds = async () => {
+    const getLearnedWordsIds = async (learnLang?: string, nativeLang?: string) => {
         try {
             type WordIdResult = { word_id: number }
             const userResults = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = ?', [1])
@@ -160,7 +160,7 @@ const useDatabase = () => {
             }
             const results = await db.getAllAsync<WordIdResult>(
                 `SELECT word_id FROM learned_words WHERE user_id = ? AND learn_lang = ? AND native_lang = ?`,
-                [1, userResults.learn_lang, userResults.native_lang]
+                [1, learnLang || userResults.learn_lang, nativeLang || userResults.native_lang]
             );
             const mappedResults = results.map((result) => result.word_id);
             
@@ -214,7 +214,6 @@ const useDatabase = () => {
             throw error;
         }
     };
-
 
     const getDailyLearnedCount = async () => {
         try {
@@ -273,6 +272,18 @@ const useDatabase = () => {
         }
     };
 
+    const updateNativeWords = async (translations: Translation[]) => { 
+        try {
+            for (const translation of translations) { 
+                await db.runAsync(`UPDATE daily_words SET native_lang = ?, native_word = ?, native_definition = ?, native_sentence = ? WHERE word_id = ? AND user_id = ?`,
+                    [translation.lang_code, translation.word, translation.definition, translation.sentence, translation.word_id, 1]
+                )
+            }
+        } catch (error) {
+            console.error('Error updating native words:', error);
+            throw error;
+        }
+    };
 
     const setNativeLanguage = async (languageCode: string) => {
         try {
@@ -347,7 +358,7 @@ const useDatabase = () => {
         }
     };
 
-    const getDailyWords = async () => {
+    const getDailyWords = async (learnLang?: string, nativeLang?:string) => {
         try {
             const userResults = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = ?', [1])
             if (!userResults) {
@@ -355,7 +366,7 @@ const useDatabase = () => {
             }
             const results = await db.getAllAsync<Word>(
                 `SELECT * FROM daily_words WHERE user_id = ? AND learn_lang = ? AND native_lang = ? ORDER BY word_id ASC`,
-                [1, userResults.learn_lang, userResults.native_lang]
+                [1, learnLang || userResults.learn_lang, nativeLang || userResults.native_lang]
             );
             
             return results;
@@ -368,13 +379,9 @@ const useDatabase = () => {
 
     const deleteAllFromDailyWords = async () => {
         try {
-            const userResults = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = ?', [1])
-            if (!userResults) {
-                throw new Error('User not found');
-            }
             await db.runAsync(
-                `DELETE FROM daily_words WHERE user_id = ? AND learn_lang = ? AND native_lang = ?`,
-                [1, userResults.learn_lang, userResults.native_lang]
+                `DELETE FROM daily_words WHERE user_id = ?`,
+                [1]
             );
             
         } catch (error) {
@@ -498,7 +505,6 @@ const useDatabase = () => {
         }
     };
 
-
     const saveLastCard = async (wordId: number) => {
         try {
             await db.runAsync(
@@ -601,7 +607,6 @@ const useDatabase = () => {
         }
     };
 
-
     const initStreakRecord = async () => {
         const date = DateTime.now().toISODate();
         const yesterday = DateTime.now().minus({ days: 1 }).toISODate();
@@ -682,7 +687,6 @@ const useDatabase = () => {
             return false;
         }
     };
-
 
     const getWeeklyStreak = async () => {
         const today = DateTime.now().toISODate();
@@ -919,6 +923,19 @@ const useDatabase = () => {
         }
     }
 
+    const setLangChangedDate = async () => {
+        const todayDate = DateTime.now().toISODate();
+        try {
+            await db.runAsync(
+                `UPDATE users SET lang_changed_date = ? WHERE id = ?`,
+                [todayDate, 1]
+            );
+        } catch (error) {
+            console.error('Error setting language changed date:', error);
+            throw error;
+        }   
+    }
+
     return {
         setUserWordsTotal,
         setUserAccessLevel,
@@ -955,7 +972,9 @@ const useDatabase = () => {
         getUserLearnedWordsCount,
         toggleRandomDailyWords,
         toggleMuted,
-        switchCardFace  
+        switchCardFace,
+        setLangChangedDate,
+        updateNativeWords,
     };
 
 }

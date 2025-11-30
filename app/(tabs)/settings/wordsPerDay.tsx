@@ -2,15 +2,18 @@ import ThemedText from '@/components/ThemedText';
 import { freeWordsAllowance } from '@/constants/languages';
 import useDatabase from '@/db/useDatabase';
 import { useUserStore } from '@/hooks/useGetUser';
+import useGetWords from '@/hooks/useGetWords';
 import { router } from 'expo-router';
+import { DateTime } from 'luxon';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react-native';
-
+import { ActivityIndicator, Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
 const WordsPerDay = () => {
     const { t } = useTranslation();
-    const { setWordsPerDay, updateStreakRecord, updateStreakCount, getUserLearnedWordsCount, getDailyWords, toggleRandomDailyWords} = useDatabase();
-    const { user, loading } = useUserStore();
+    const { setWordsPerDay, updateStreakRecord, updateStreakCount, getUserLearnedWordsCount, getLearnedWordsIds, getDailyWords, toggleRandomDailyWords} = useDatabase();
+    const { user, setActiveWordsStore, activeWordsStore, filterActiveWordsStore } = useUserStore();
+    const { handleWPDChange } = useGetWords();
+    const [wpdLoading, setWpdLoading] = useState(false);
     const [selectedNumber, setSelectedNumber] = useState<number>(10);
     const numbers = Array.from({ length: 30 }, (_, i) => i + 1);
 
@@ -21,34 +24,42 @@ const WordsPerDay = () => {
     }, [user]);
 
     const handleSave = async (selectedNumber: number) => {
-        if (!user) return;
+        if (!user || selectedNumber === user.words_per_day) return;
+        setWpdLoading(true);
         const userProgress = await getUserLearnedWordsCount();
         const storedWords = await getDailyWords();
         const currentDailyWords = storedWords.length;
+        const localDatetime = DateTime.now().setZone(user.timezone).toString();
 
         try {
-            if (user.access_level === 'free' && selectedNumber > freeWordsAllowance) { 
+            if (user.access_level === 'free' && selectedNumber > freeWordsAllowance) {
                 return router.push('../../(onboarding)/Subscribe');
             }
-            if (selectedNumber < currentDailyWords) { 
-                const wordsToRemove = currentDailyWords - selectedNumber;
-                await toggleRandomDailyWords(wordsToRemove, 'hide');
+            
+            const newData = await handleWPDChange(selectedNumber, user.learn_lang, user.native_lang, user.difficulty_level, localDatetime);
+            
+            if (newData) { 
+                setActiveWordsStore(newData);
+                filterActiveWordsStore();
             }
             
-            if(userProgress >= selectedNumber) {
+            if (userProgress >= selectedNumber) {
                 await updateStreakCount("increment");
                 await updateStreakRecord(1);
             }
             await setWordsPerDay(selectedNumber);
             router.back();
+        
         } catch (error) {
-            console.error('Error saving words per day:', error);
+            Alert.alert(t("error"), t("wpd_change_error"));
+        } finally { 
+            setWpdLoading(false);
         }
     };
 
-    if (loading) {
+    if (wpdLoading) {
         return (
-            <ActivityIndicator size="small" className="flex-1 justify-center items-center" />
+            <ActivityIndicator size="small" className="flex-1 justify-center items-center bg-background-light dark:bg-background-dark" />
         );
     }
 

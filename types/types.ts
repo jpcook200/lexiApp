@@ -39,6 +39,7 @@ export interface User {
     muted?: 0 | 1;
     total_words_count: number;
     switch_card_face: 0 | 1;
+    lang_changed_date?: string;
 }
 
 export interface CountType { 
@@ -58,11 +59,11 @@ export interface LearnedCounts {
 
 export interface getWordsParams {
     nativeLang: string;
-    learningLang: string;
+    learnLang: string;
     difficulty: string;
     limit: number;
     excludeIds: number[];
-    localDatetime: string;
+    currentDateTime: string;
     transactionId: string | null;
 }
 
@@ -107,4 +108,12 @@ export type PracticeSettingsProps = {
     filters: PracticeFiltersType;
     setFilters: React.Dispatch<React.SetStateAction<PracticeFiltersType>>;
     getPracticeWords: (filters: PracticeFiltersType) => Promise<void>;
+};
+
+export type Translation = {
+    word_id: number;
+    lang_code: string;
+    word: string;
+    definition: string;
+    sentence: string;
 };

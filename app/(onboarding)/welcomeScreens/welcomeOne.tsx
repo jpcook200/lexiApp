@@ -1,3 +1,4 @@
+import Logo from '@/components/Logo';
 import MainButton from '@/components/MainButton';
 import ThemedText from '@/components/ThemedText';
 import { router } from 'expo-router';
@@ -21,7 +22,12 @@ const WelcomeOne = () => {
             <View className=' w-full justify-end py-8'>
                 <View className='gap-4'>
                     <ThemedText className='text-5xl font-bold'>{t("welcome_to")}</ThemedText>
-                    <ThemedText className='text-4xl font-black'>Lexigram</ThemedText>
+                    <Logo
+                        width={40}
+                        height={40}
+                        scale={1.1}
+                        gap={ 8 }
+                    />
                     <ThemedText variant='subtext' className='text-lg'>{t("welcome_desc")}</ThemedText>
                 </View>
             </View>

@@ -195,5 +195,14 @@
     "date": "日付",
     "limit": "制限",
     "yesterday": "昨日",
-    "unlimited": "無制限"
+    "unlimited": "無制限",
+
+    "wpd_change_error": "1日の単語数の変更中にエラーが発生しました。もう一度お試しください。",
+    "fetch_words_error": "単語の取得中にエラーが発生しました。後でもう一度お試しください。",
+    "error": "エラー",
+    "check_connection": "接続を確認してください。",
+    "not_avail": "この商品は購入できません。",
+    "no_words_available": "利用可能な単語がありません",
+    "lang_change_limit": "学習言語または母国語は1日に1回だけ変更できます。",
+    "could_not_change_language": "言語を変更できませんでした。後でもう一度お試しください。"
 }

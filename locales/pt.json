@@ -195,5 +195,14 @@
     "date": "Data",
     "limit": "Limite",
     "yesterday": "Ontem",
-    "unlimited": "Ilimitado"
+    "unlimited": "Ilimitado",
+
+    "wpd_change_error": "Erro ao mudar palavras por dia. Por favor, tente novamente.",
+    "fetch_words_error": "Houve um erro ao buscar as palavras. Por favor, tente novamente mais tarde.",
+    "error": "Erro",
+    "check_connection": "Por favor, verifique sua conexão.",
+    "not_avail": "Este item não está disponível para compra.",
+    "no_words_available": "Nenhuma palavra disponível",
+    "lang_change_limit": "Você só pode mudar seu idioma de aprendizado ou nativo uma vez por dia.",
+    "could_not_change_language": "Não foi possível mudar o idioma. Por favor, tente novamente mais tarde."
 }

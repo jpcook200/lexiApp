@@ -61,7 +61,8 @@ export default function RootLayout() {
                             access_level TEXT DEFAULT 'free',
                             words_total INTEGER DEFAULT 0,
                             muted BOOLEAN DEFAULT 0,
-                            switch_card_face BOOLEAN DEFAULT 0
+                            switch_card_face BOOLEAN DEFAULT 0,
+                            lang_changed_date DATETIME
                         );
                         
                         CREATE TABLE IF NOT EXISTS difficulties (

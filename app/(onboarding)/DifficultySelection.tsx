@@ -2,6 +2,7 @@ import BackButton from '@/components/BackButton';
 import MainButton from '@/components/MainButton';
 import ThemedIcon from '@/components/ThemedIcon';
 import ThemedText from '@/components/ThemedText';
+import ThemedView from '@/components/ThemedView';
 import { levels } from '@/constants/languages';
 import useDatabase from '@/db/useDatabase';
 import { useUserStore } from '@/hooks/useGetUser';
@@ -50,11 +51,13 @@ const DifficultySelection = () => {
     )
 
     return (
-        <SafeAreaView className="flex-1 h-full bg-secondary-light dark:bg-secondary-dark">
-            <View className='w-full h-52 bg-secondary-light dark:bg-secondary-dark'>
+        <SafeAreaView className="flex-1 h-full bg-item-light dark:bg-item-dark">
+            <View className='w-full h-52 bg-item-light dark:bg-item-dark'>
                 <View className='flex-1 justify-center items-center px-4'>
-                    <BackButton/>
-                    <View className='w-20 h-20 bg-item-light dark:bg-item-dark rounded-full flex items-center justify-center border-2 border-border-light dark:border-border-dark'>
+                    <BackButton
+                        white
+                    />
+                    <View className='w-20 h-20 bg-background-light dark:bg-background-dark rounded-full flex items-center justify-center border-2 border-border-light dark:border-border-dark'>
                         <ThemedIcon name='Gauge' />
                     </View>
                     <ThemedText className='text-2xl font-bold mt-4'>{ t("whats_your_proficiency_level") }</ThemedText>
@@ -64,10 +67,12 @@ const DifficultySelection = () => {
                 <ScrollView className='flex-1 bg-background-light dark:bg-background-dark border-t border-border-light dark:border-border-dark pt-4'>
                     <View className="flex-row flex-wrap px-4 gap-4 justify-center">
                         {levels.map((level, index) => (
-                            <Pressable disabled={ index > 2 } key={ level.code } onPress={() => setActiveLevel(level.code)} className={`${index > 2 && 'opacity-50'} shadow-sm w-36 h-36 border ${activeLevel === level.code ? 'border-yellow-500' : 'border-border-light dark:border-border-dark'} rounded-2xl p-2 justify-center items-center ${activeLevel === level.code ? 'bg-orange-400' : 'bg-item-light dark:bg-item-dark'}`}>
-                                <Text className='text-2xl w-full text-center uppercase font-bold text-primary'>{t(level.code)}</Text>
-                                <ThemedText className='text-sm font-medium font-bold text-center'>{t(level.label.replace(' ', '_').toLowerCase())}</ThemedText>
-                            </Pressable>
+                            <ThemedView key={ level.code } variant='shaded' className={`${index > 2 && 'opacity-50'} shadow-sm w-36 h-36 border ${activeLevel === level.code ? 'border-yellow-500' : 'border-border-light dark:border-border-dark'} rounded-2xl ${activeLevel === level.code ? 'bg-orange-400' : 'bg-item-light dark:bg-item-dark'}`}>
+                                <Pressable className='flex-1 p-2 justify-center items-center' disabled={ index > 2 }  onPress={() => setActiveLevel(level.code)} >
+                                    <Text className='text-2xl w-full text-center uppercase font-bold text-primary'>{t(level.code)}</Text>
+                                    <ThemedText className='text-sm font-medium font-bold text-center'>{t(level.label.replace(' ', '_').toLowerCase())}</ThemedText>
+                                </Pressable>
+                            </ThemedView>
                         ))}
                     </View>
                     <ThemedText className='text-center text-sm text-muted-light dark:text-muted-dark mt-6 px-4'>{ t("level_disclaimer") }</ThemedText>

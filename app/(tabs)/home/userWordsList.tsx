@@ -2,7 +2,6 @@ import { getWordsCount } from '@/api/getWords';
 import { useTextToSpeech } from '@/api/textToSpeech';
 import BackButton from '@/components/BackButton';
 import FiltersModal from '@/components/FiltersModal';
-import MainButton from '@/components/MainButton';
 import ProgressBar from '@/components/ProgressBar';
 import ThemedIcon from '@/components/ThemedIcon';
 import ThemedText from '@/components/ThemedText';
@@ -95,9 +94,9 @@ const userWordsList = () => {
     };
 
     useFocusEffect(
-        useCallback(() => {
-            handleGetWordsCount();
+        useCallback(() => {  
             handleFocusEffect();
+            handleGetWordsCount();
         }, [user])
     );
 
@@ -108,7 +107,17 @@ const userWordsList = () => {
     return (
         <SafeAreaView edges={['top']} className='h-full bg-item-light dark:bg-item-dark'>
             <View className='px-4 border-b-2 border-border-light dark:border-border-dark pb-4 '>
-                <BackButton/>
+                
+                <View className='flex-row justify-between items-center'>
+                    <BackButton
+                        white
+                    />
+                    <TouchableOpacity accessibilityLabel='Start Practicing Words' accessibilityHint='Start a practice session with your learned words' style={{ boxShadow: `inset -3px -3px 0 0 ${colorScheme === 'dark' ? '#0000002c' : '#b7b7b727'}` }} onPress={() => router.push('/(tabs)/home/Practice')} className='flex-row items-center self-start rounded-full border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark pl-4 pr-3 h-9'>
+                        <ThemedText className='text-lg mr-2 font-bold'>{t("practice")}</ThemedText>
+                        <ThemedIcon name='ArrowRight' size={20} />
+                    </TouchableOpacity>
+                </View>
+                
                 <View className='flex-row justify-between items-center my-2'>
                     <View>
                         <ThemedText variant='subtext'>{ t("learned") }</ThemedText>
@@ -119,12 +128,12 @@ const userWordsList = () => {
                         <ThemedText className='text-2xl font-bold'>{user.words_total}</ThemedText>
                     </View>
                     <TouchableOpacity accessibilityLabel='Open Filters Menu' onPress={() => setModalVisible(!modalVisible)}>
-                        <ThemedIcon name='Settings' size={24} />
+                        <ThemedIcon name='Settings' size={24} strokeWidth={2} />
                     </TouchableOpacity>
                 </View>
                 <ProgressBar progressPercent={progressPercent}/>
             </View>
-            <ScrollView className='flex-1'>
+            <ScrollView className='flex-1 bg-background-light dark:bg-background-dark'>
                 {learnedWords.length === 0 ? (
                     <View className='flex-1 justify-center items-center mt-20 px-4'>
                         <ThemedText className='text-center text-lg opacity-50'>{ t("no_words") }</ThemedText>
@@ -163,14 +172,6 @@ const userWordsList = () => {
                 )}
                 
             </ScrollView>
-            <View className="mt-auto w-full px-4 py-4 bg-background-light dark:bg-background-dark border-t border-border-light dark:border-border-dark justify-start">
-                <MainButton
-                    text={t("practice")}
-                    onPress={() => router.push('/(tabs)/home/Practice')}
-                    accessibilityLabel='Start Practicing Words'
-                    accessibilityHint='Start a practice session with your learned words'
-                />
-            </View>
             <FiltersModal
                 modalVisible={modalVisible}
                 setModalVisible={setModalVisible}

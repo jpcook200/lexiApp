@@ -1,9 +1,9 @@
 import useDatabase from '@/db/useDatabase';
 import { useUserStore } from '@/hooks/useGetUser';
 import { User, Word } from '@/types/types';
-import { useAudioPlayer } from 'expo-audio';
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import * as Haptics from 'expo-haptics';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dimensions, Text } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -29,10 +29,17 @@ type CardStackCardProps = {
     switchFace: boolean;
 };
 
+const sounds: Record<string, any> = {
+    cardswipe: require("@/assets/sounds/cardswipe.mp3"),
+    complete: require("@/assets/sounds/goal-complete.mp3"),
+};
+
+
 const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWords, activeWords = [], updateProgress, practice = false, progress, setCurrentStreak, lastWordLearned, setlastWordLearned, switchFace}: CardStackCardProps) => {
     const { t } = useTranslation();
+    const { removeActiveWordStore, reorderWordStore } = useUserStore();
     const player = useAudioPlayer(require("@/assets/sounds/cardswipe.mp3"));
-    const completedPlayer = useAudioPlayer(require("@/assets/sounds/goal-complete.mp3"));
+    const status = useAudioPlayerStatus(player);
     const [cardsMoving, setCardsMoving] = useState(false);
     const { setSelectedWordId } = useUserStore();
     const { toggleLearned, insertIntoLearnedWords, updateStreakCount, updateStreakRecord} = useDatabase();
@@ -40,18 +47,20 @@ const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWo
     const screenHeight = Dimensions.get('window').height;
     const translationX = useSharedValue(0);
     const translationY = useSharedValue(0);
+    const soundDisabled = useRef(false);
 
     const handleSwipeUp = async () => {
-        if (!word || !user || !setActiveWords || !updateProgress || practice || progress === undefined) return;
+        if (!word || !user || !updateProgress || practice || progress === undefined) return;
         try {
             await insertIntoLearnedWords(word);
             await toggleLearned(word.word_id)
             updateProgress();
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             setlastWordLearned(word);
-            setActiveWords((prev: Word[]) => (Array.isArray(prev) ? prev.filter(w => w.id !== word.id) : []));
+            removeActiveWordStore(word.id)
             
             if (activeWords.length <= 1) {
+                playSound();
                 await updateStreakCount("increment");
                 const newValue = await updateStreakRecord(1);
                 setCurrentStreak(newValue);
@@ -62,28 +71,41 @@ const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWo
     }
     
     const loopCards = (index: number) => {
-        if (!setActiveWords) return;
-        setSelectedWordId(activeWords[index + 1].word_id)
-        setTimeout(() => {
-            setActiveWords((prev: Word[]) => {
-                const currentActive = prev || [];
-                if (index < 0 || index >= currentActive.length) return prev;
-
-                const swipedCard = currentActive[index];
-                const remaining = [
-                    ...currentActive.slice(0, index),
-                    ...currentActive.slice(index + 1)
-                ];
-                const updated = [...remaining, swipedCard];
-                return updated ;
-            });
+    if (!activeWords) return;
+    
+    setTimeout(() => {
+        reorderWordStore(index);
+        const newActiveWords = useUserStore.getState().activeWordsStore;
+        if (newActiveWords && newActiveWords.length > 0) {
+            setSelectedWordId(newActiveWords[0].word_id);
+        }
         }, 150);
     };
 
-    const playSwipe = () => { 
-        if(user.muted === 1) return;
-        player.play()
-    }
+    const disableSoundTemporarily = (ms = 200) => {
+        soundDisabled.current = true;
+        setTimeout(() => {
+            soundDisabled.current = false;
+        }, ms);
+        };
+
+    const playSound = () => {
+        if (soundDisabled.current) return;
+        if (user.muted === 1) return;
+        if (!status?.isLoaded || status?.isBuffering) return;
+
+        soundDisabled.current = true;
+
+        try {
+            player.play();
+        } catch (err) {
+            console.log("Sound play error:", err);
+        }
+
+        disableSoundTemporarily(250);
+    };
+
+
 
     const handleSetCardsMoving = (moving: boolean) => {
         if (moving === cardsMoving) return;
@@ -115,7 +137,7 @@ const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWo
                     Math.sign(event.velocityX) * (screenWidth * 1.5),
                     { velocity: event.velocityX },
                 );
-                scheduleOnRN(playSwipe);
+                scheduleOnRN(playSound);
                 scheduleOnRN(loopCards, index);
                 activeIndex.value = withSpring(index + 1);
             } else if (event.velocityY < -300) {

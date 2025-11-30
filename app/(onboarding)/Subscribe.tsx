@@ -4,6 +4,7 @@ import ThemedIcon from '@/components/ThemedIcon';
 import ThemedText from '@/components/ThemedText';
 import useDatabase from '@/db/useDatabase';
 import { router } from 'expo-router';
+import { useColorScheme } from 'nativewind';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
@@ -26,6 +27,7 @@ const Subscribe = () => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [purchaseLoading, setPurchaseLoading] = useState(false);
+  const { colorScheme } = useColorScheme();
   const {
     connected,
     subscriptions,
@@ -39,20 +41,18 @@ const Subscribe = () => {
           case ErrorCode.UserCancelled:
             break;
           case ErrorCode.NetworkError:
-            Alert.alert('Network Error', 'Please check your connection.');
+            Alert.alert(t("error"), t("check_connection"));
             break;
           case ErrorCode.ItemUnavailable:
-            Alert.alert('Item Unavailable', 'This item is not available for purchase.');
+            Alert.alert(t("error"), t("not_avail"));
             break;
           default:
-            Alert.alert('Purchase Failed', error.message);
+            Alert.alert(t("error"));
         }
      },
    });
   
-  const [plans, setPlans] = useState<Plan[]>([
-
-  ])
+  const [plans, setPlans] = useState<Plan[]>([])
 
   const subscriptionSkus = Platform.select({
     ios: ['lexigramproweekly', 'lexigramproyearly'],
@@ -103,12 +103,29 @@ const Subscribe = () => {
   ];
 
   const buySubscriptionWithOffer = async (subscriptionId: string | undefined) => {
-    if (!subscriptionId) {
-      Alert.alert('Error', 'Subscription ID is undefined.');
+    console.log('Buy subscription called:', subscriptionId, 'Loading:', purchaseLoading);
+    
+    // Prevent multiple simultaneous requests
+    if (purchaseLoading) {
+      console.log('Already loading, ignoring');
       return;
     }
+
+    if (!subscriptionId) {
+      Alert.alert(t("error"), t("subscription_unavailable"));
+      return;
+    }
+
+    // Verify the subscription exists in our products
+    const subscriptionExists = subscriptions.find(sub => sub.id === subscriptionId);
+    if (!subscriptionExists) {
+      Alert.alert(t("error"), t("subscription_not_found"));
+      return;
+    }
+
     try {
       setPurchaseLoading(true);
+      
       await requestPurchase({
         request: {
           ios: { sku: subscriptionId },
@@ -116,6 +133,7 @@ const Subscribe = () => {
         },
         type: 'subs',
       });
+      
       const activeSubs = await getActiveSubscriptions();
       if (activeSubs.length > 0) {
         await setUserAccessLevel('pro');
@@ -123,9 +141,10 @@ const Subscribe = () => {
       }
       
     } catch (error) {
-        console.error('Purchase request failed:', error);
+      console.error('Purchase request failed:', error);
+      // Don't show alert here since onPurchaseError handles it
     } finally {
-        setPurchaseLoading(false);
+      setPurchaseLoading(false);
     }
   };
 
@@ -140,7 +159,7 @@ const Subscribe = () => {
       <View className='absolute -top-10 -left-60 h-[100%] aspect-[1/1] rounded-br-full bg-background-light dark:bg-background-dark'></View>
       <View className='flex-row items-center justify-between'>
         <BackButton />
-        <TouchableOpacity onPress={() => router.push('/(tabs)/home')} className='flex-row items-center self-start rounded-full border border-border-light dark:border-border-dark bg-item-light dark:bg-item-dark pl-4 pr-3 h-9'>
+        <TouchableOpacity accessibilityLabel='Start Practicing Words' accessibilityHint='Start a practice session with your learned words' style={{ boxShadow: `inset -3px -3px 0 0 ${colorScheme === 'dark' ? '#0000002c' : '#b7b7b727'}` }} onPress={() => router.push('/(tabs)/home')} className='flex-row items-center self-start rounded-full border border-border-light dark:border-border-dark bg-item-light dark:bg-item-dark pl-4 pr-3 h-9'>
           <ThemedText className='text-lg mr-2 font-bold'>{t("skip")}</ThemedText>
           <ThemedIcon name='ArrowRight' size={20} />
         </TouchableOpacity>
@@ -205,15 +224,21 @@ const Subscribe = () => {
         </View>
       </ScrollView>
       <View className='h-20 items-center justify-center'>
-        {purchaseLoading ?(
+        {purchaseLoading ? (
           <ActivityIndicator size="small" />
         ) : (
-            <MainButton
-              text={(t("subscribe_now"))}
-              onPress={() => buySubscriptionWithOffer(selectedPlan)}
-              accessibilityLabel='Proceed to Homepage'
-              accessibilityHint='Navigates to the homepage'
-            />
+          <MainButton
+            text={t("subscribe_now")}
+            onPress={() => {
+              const plan = plans.find(p => p.id === selectedPlan);
+              if (plan) {
+                buySubscriptionWithOffer(plan.id);
+              }
+            }}
+            
+            accessibilityLabel='Proceed to Homepage'
+            accessibilityHint='Navigates to the homepage'
+          />
         )}
       </View>
       

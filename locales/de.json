@@ -195,5 +195,14 @@
     "date": "Datum",
     "limit": "Limit",
     "yesterday": "Gestern",
-    "unlimited": "Unbegrenzt"
+    "unlimited": "Unbegrenzt",
+
+    "wpd_change_error": "Fehler beim Ändern der Wörter pro Tag. Bitte versuche es erneut.",
+    "fetch_words_error": "Beim Abrufen der Wörter ist ein Fehler aufgetreten. Bitte versuche es später erneut.",
+    "error": "Fehler",
+    "check_connection": "Bitte überprüfe deine Verbindung.",
+    "not_avail": "Dieser Artikel ist nicht zum Kauf verfügbar.",
+    "no_words_available": "Keine Wörter verfügbar",
+    "lang_change_limit": "Du kannst deine Lern- oder Muttersprache nur einmal am Tag ändern.",
+    "could_not_change_language": "Konnte die Sprache nicht ändern. Bitte versuche es später erneut."
 }

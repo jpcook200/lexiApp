@@ -1,6 +1,7 @@
 import { useTextToSpeech } from '@/api/textToSpeech';
 import useDatabase from '@/db/useDatabase';
 import { User, Word } from '@/types/types';
+import { formatSentenceByLanguage, trimEdgeChars } from '@/utilities/helpers';
 import { Heart, Mars, Venus } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useEffect, useRef, useState } from 'react';
@@ -127,9 +128,9 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
                                     </View>
                                     <View>
                                         <ThemedText variant='primary' className='text-5xl sm:text-4xl font-bold'>
-                                            { word?.learning_word }
+                                            { (word?.learning_word).toLowerCase() }
                                         </ThemedText>
-                                        <ThemedText variant='subtext' className='text-xl'>{ word?.learning_pronunciation }</ThemedText>
+                                        <ThemedText variant='subtext' className='text-xl'>{ trimEdgeChars(word?.learning_pronunciation) }</ThemedText>
                                     </View>
                                     <View className='bg-primary w-auto px-5 py-1 rounded-full self-start mt-3'>
                                         <ThemedText className='font-bold capitalize text-white'>{ t(word?.part_of_speech) }</ThemedText>
@@ -162,15 +163,15 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
                                                 : null
                                         }
                                         </View>
-                                        <TouchableOpacity accessibilityLabel='Text to Speech for Example Sentence' onPress={() => handleTextToSpeech(word?.learning_sentence, user?.learn_lang || 'en')} disabled={displayOnly || ttsDisabled} className={`p-2 ${ttsDisabled ? 'opacity-50' : ''}`}>
+                                        <TouchableOpacity accessibilityLabel='Text to Speech for Example Sentence' onPress={() => handleTextToSpeech(word?.learning_sentence, word?.learn_lang || 'en')} disabled={displayOnly || ttsDisabled} className={`p-2 ${ttsDisabled ? 'opacity-50' : ''}`}>
                                             <ThemedIcon name={ ttsDisabled ? 'VolumeOff' : 'Volume2' } size={24}/>
                                         </TouchableOpacity>
                                     </View>
                                     <View>
                                         <View>
-                                            <ThemedText variant='primary' className='text-5xl mb-1 font-bold sm:text-4xl'>{ word?.native_word }</ThemedText>
+                                            <ThemedText variant='primary' className='text-5xl mb-1 font-bold sm:text-4xl'>{ (word?.native_word).toLowerCase() }</ThemedText>
                                         </View>
-                                        <ThemedText variant='subtext' className='text-lg'>{ word?.native_definition }</ThemedText>
+                                        <ThemedText variant='subtext' className='text-lg'>{ formatSentenceByLanguage(word?.native_definition, word?.native_lang) }</ThemedText>
                                     </View>
                                     <View>
                                         <View className='flex-row items-center justify-between'>
@@ -180,9 +181,9 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
                                             </TouchableOpacity>
                                         </View>
                                         
-                                        {showTranslation ? (<ThemedText variant='subtext' className='text-lg italic'>{word?.native_sentence}</ThemedText>)
+                                        {showTranslation ? (<ThemedText variant='subtext' className='text-lg italic'>{formatSentenceByLanguage(word?.native_sentence, word?.native_lang)}</ThemedText>)
                                             :
-                                            (<ThemedText variant='subtext' className='text-lg italic'>{word?.learning_sentence}</ThemedText>
+                                            (<ThemedText variant='subtext' className='text-lg italic'>{formatSentenceByLanguage(word?.learning_sentence, word?.learn_lang)}</ThemedText>
                                         )}
                                         
                                     </View>

@@ -1,18 +1,54 @@
-import { getWords } from '@/api/getWords';
+import { getNativeTranslations, getWords } from '@/api/getWords';
 import useDatabase from '@/db/useDatabase';
 import { User, Word } from '@/types/types';
 import { createDirectory } from '@/utilities/createDirectory';
+import i18next from 'i18next';
 import { DateTime } from 'luxon';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert } from 'react-native';
-import { useIAP } from 'react-native-iap';
+import { endConnection, initConnection, useIAP } from 'react-native-iap';
+import { useUserStore } from './useGetUser';
 
 const useGetWords = () => {
-    const { setLastSet, increaseDifficultyLevel, deleteAllFromDailyWords, getDailyLearnedCount, getDailyWords, saveDailyWords, getLearnedWordsIds, saveLastFetchedDate, toggleRandomDailyWords } = useDatabase();
+    const { getDailyLearnedCount, saveDailyWords, updateNativeWords, setLangChangedDate, resetProgressByLanguagePair, saveLastFetchedDate, getDailyWords, deleteAllFromDailyWords, getLearnedWordsIds, increaseDifficultyLevel, setLastSet, initStreakRecord, toggleRandomDailyWords, setLearningLanguage, setNativeLanguage } = useDatabase();
+    const { getActiveSubscriptions, fetchProducts } = useIAP();
+    const { setActiveWordsStore, activeWordsStore } = useUserStore();
+    const [error, setError] = useState(false);
+    const { t } = useTranslation();
+
+    //state
     const [progressToday, setProgressToday] = useState(0);
-    const [activeWords, setActiveWords] = useState<Word[]>([]);
-    const { getActiveSubscriptions, connected } = useIAP();
+    const [wordsLoading, setWordsLoading] = useState(false);
     
+    const handleGetProgessCount = async () => {
+        try {
+            const count = await getDailyLearnedCount();
+            setProgressToday(count ?? 0);
+        } catch (error) {
+            console.error('Error fetching daily learned words count:', error);
+        }
+    };
+
+    const getTransactionId = async () => {
+        try {
+            await initConnection();
+            const products = await getActiveSubscriptions();
+            if (products && products.length > 0) {
+                return products[0].transactionId || null;
+            }
+            
+            return null;
+        } catch (error) {
+            console.error('Error initializing IAP connection:', error);
+            
+            return null;
+        }
+        finally {
+            await endConnection();
+        }
+    }
+
     const getHighestDifficultyLevel = (words: Word[]) => {
         const difficulties = ['a1', 'a2', 'b1', 'b2', 'c1', 'c2'];
         if (!Array.isArray(words) || words.length === 0) return 'a1';
@@ -27,181 +63,282 @@ const useGetWords = () => {
         return difficulties[maxIndex];
     };
 
-    const handleGetProgessCount = async () => {
+    //Day handlers--------------------------------------------------------------------------------------------------------------------
+
+    const handleNativeLanguageChange = async (lang: string) => {
         try {
-            const count = await getDailyLearnedCount();
-            setProgressToday(count ?? 0);
+            const storedDailyWords = await getDailyWords();
+            if(storedDailyWords.length > 0) {
+                const storedWordIds = storedDailyWords.map((word: Word) => word.word_id);
+                const newTranslations = await getNativeTranslations(lang, storedWordIds);
+                await updateNativeWords(newTranslations);
+
+            }
+
+            await setNativeLanguage(lang);
+            i18next.changeLanguage(lang);
+
         } catch (error) {
-            console.error('Error fetching daily learned words count:', error);
+            console.error('Error setting native language:', error);
+            throw error;
         }
     };
 
-    const handleCompletedSet = (storedDailyWords: Word[]) => {
-        return storedDailyWords.filter((word) => word.learned === 0 && word.hidden === 0);
-    };
-
-    const handleNewDayOrEmptyWords = async ({ user, learnedWordIds, dailyWordIds, localDatetime, deleteWords, transactionId }: {user: User, learnedWordIds: number[], dailyWordIds: number[], localDatetime: string, deleteWords: boolean, transactionId: string | null}) => {
+    const handleLanguageChange = async (
+        wordsPerDay: number,
+        oldLearnLang: string,
+        oldNativeLang: string,
+        newLearnLang: string,
+        newNativeLang: string,
+        lastChangedDate: string | undefined,
+        userAccessLevel: 'pro' | 'free',
+        userDifficultyLevel?: string
+    ) => {
+        let wordsToReturn: Word[] = [];
+        const todayDate = DateTime.now().toISODate();
+        const transactionId = await getTransactionId();
         try {
-            setProgressToday(0);
-            await createDirectory();
+            if (userAccessLevel === 'free') {
+                if (todayDate === lastChangedDate) {
+                    throw new Error("lang_change_limit");
+                }
 
-            if (deleteWords) {
+                const { words: newWords, lastSet } = await getWords({
+                    nativeLang: newNativeLang,
+                    learnLang: newLearnLang,
+                    difficulty: userDifficultyLevel || 'a1',
+                    limit: wordsPerDay,
+                    excludeIds: [],
+                    currentDateTime: todayDate,
+                    transactionId
+                });
+
+                if (newLearnLang !== oldLearnLang) {
+                    await setLearningLanguage(newLearnLang);
+                }
+
+                if (newNativeLang !== oldNativeLang) {
+                    await setNativeLanguage(newNativeLang);
+                }
+
+                await setLangChangedDate();
+
                 await deleteAllFromDailyWords();
+                await resetProgressByLanguagePair(oldNativeLang, oldLearnLang);
+
+                const newData = await saveDailyWords(newWords);
+                await saveLastFetchedDate();
+                
+                wordsToReturn =  newData;
+            
+            } else if (userAccessLevel === 'pro') { 
+                const newData = await handleWPDChange(wordsPerDay, newLearnLang, newNativeLang, userDifficultyLevel = 'a1', todayDate);
+                if (newData) { 
+                    wordsToReturn = newData;
+                }
             }
 
-            const { words: newWords, lastSet } = await getWords({
-                nativeLang: user.native_lang,
-                learningLang: user.learn_lang,
-                difficulty: user.difficulty_level,
-                limit: user.words_per_day!,
-                excludeIds: [...learnedWordIds, ...dailyWordIds],
-                localDatetime,
+            if (newLearnLang !== oldLearnLang) {
+                await setLearningLanguage(newLearnLang);
+            }
+
+            if (newNativeLang !== oldNativeLang) {
+                await setNativeLanguage(newNativeLang);
+                i18next.changeLanguage(newNativeLang);
+            }
+            return wordsToReturn;
+        } catch (error) {
+            console.error('Error handling language change:', error);
+            throw error;
+        }
+    };
+
+    const handleWPDChange = async (selectedNumber: number, learnLang: string, nativeLang: string, difficulty: string, currentDateTime: string ) => { 
+        let wordsToReturn: Word[] | null = null;
+        const storedWords = await getDailyWords(learnLang, nativeLang);
+        const unhiddenStoredWords = storedWords.filter(word => word.hidden === 0);
+        const currentDailyWords = unhiddenStoredWords.length;
+        try {
+            if (selectedNumber < currentDailyWords) {
+                const wordsToRemove = currentDailyWords - selectedNumber;
+                await toggleRandomDailyWords(wordsToRemove, 'hide');
+                wordsToReturn = await getDailyWords();
+            
+            } else if (selectedNumber > currentDailyWords) {
+                const wordsToAdd = selectedNumber - currentDailyWords;
+                await toggleRandomDailyWords(wordsToAdd, 'show');
+                const newStoredWords = await getDailyWords(learnLang, nativeLang);
+                wordsToReturn = newStoredWords;
+                const dailyWordIds = newStoredWords.map((word: Word) => word.word_id);
+                const learnedWordIds = await getLearnedWordsIds(learnLang, nativeLang);
+                
+                if (selectedNumber > newStoredWords.length) {
+                    const limit = selectedNumber - newStoredWords.length;
+                    const transactionId = await getTransactionId();
+                    const { words: newWords, lastSet } = await getWords({
+                        nativeLang,
+                        learnLang,
+                        difficulty,
+                        limit,
+                        excludeIds: [...learnedWordIds, ...dailyWordIds],
+                        currentDateTime,
+                        transactionId
+                    });
+                    await saveLastFetchedDate();
+                    const newData = await saveDailyWords(newWords);
+                    wordsToReturn = newData;
+
+                }
+            } else { 
+                wordsToReturn = storedWords;
+            }
+            
+            return wordsToReturn
+            
+        } catch (error) {
+            console.error('Error handling change in wpd:', error);
+            throw error;
+        }
+    };
+    
+    const handleFirstDay = async (limit: number, nativeLang: string, learnLang: string, difficulty: string, currentDateTime: string) => {
+        try {
+            await createDirectory();
+            const transactionId = await getTransactionId();
+            const { words: newWords } = await getWords({
+                nativeLang,
+                learnLang,
+                difficulty,
+                limit,
+                excludeIds: [],
+                currentDateTime,
                 transactionId
             });
             
+            const newData = await saveDailyWords(newWords);           
             await saveLastFetchedDate();
-
-            const newData = await saveDailyWords(newWords);
-            const filteredResults = newData.filter((word: Word) => word.learned === 0 && word.hidden === 0);
+            return newData;
             
-            const highestWordDifficulty = getHighestDifficultyLevel(filteredResults);
-            const allSameAsHighest = filteredResults.length > 0 && filteredResults.every(word => (word.learning_difficulty ?? '').toLowerCase() === highestWordDifficulty);
-            if (filteredResults.length > 0 && !allSameAsHighest) {
-                await increaseDifficultyLevel(highestWordDifficulty);
-            }
-            
-            setActiveWords(filteredResults);
-
-            if (user.last_set === 0 && (lastSet === true)) {
-                alert('Well Done You Have Completed the course, these are your last words to learn!');
-                await setLastSet();
-            }
-
-            return filteredResults;
-
-        } catch (e) {
-            Alert.alert('Error', 'There was an error fetching your words. Please try again later.');
-            throw e
+        } catch (error) {
+            console.error('Error handling first day:', error);
+            throw error;
         }
-        
     };
 
-    const handleSameDay = async ({ user, storedDailyWords, learnedWordIds, dailyWordIds, localDatetime, transactionId}: {user: User, storedDailyWords: Word[], learnedWordIds: number[], dailyWordIds: number[], localDatetime: string, transactionId: string | null}) => {
+    const handleSameDay = async () => {
+        const updatedWords = useUserStore.getState().activeWordsStore;
         try {
-
-            let newStoredWords = storedDailyWords;
-            const unhiddenWords = newStoredWords.filter((word) => word.hidden === 0);
-
-            if (unhiddenWords.length < user.words_per_day!) {
-                const wordsNeeded = user.words_per_day! - unhiddenWords.length;
-                await toggleRandomDailyWords(wordsNeeded, 'show');
-            }
-
-            newStoredWords = await getDailyWords();
-
-            if (user.words_per_day! > newStoredWords.length) {
-                const { words: newWords, lastSet } = await getWords({
-                    nativeLang: user.native_lang,
-                    learningLang: user.learn_lang,
-                    difficulty: user.difficulty_level,
-                    limit: user.words_per_day! - newStoredWords.length,
-                    excludeIds: [...learnedWordIds, ...dailyWordIds],
-                    localDatetime,
-                    transactionId
-                });
-
-                await saveLastFetchedDate();    
-
-                if (user.last_set === 0 && (lastSet === true)) {
-                    alert('Well Done You Have Completed the course, these are your last words to learn!');
-                    await setLastSet();
-                }
-            
-                const newData = await saveDailyWords(newWords);
-                const filteredResults = newData.filter((word) => word.learned === 0  && word.hidden === 0)
-
-                setActiveWords(filteredResults);
-                return filteredResults;
-            } else {
-                const filteredResults = newStoredWords.filter((word) => word.learned === 0 && word.hidden === 0);
-                setActiveWords(filteredResults);
-                return filteredResults;
+            if (updatedWords.length === 0) {
+                setWordsLoading(true);
+                const storedDailyWords = await getDailyWords();
+                return storedDailyWords;
+            } else { 
+                return null
             }
             
-        } catch (e) {
-            Alert.alert('Error', 'There was an error fetching your words. Please try again later.');
-            throw e
+        } catch (error) {
+            console.error('Error handling same day:', error);
+            throw error;
         }
-        
     };
 
-    const handleGetWords = async (user: User) => {
+    const handleNewDay = async (limit: number, nativeLang: string, learnLang: string, difficulty: string, currentDateTime: string, userLastSet: number, userAccessLevel: 'pro' | 'free') => { 
         try {
-            
+            await initStreakRecord();
+            await deleteAllFromDailyWords();
+            const transactionId = await getTransactionId();
             const storedDailyWords = await getDailyWords();
             const dailyWordIds = storedDailyWords.map((word: Word) => word.word_id);
             const learnedWordIds = await getLearnedWordsIds();
+            setProgressToday(0);
 
-            const userTimezone = user.timezone;
-            const localDatetime = DateTime.now().setZone(userTimezone).toString();
+            const { words: newWords, lastSet } = await getWords({
+                nativeLang,
+                learnLang,
+                difficulty,
+                limit,
+                excludeIds: [...dailyWordIds, ...learnedWordIds],
+                currentDateTime,
+                transactionId
+            });
 
-            const localDate = localDatetime.split('T')[0];
-            const storedDate = user.last_fetched?.split(' ')[0] || null;
+            const newData = await saveDailyWords(newWords);           
+            await saveLastFetchedDate();
 
-            if (!connected || !user) { 
-                return storedDailyWords.filter((word) => word.learned === 0 && word.hidden === 0);
-            }
-            const activeSubscriptions = await getActiveSubscriptions();
-            const transactionId = activeSubscriptions[0]?.transactionId || null;
-
-            if (user.last_set === 1 && user.difficulty_level === 'c2') {
-                return handleCompletedSet(storedDailyWords);
-            }
-
-            if (storedDailyWords.length === 0 || !storedDate) {
-                return handleNewDayOrEmptyWords({
-                    user,
-                    learnedWordIds,
-                    dailyWordIds,
-                    localDatetime,
-                    deleteWords: false,
-                    transactionId
-                    
-                });
+            const highestWordDifficulty = getHighestDifficultyLevel(newData);
+            const allSameAsHighest = newData.length > 0 && newData.every(word => (word.learning_difficulty ?? '').toLowerCase() === highestWordDifficulty);
+            if (newData.length > 0 && !allSameAsHighest) {
+                await increaseDifficultyLevel(highestWordDifficulty);
             }
 
-            if (localDate > storedDate) {
-                return handleNewDayOrEmptyWords({
-                    user,
-                    learnedWordIds,
-                    dailyWordIds,
-                    localDatetime,
-                    deleteWords: true,
-                    transactionId
-                });
-            } else if (storedDate === localDate) {
-                return handleSameDay({
-                    user,
-                    storedDailyWords,
-                    learnedWordIds,
-                    dailyWordIds,
-                    localDatetime,
-                    transactionId
-                });
+            if (userLastSet === 0 && (lastSet === true)) {
+                if (userAccessLevel === 'pro') { 
+                    alert('Well done you have completed the course, these are your last words to learn!');
+
+                } else if (userAccessLevel === 'free') {
+                    alert('Well done you have completed the free course, consider upgrading to pro to access more words!');
+
+                }
+                
+                await setLastSet();
             }
 
-            return storedDailyWords.filter((word) => word.learned === 0 && word.hidden === 0);
-
+            return newData;
+            
         } catch (error) {
-            console.error('Error fetching daily words:', error);
-            const errorStoredDailyWords = await getDailyWords();
-            const fallbackWords = errorStoredDailyWords.filter((word) => word.learned === 0 && word.hidden === 0);
-            setActiveWords(fallbackWords);
-            return fallbackWords;
+            console.error('Error handling new day:', error);
+            throw error;
         }
-    };
+    }
 
-    return { handleGetWords, activeWords, setActiveWords, progressToday, setProgressToday, handleGetProgessCount };
+    const handleGetWords = async (user: User, currentDateTime: string) => {
+        let wordsToReturn: Word[] | null = null;
+        const userLastFetched = user.last_fetched ? DateTime.fromISO(user.last_fetched.slice(0, 10)).startOf("day") : null;
+        const currentDate = DateTime.fromISO(currentDateTime).startOf("day")
+        await handleGetProgessCount();
+
+        try {
+            if (userLastFetched === null) {
+                setWordsLoading(true);
+                wordsToReturn = await handleFirstDay(
+                    user.words_per_day,
+                    user.native_lang,
+                    user.learn_lang,
+                    user.difficulty_level,
+                    currentDateTime
+                );
+
+            } else if (userLastFetched < currentDate) {
+                setWordsLoading(true);
+                wordsToReturn = await handleNewDay(
+                    user.words_per_day,
+                    user.native_lang,
+                    user.learn_lang,
+                    user.difficulty_level,
+                    currentDateTime,
+                    user.last_set,
+                    user.access_level
+                );
+            } else {
+                wordsToReturn = await handleSameDay() || null;
+            }
+
+            if (wordsToReturn) {
+                return wordsToReturn;
+            }
+            else { 
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching words:', error);
+            Alert.alert(t("error"), t("fetch_words_error"));
+            setError(true);
+            throw error;
+        } finally {
+            setWordsLoading(false);
+        }
+    }
+    return { handleGetWords, handleNativeLanguageChange, handleGetProgessCount, progressToday, handleWPDChange, handleLanguageChange, wordsLoading, error}
 };
 
 export default useGetWords;

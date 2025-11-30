@@ -51,11 +51,13 @@ const ChooseLanguage = () => {
     }, []);
 
     return (
-        <SafeAreaView className="flex-1 h-full bg-secondary-light dark:bg-secondary-dark">
-            <View className='w-full h-52 bg-secondary-light dark:bg-secondary-dark'>
+        <SafeAreaView className="flex-1 h-full bg-item-light dark:bg-item-dark">
+            <View className='w-full h-52 bg-item-light dark:bg-item-dark'>
                 <View className='flex-1 justify-center items-center px-4'>
-                    <BackButton/>
-                    <View className='w-20 h-20 bg-item-light dark:bg-item-dark rounded-full flex items-center justify-center border border-border-light dark:border-border-dark'>
+                    <BackButton
+                        white
+                    />
+                    <View className='w-20 h-20 bg-background-light dark:bg-background-dark rounded-full flex items-center justify-center border border-border-light dark:border-border-dark'>
                         <ThemedIcon name='Languages' />
                     </View>
                     <ThemedText className='text-2xl font-bold mt-4'>{ t("whats_your_native_language") }</ThemedText>
@@ -75,7 +77,7 @@ const ChooseLanguage = () => {
                     ))}
                 </View>
             </ScrollView>
-            <View className='p-4 mb-4 border-t border-border-light dark:border-border-dark' >
+            <View className='p-4 mb-4 border-t border-border-light dark:border-border-dark bg-item-light dark:bg-item-dark' >
                 <MainButton
                     text={ t("next") }
                     onPress={handleNext}

@@ -11,10 +11,10 @@ type GetWordsResponse = {
 
 
 
-export const getWords = async ({ nativeLang, learningLang, difficulty = 'a1', limit, excludeIds, localDatetime, transactionId }: getWordsParams): Promise<GetWordsResponse> => {
+export const getWords = async ({ nativeLang, learnLang, difficulty = 'a1', limit, excludeIds, currentDateTime, transactionId }: getWordsParams): Promise<GetWordsResponse> => {
     try {
         const installationId = await getInstallationId();
-        const response = await fetch(`${apiUrl}/api/words/get-daily?nativeLang=${nativeLang}&learningLang=${learningLang}&difficulty=${difficulty || 'a1'}&limit=${limit}`, {
+        const response = await fetch(`${apiUrl}/api/words/get-daily?nativeLang=${nativeLang}&learningLang=${learnLang}&difficulty=${difficulty || 'a1'}&limit=${limit}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -22,7 +22,7 @@ export const getWords = async ({ nativeLang, learningLang, difficulty = 'a1', li
                 "transaction-id": transactionId || '',
                 "installation-id": installationId || '',
             },
-            body: JSON.stringify({ excludeIds, localDatetime }),
+            body: JSON.stringify({ excludeIds, currentDateTime }),
         });
 
         if (!response.ok) {
@@ -60,6 +60,34 @@ export const getWordsCount = async (langCode: string, premium: boolean) => {
 
     } catch (error) {
         console.error('Error fetching words count:', error);
+        throw error;
+    }
+}
+
+export const getNativeTranslations = async (newNativeLang: string, wordIds: number[]) => {
+    try {
+        const response = await fetch(`${apiUrl}/api/words/get-new-translations`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                "api-key": apiKey,
+            },
+            body: JSON.stringify({
+                newNativeLang,
+                wordIds
+            })
+        });
+
+        if (!response.ok) {
+            console.error('Failed to fetch native translations:', response.statusText);
+            throw new Error('Failed to fetch native translations');
+        }
+
+        const data = await response.json();
+        return data
+        
+    } catch (error) {
+        console.error('Error fetching native translations:', error);
         throw error;
     }
 }
