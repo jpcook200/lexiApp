@@ -12,7 +12,7 @@ import { ErrorCode, useIAP } from 'react-native-iap';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 type Plan = {
-  id: string | undefined;
+  id: string ;
   name: string;
   price: string | undefined;
   billingCycle: string;
@@ -23,7 +23,7 @@ type Plan = {
 
 const Subscribe = () => {
   const { setUserAccessLevel } = useDatabase();
-  const [selectedPlan, setSelectedPlan] = useState<string | undefined>('lexigramproweekly');
+  const [selectedPlan, setSelectedPlan] = useState<string>('lexigramproweekly');
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [purchaseLoading, setPurchaseLoading] = useState(false);
@@ -87,10 +87,11 @@ const Subscribe = () => {
   }, [connected, redirected]);
 
   useEffect(() => {
+    console.log(subscriptions)
     if(subscriptions.length == 0) return;
     setPlans([
-      { id: subscriptions.find(item => item.id === 'lexigramproweekly')?.id, name: t("weekly_plan"), price: subscriptions.find(item => item.id === 'lexigramproweekly')?.displayPrice, billingCycle: t("weekly"), per: t("per_week"), caption: "per week after 7 day free trial"  },
-      { id: subscriptions.find(item => item.id === 'lexigramproyearly')?.id, name: t("yearly_plan"), price: subscriptions.find(item => item.id === 'lexigramproyearly')?.displayPrice, billingCycle: t("yearly"), per: t("per_year"), caption: "per year after 7 day free trial" },
+      { id: "lexigramproweekly", name: t("weekly_plan"), price: subscriptions.find(item => item.id === 'lexigramproweekly')?.displayPrice, billingCycle: t("weekly"), per: t("per_week"), caption: "per week after 7 day free trial"  },
+      { id: "lexigramproyearly", name: t("yearly_plan"), price: subscriptions.find(item => item.id === 'lexigramproyearly')?.displayPrice, billingCycle: t("yearly"), per: t("per_year"), caption: "per year after 7 day free trial" },
     ]);
    }, [subscriptions]);
 
@@ -103,6 +104,7 @@ const Subscribe = () => {
   ];
 
   const buySubscriptionWithOffer = async (subscriptionId: string | undefined) => {
+    
     console.log('Buy subscription called:', subscriptionId, 'Loading:', purchaseLoading);
     
     // Prevent multiple simultaneous requests
@@ -122,10 +124,10 @@ const Subscribe = () => {
       Alert.alert(t("error"), t("subscription_not_found"));
       return;
     }
-
+    setPurchaseLoading(true);
     try {
-      setPurchaseLoading(true);
-      
+      console.log('Purchase request successful for:', subscriptionId);
+      console.log("connected:", connected);
       await requestPurchase({
         request: {
           ios: { sku: subscriptionId },
@@ -142,7 +144,6 @@ const Subscribe = () => {
       
     } catch (error) {
       console.error('Purchase request failed:', error);
-      // Don't show alert here since onPurchaseError handles it
     } finally {
       setPurchaseLoading(false);
     }
@@ -232,6 +233,7 @@ const Subscribe = () => {
             onPress={() => {
               const plan = plans.find(p => p.id === selectedPlan);
               if (plan) {
+                console.log(plan.id)
                 buySubscriptionWithOffer(plan.id);
               }
             }}
