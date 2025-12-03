@@ -30,7 +30,7 @@ export default function HomeScreen() {
     const getLearnedWords = async () => { 
         if (!user) return;
         try {
-            const results = await db.getAllAsync<Word>(`SELECT * FROM learned_words WHERE user_id = ? AND learn_lang = ? AND native_lang = ? ORDER BY learned_at DESC LIMIT 5`, [1, user.learn_lang, user.native_lang]);
+            const results = await db.getAllAsync<Word>(`SELECT * FROM learned_words WHERE user_id = ? AND learn_lang = ? ORDER BY learned_at DESC LIMIT 5`, [1, user.learn_lang, user.native_lang]);
             const { allTime, today, pastWeek } = await getLearnedWordsByTimeframe()
             setLearnedCounts(prev => ({...prev, 
                 today: today, 
