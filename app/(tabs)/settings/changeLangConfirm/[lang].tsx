@@ -5,7 +5,6 @@ import ThemedView from '@/components/ThemedView';
 import useDatabase from '@/db/useDatabase';
 import { useUserStore } from '@/hooks/useGetUser';
 import useGetWords from '@/hooks/useGetWords';
-import i18next from '@/services/i18next';
 import { router, useLocalSearchParams } from 'expo-router';
 import { CircleAlert } from 'lucide-react-native';
 import { useState } from 'react';
@@ -17,7 +16,7 @@ import { Word } from '../../../../types/types';
 const changeLangConfirm = () => {
     const { user, setActiveWordsStore } = useUserStore();
     const { t } = useTranslation();
-    const { setLearningLanguage, resetProgressByLanguagePair, setNativeLanguage } = useDatabase();
+    const { setLearningLanguage, resetProgressByLanguage, setNativeLanguage } = useDatabase();
     const [loading, setLoading] = useState(false);
     const { handleLanguageChange } = useGetWords();
     const params = useLocalSearchParams<{ lang: string }>();
@@ -40,21 +39,12 @@ const changeLangConfirm = () => {
                     lang,
                     updatedUser.native_lang,
                     updatedUser.lang_changed_date,
-                    updatedUser.access_level
+                    updatedUser.access_level,
+                    updatedUser.difficulty_level,
+                    updatedUser.fresh_date
+
                 );
                 
-            } else if (type === 'native') {
-                newWords = await handleLanguageChange(
-                    updatedUser.words_per_day,
-                    updatedUser.learn_lang,
-                    updatedUser.native_lang,
-                    updatedUser.learn_lang,
-                    lang,
-                    updatedUser.lang_changed_date,
-                    updatedUser.access_level
-                );
-
-                await i18next.changeLanguage(lang);
             }
 
             // Success → update words + redirect

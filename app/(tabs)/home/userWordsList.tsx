@@ -8,7 +8,9 @@ import ThemedText from '@/components/ThemedText';
 import useDatabase from '@/db/useDatabase';
 import { useUserStore } from '@/hooks/useGetUser';
 import { FiltersType, Word } from '@/types/types';
+import { getLanguageFlag } from '@/utilities/helpers';
 import { router, useFocusEffect } from 'expo-router';
+import { useSQLiteContext } from 'expo-sqlite';
 import { Heart } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useCallback, useState } from 'react';
@@ -19,8 +21,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const userWordsList = () => {
     const [ttsDisabled, setTtsDisabled] = useState(false);
     const { t } = useTranslation();
-    const { user } = useUserStore();
+    const db  = useSQLiteContext()
+    const { user, fetchUser } = useUserStore();
     const { toggleFavourite, setUserWordsTotal } = useDatabase();
+    const [userWordsTotalState, setUserWordsTotalState] = useState<number>(user?.words_total || 0);
     const { colorScheme } = useColorScheme();
     const { getLearnedWords } = useDatabase();
     const { tts } = useTextToSpeech();
@@ -76,6 +80,7 @@ const userWordsList = () => {
             const wordsCount = await getWordsCount(user!.learn_lang, user!.access_level === 'pro');
             if (wordsCount !== user?.words_total) { 
                 await setUserWordsTotal(wordsCount);
+                setUserWordsTotalState(wordsCount);
             }  
         } catch (error) {
             console.error('Error getting words count:', error);
@@ -106,8 +111,8 @@ const userWordsList = () => {
     
     return (
         <SafeAreaView edges={['top']} className='h-full bg-item-light dark:bg-item-dark'>
-            <View className='px-4 border-b-2 border-border-light dark:border-border-dark pb-4 '>
-                
+            <View className='px-4 border-b-2 border-border-light dark:border-border-dark pb-6 '>
+
                 <View className='flex-row justify-between items-center'>
                     <BackButton
                         white
@@ -125,7 +130,7 @@ const userWordsList = () => {
                     </View>
                     <View>
                         <ThemedText variant='subtext'>{ t("total") }</ThemedText>
-                        <ThemedText className='text-2xl font-bold'>{user.words_total}</ThemedText>
+                        <ThemedText className='text-2xl font-bold'>{userWordsTotalState || '-'}</ThemedText>
                     </View>
                     <TouchableOpacity accessibilityLabel='Open Filters Menu' onPress={() => setModalVisible(!modalVisible)}>
                         <ThemedIcon name='Settings' size={24} strokeWidth={2} />
@@ -148,8 +153,12 @@ const userWordsList = () => {
                                     </TouchableOpacity>
                                 <ThemedText className="font-bold text-xl flex-wrap mb-1 ml-1">{word?.learning_word}</ThemedText>
                                 {(word?.learning_gender && word?.learning_gender !== 'n') && <ThemedIcon name={word?.learning_gender === 'm' ? 'Mars' : 'Venus'} size={16} />}
-                            </View>
-                            <ThemedText variant="subtext" className="italic ml-auto">{word?.native_word}</ThemedText>
+                                </View>
+                                <View className='flex-row items-center'>
+                                    <Text className='text-lg mr-2 mt-1'>{ getLanguageFlag(word?.native_lang) }</Text>
+                                    <ThemedText variant="subtext" className="italic ml-auto">{word?.native_word}</ThemedText>
+                                </View>
+                            
                         </View>
                         <View className='flex-row items-center justify-between'>
                             <View className='flex-1 mr-4'>

@@ -34,7 +34,7 @@ const Subscribe = () => {
     fetchProducts,
     requestPurchase,
     getActiveSubscriptions,
-    validateReceipt
+    finishTransaction,
    } = useIAP({
       onPurchaseError: (error) => {
         switch (error.code) {
@@ -50,6 +50,13 @@ const Subscribe = () => {
             Alert.alert(t("error"));
         }
      },
+     onPurchaseSuccess: async (purchase) => {
+       try {
+         await finishTransaction({ purchase });
+       } catch (error) {
+         console.error('Error finishing transaction:', error);
+       }
+     }
    });
   
   const [plans, setPlans] = useState<Plan[]>([])
@@ -83,11 +90,12 @@ const Subscribe = () => {
   }
 
   useEffect(() => {
-    initProducts();
+    if (connected) { 
+      initProducts();
+    }
   }, [connected, redirected]);
 
   useEffect(() => {
-    console.log(subscriptions)
     if(subscriptions.length == 0) return;
     setPlans([
       { id: "lexigramproweekly", name: t("weekly_plan"), price: subscriptions.find(item => item.id === 'lexigramproweekly')?.displayPrice, billingCycle: t("weekly"), per: t("per_week"), caption: "per week after 7 day free trial"  },
@@ -104,10 +112,8 @@ const Subscribe = () => {
   ];
 
   const buySubscriptionWithOffer = async (subscriptionId: string | undefined) => {
-    
-    console.log('Buy subscription called:', subscriptionId, 'Loading:', purchaseLoading);
-    
-    // Prevent multiple simultaneous requests
+    console.log('Attempting to purchase subscription:', subscriptionId);
+    console.log(connected)
     if (purchaseLoading) {
       console.log('Already loading, ignoring');
       return;
@@ -118,16 +124,15 @@ const Subscribe = () => {
       return;
     }
 
-    // Verify the subscription exists in our products
     const subscriptionExists = subscriptions.find(sub => sub.id === subscriptionId);
     if (!subscriptionExists) {
       Alert.alert(t("error"), t("subscription_not_found"));
       return;
     }
+
     setPurchaseLoading(true);
+    
     try {
-      console.log('Purchase request successful for:', subscriptionId);
-      console.log("connected:", connected);
       await requestPurchase({
         request: {
           ios: { sku: subscriptionId },
@@ -135,7 +140,7 @@ const Subscribe = () => {
         },
         type: 'subs',
       });
-      
+      console.log('Purchase request successful for:', subscriptionId);
       const activeSubs = await getActiveSubscriptions();
       if (activeSubs.length > 0) {
         await setUserAccessLevel('pro');

@@ -39,7 +39,8 @@ const LearningLanguages = () => {
                     updatedUser.native_lang,
                     updatedUser.lang_changed_date,
                     updatedUser.access_level,
-                    updatedUser.difficulty_level
+                    updatedUser.difficulty_level,
+                    updatedUser.fresh_date || ''
                 );
 
                 setActiveWordsStore([]);

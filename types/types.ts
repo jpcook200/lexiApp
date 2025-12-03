@@ -40,6 +40,7 @@ export interface User {
     total_words_count: number;
     switch_card_face: 0 | 1;
     lang_changed_date?: string;
+    fresh_date?: string;
 }
 
 export interface CountType { 
@@ -65,6 +66,7 @@ export interface getWordsParams {
     excludeIds: number[];
     currentDateTime: string;
     transactionId: string | null;
+    getDemoWords?: boolean;
 }
 
 export type FiltersType = {
@@ -77,14 +79,14 @@ export type StreakRow = {
     user_id?: number;
     date: string;
     completed: number;
-    lang_pair_code?: string;
+    learn_lang?: string;
 };
 
 export type StreakCount = {
     longest: number;
     current: number;
     langPair: string;
-    lang_pair_code: string;
+    learn_lang: string;
 }
 
 export type PracticeFiltersType = {

@@ -11,9 +11,8 @@ const LanguagesList = ({ onSelectLanguage, streakData, streakDisplay }: { onSele
     const { user } = useUserStore();
 
     const getStreakByLanguage = (langCode: string) => {
-        const langPairCode = `${user?.native_lang}-${langCode}`;
-        const entry = streakData?.find((s) => s.lang_pair_code === langPairCode);
-        return entry?.current ?? 0;  // safe fallback
+        const entry = streakData?.find((s) => s.learn_lang === langCode);
+        return entry?.current ?? 0;
     };
 
     return (

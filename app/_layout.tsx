@@ -47,17 +47,12 @@ export default function RootLayout() {
                 databaseName="userDatabase.db"
                 onInit={async (db) => {
                     await db.execAsync(`
-                        drop table if exists users;
-                        drop table if exists difficulties;
-                        drop table if exists learned_words;
-                        drop table if exists daily_words;
-                        drop table if exists streak;
-                        drop table if exists streak_counts;
+           
                         CREATE TABLE IF NOT EXISTS users (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             native_lang TEXT,
                             learn_lang TEXT,
-                            words_per_day INTEGER DEFAULT 5,
+                            words_per_day INTEGER DEFAULT 10,
                             onboarding_completed BOOLEAN DEFAULT 0,
                             reminders_on BOOLEAN DEFAULT 0,
                             timezone TEXT,
@@ -68,7 +63,8 @@ export default function RootLayout() {
                             words_total INTEGER DEFAULT 0,
                             muted BOOLEAN DEFAULT 0,
                             switch_card_face BOOLEAN DEFAULT 0,
-                            lang_changed_date DATETIME
+                            lang_changed_date DATETIME,
+                            fresh_date DATETIME
                         );
                         
                         CREATE TABLE IF NOT EXISTS difficulties (
@@ -126,16 +122,16 @@ export default function RootLayout() {
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             user_id INTEGER,
                             date TEXT,
-                            lang_pair_code TEXT,
+                            learn_lang TEXT,
                             completed BOOLEAN DEFAULT 0,
                             reset_today BOOLEAN DEFAULT 0,
-                            UNIQUE(user_id, date, lang_pair_code),
+                            UNIQUE(user_id, date, learn_lang),
                             FOREIGN KEY (user_id) REFERENCES users(id)
                         );
 
                         CREATE TABLE IF NOT EXISTS streak_counts (
                             user_id INTEGER,
-                            lang_pair_code TEXT UNIQUE,
+                            learn_lang TEXT UNIQUE,
                             current INT default 0,
                             longest INT,
                             FOREIGN KEY (user_id) REFERENCES users(id)
@@ -149,7 +145,7 @@ export default function RootLayout() {
                 <Stack
                     screenOptions={{
                         headerShown: false,
-                        }}
+                    }}
                 />
             </SQLiteProvider>
         </QueryClientProvider>

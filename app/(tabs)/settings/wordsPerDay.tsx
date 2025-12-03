@@ -10,8 +10,8 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
 const WordsPerDay = () => {
     const { t } = useTranslation();
-    const { setWordsPerDay, updateStreakRecord, updateStreakCount, getUserLearnedWordsCount, getLearnedWordsIds, getDailyWords, toggleRandomDailyWords} = useDatabase();
-    const { user, setActiveWordsStore, activeWordsStore, filterActiveWordsStore } = useUserStore();
+    const { setWordsPerDay, updateStreakRecord, updateStreakCount, getDailyWords} = useDatabase();
+    const { user, setActiveWordsStore, filterActiveWordsStore } = useUserStore();
     const { handleWPDChange } = useGetWords();
     const [wpdLoading, setWpdLoading] = useState(false);
     const [selectedNumber, setSelectedNumber] = useState<number>(10);
@@ -26,9 +26,8 @@ const WordsPerDay = () => {
     const handleSave = async (selectedNumber: number) => {
         if (!user || selectedNumber === user.words_per_day) return;
         setWpdLoading(true);
-        const userProgress = await getUserLearnedWordsCount();
         const storedWords = await getDailyWords();
-        const currentDailyWords = storedWords.length;
+        const userProgress = storedWords.filter(word => word.learned === 1).length;
         const localDatetime = DateTime.now().setZone(user.timezone).toString();
 
         try {
@@ -36,7 +35,7 @@ const WordsPerDay = () => {
                 return router.push('../../(onboarding)/Subscribe');
             }
             
-            const newData = await handleWPDChange(selectedNumber, user.learn_lang, user.native_lang, user.difficulty_level, localDatetime);
+            const newData = await handleWPDChange(selectedNumber, user.learn_lang, user.native_lang, user.difficulty_level, localDatetime, user.fresh_date || '');
             
             if (newData) { 
                 setActiveWordsStore(newData);

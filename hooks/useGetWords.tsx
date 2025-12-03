@@ -11,9 +11,8 @@ import { endConnection, initConnection, useIAP } from 'react-native-iap';
 import { useUserStore } from './useGetUser';
 
 const useGetWords = () => {
-    const { getDailyLearnedCount, saveDailyWords, updateNativeWords, setLangChangedDate, resetProgressByLanguagePair, saveLastFetchedDate, getDailyWords, deleteAllFromDailyWords, getLearnedWordsIds, increaseDifficultyLevel, setLastSet, initStreakRecord, toggleRandomDailyWords, setLearningLanguage, setNativeLanguage } = useDatabase();
-    const { getActiveSubscriptions, fetchProducts } = useIAP();
-    const { setActiveWordsStore, activeWordsStore } = useUserStore();
+    const { getDailyLearnedCount, saveDailyWords, updateNativeWords, setLangChangedDate, resetProgressByLanguage, saveLastFetchedDate, getDailyWords, deleteAllFromDailyWords, getLearnedWordsIds, increaseDifficultyLevel, setLastSet, initStreakRecord, toggleRandomDailyWords, setLearningLanguage, setNativeLanguage } = useDatabase();
+    const { getActiveSubscriptions} = useIAP();
     const [error, setError] = useState(false);
     const { t } = useTranslation();
 
@@ -64,7 +63,6 @@ const useGetWords = () => {
     };
 
     //Day handlers--------------------------------------------------------------------------------------------------------------------
-
     const handleNativeLanguageChange = async (lang: string) => {
         try {
             const storedDailyWords = await getDailyWords();
@@ -76,6 +74,7 @@ const useGetWords = () => {
             }
 
             await setNativeLanguage(lang);
+            await initStreakRecord();
             i18next.changeLanguage(lang);
 
         } catch (error) {
@@ -92,11 +91,14 @@ const useGetWords = () => {
         newNativeLang: string,
         lastChangedDate: string | undefined,
         userAccessLevel: 'pro' | 'free',
-        userDifficultyLevel?: string
+        userDifficultyLevel?: string,
+        freshDate?: string | null
     ) => {
         let wordsToReturn: Word[] = [];
+        
         const todayDate = DateTime.now().toISODate();
         const transactionId = await getTransactionId();
+
         try {
             if (userAccessLevel === 'free') {
                 if (todayDate === lastChangedDate) {
@@ -110,7 +112,8 @@ const useGetWords = () => {
                     limit: wordsPerDay,
                     excludeIds: [],
                     currentDateTime: todayDate,
-                    transactionId
+                    transactionId,
+                    getDemoWords: todayDate === freshDate
                 });
 
                 if (newLearnLang !== oldLearnLang) {
@@ -124,7 +127,7 @@ const useGetWords = () => {
                 await setLangChangedDate();
 
                 await deleteAllFromDailyWords();
-                await resetProgressByLanguagePair(oldNativeLang, oldLearnLang);
+                await resetProgressByLanguage(oldLearnLang);
 
                 const newData = await saveDailyWords(newWords);
                 await saveLastFetchedDate();
@@ -132,7 +135,7 @@ const useGetWords = () => {
                 wordsToReturn =  newData;
             
             } else if (userAccessLevel === 'pro') { 
-                const newData = await handleWPDChange(wordsPerDay, newLearnLang, newNativeLang, userDifficultyLevel = 'a1', todayDate);
+                const newData = await handleWPDChange(wordsPerDay, newLearnLang, newNativeLang, userDifficultyLevel = 'a1', todayDate, freshDate || '');
                 if (newData) { 
                     wordsToReturn = newData;
                 }
@@ -153,11 +156,12 @@ const useGetWords = () => {
         }
     };
 
-    const handleWPDChange = async (selectedNumber: number, learnLang: string, nativeLang: string, difficulty: string, currentDateTime: string ) => { 
+    const handleWPDChange = async (selectedNumber: number, learnLang: string, nativeLang: string, difficulty: string, currentDateTime: string, freshDate: string ) => { 
         let wordsToReturn: Word[] | null = null;
         const storedWords = await getDailyWords(learnLang, nativeLang);
         const unhiddenStoredWords = storedWords.filter(word => word.hidden === 0);
         const currentDailyWords = unhiddenStoredWords.length;
+        const todayDate = DateTime.now().toISODate();
         try {
             if (selectedNumber < currentDailyWords) {
                 const wordsToRemove = currentDailyWords - selectedNumber;
@@ -170,7 +174,7 @@ const useGetWords = () => {
                 const newStoredWords = await getDailyWords(learnLang, nativeLang);
                 wordsToReturn = newStoredWords;
                 const dailyWordIds = newStoredWords.map((word: Word) => word.word_id);
-                const learnedWordIds = await getLearnedWordsIds(learnLang, nativeLang);
+                const learnedWordIds = await getLearnedWordsIds(learnLang);
                 
                 if (selectedNumber > newStoredWords.length) {
                     const limit = selectedNumber - newStoredWords.length;
@@ -182,7 +186,8 @@ const useGetWords = () => {
                         limit,
                         excludeIds: [...learnedWordIds, ...dailyWordIds],
                         currentDateTime,
-                        transactionId
+                        transactionId,
+                        getDemoWords: todayDate === freshDate
                     });
                     await saveLastFetchedDate();
                     const newData = await saveDailyWords(newWords);
@@ -212,7 +217,8 @@ const useGetWords = () => {
                 limit,
                 excludeIds: [],
                 currentDateTime,
-                transactionId
+                transactionId,
+                getDemoWords: true
             });
             
             const newData = await saveDailyWords(newWords);           

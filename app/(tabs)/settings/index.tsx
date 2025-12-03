@@ -7,9 +7,10 @@ import { useUserStore } from '@/hooks/useGetUser';
 import { getInstallationId } from '@/utilities/getInstallationId';
 import { getLanguageFlag } from '@/utilities/helpers';
 import { scheduleDailyReminder } from '@/utilities/notifications';
+import { useFocusEffect } from '@react-navigation/native';
 import * as Clipboard from 'expo-clipboard';
 import * as Notifications from 'expo-notifications';
-import { router, useFocusEffect } from 'expo-router';
+import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Copy } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
@@ -24,7 +25,7 @@ export default function Settings() {
     const db = useSQLiteContext()
     const { user, loading, fetchUser, setUser, setActiveWordsStore } = useUserStore();
     const { colorScheme, toggleColorScheme } = useColorScheme();
-    const { setRemindersOn, resetProgressByLanguagePair, toggleMuted } = useDatabase();
+    const { setRemindersOn, resetProgressByLanguage, toggleMuted } = useDatabase();
     const { setUserAccessLevel } = useDatabase();
     const { connected, hasActiveSubscriptions, getActiveSubscriptions } = useIAP();
     const [checkingConnection, setCheckingConnection] = useState(true);
@@ -68,7 +69,7 @@ export default function Settings() {
     const handleResetProgress = async () => { 
         try {
             if (!user) return;
-            await resetProgressByLanguagePair(user.native_lang, user.learn_lang);
+            await resetProgressByLanguage(user.learn_lang);
             setActiveWordsStore([]);
             router.replace('/');
         } catch (error) {
@@ -92,15 +93,13 @@ export default function Settings() {
         try {
             await initConnection();
             await fetchUser(db);
-            if (connected) {
-                const activeSubs = await getActiveSubscriptions()
-                if (user) {
-                    const newAccessLevel = activeSubs.length > 0 ? 'pro' : 'free';
-                    if (user.access_level !== newAccessLevel) {
-                        await setUserAccessLevel(newAccessLevel);
-                    }
-                    
+            const activeSubs = await getActiveSubscriptions()
+            if (user) {
+                const newAccessLevel = activeSubs.length > 0 ? 'pro' : 'free';
+                if (user.access_level !== newAccessLevel) {
+                    await setUserAccessLevel(newAccessLevel);
                 }
+                await fetchUser(db);
             }
             
         } catch (error) {
@@ -125,8 +124,11 @@ export default function Settings() {
 
     useFocusEffect(
         useCallback(() => {
-            handleCheckSubscription();
-          
+            setCheckingConnection(true);
+            if (connected) {
+                handleCheckSubscription(); 
+                
+            }
         }, [connected])
     );
 
@@ -137,10 +139,10 @@ export default function Settings() {
         })();
     }, []);
 
-    if (!user) {
+    if (checkingConnection || !user) {
         return (
             <SafeAreaView edges={['top']} className='flex-1 h-full bg-background-light dark:bg-background-dark p-4 justify-center items-center'>
-                <ActivityIndicator size='small' color='#1c95ffff'/>
+                <ActivityIndicator size='small'/>
             </SafeAreaView>
         );
     }
@@ -203,10 +205,10 @@ export default function Settings() {
                                 { checkingConnection ? (
                                     <ActivityIndicator size='small' className='ml-auto' />
                                 ) : (
-                                    user.access_level === 'pro' ? (
-                                    <Text className='ml-auto text-primary font-black text-primary'>{ t(user.access_level) }</Text>
+                                    user?.access_level === 'pro' ? (
+                                    <Text className='ml-auto text-primary font-black text-primary'>{ t(user?.access_level) }</Text>
                                 ) : (
-                                    <ThemedText className='ml-auto text-secondary font-medium'>{ t(user.access_level) }</ThemedText>
+                                    <ThemedText className='ml-auto text-secondary font-medium'>{ t(user?.access_level) }</ThemedText>
                                 )
                                 )}
                                 <ThemedIcon name='ChevronRight' size={20} />
@@ -220,13 +222,13 @@ export default function Settings() {
                             <TouchableOpacity accessibilityLabel='Choose Native Language' onPress={() => router.push('/settings/nativeLanguages')} className='flex-row items-center gap-4 py-6 border-b border-border-light dark:border-border-dark h-20'>
                                 <ThemedIcon name={'Earth'} size={20} />
                                 <ThemedText className='text-lg font-medium'>{ t("native_language") }</ThemedText>
-                                <ThemedText className='ml-auto'>{getLanguageFlag(user.native_lang) + ' ' +  t(user.native_lang) }</ThemedText>
+                                <ThemedText className='ml-auto'>{getLanguageFlag(user?.native_lang) + ' ' +  t(user?.native_lang) }</ThemedText>
                                 <ThemedIcon name='ChevronRight' size={20} />
                             </TouchableOpacity>
                             <TouchableOpacity accessibilityLabel='Choose Learning Language' onPress={() => router.push('/settings/learningLanguages')} className='flex-row items-center gap-4 py-6 border-b border-border-light dark:border-border-dark'>
                                 <ThemedIcon name={'BookA'} size={20} />
                                 <ThemedText className='text-lg font-medium'>{ t("learning_language") }</ThemedText>
-                                <ThemedText className='ml-auto'>{getLanguageFlag(user.learn_lang) + ' ' + t(user.learn_lang) }</ThemedText>
+                                <ThemedText className='ml-auto'>{getLanguageFlag(user?.learn_lang) + ' ' + t(user?.learn_lang) }</ThemedText>
                                 <ThemedIcon name='ChevronRight' size={20} />
                             </TouchableOpacity>
                             <TouchableOpacity accessibilityLabel='Choose Words per Day' onPress={() => router.push('/settings/wordsPerDay')} className='flex-row items-center gap-4 py-6 border-b border-border-light dark:border-border-dark'>

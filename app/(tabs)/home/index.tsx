@@ -60,7 +60,7 @@ export default function HomeScreen() {
     if (!user) { 
         return (
             <SafeAreaView edges={['top']} className='flex-1 h-full bg-background-light dark:bg-background-dark p-4 justify-center items-center'>
-                <ActivityIndicator size='small' color='#1c95ffff'/>
+                <ActivityIndicator size='small'/>
             </SafeAreaView>
         )
     }

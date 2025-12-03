@@ -11,7 +11,7 @@ type GetWordsResponse = {
 
 
 
-export const getWords = async ({ nativeLang, learnLang, difficulty = 'a1', limit, excludeIds, currentDateTime, transactionId }: getWordsParams): Promise<GetWordsResponse> => {
+export const getWords = async ({ nativeLang, learnLang, difficulty = 'a1', limit, excludeIds, currentDateTime, transactionId, getDemoWords }: getWordsParams): Promise<GetWordsResponse> => {
     try {
         const installationId = await getInstallationId();
         const response = await fetch(`${apiUrl}/api/words/get-daily?nativeLang=${nativeLang}&learningLang=${learnLang}&difficulty=${difficulty || 'a1'}&limit=${limit}`, {
@@ -22,7 +22,7 @@ export const getWords = async ({ nativeLang, learnLang, difficulty = 'a1', limit
                 "transaction-id": transactionId || '',
                 "installation-id": installationId || '',
             },
-            body: JSON.stringify({ excludeIds, currentDateTime }),
+            body: JSON.stringify({ excludeIds, currentDateTime, getDemoWords }),
         });
 
         if (!response.ok) {

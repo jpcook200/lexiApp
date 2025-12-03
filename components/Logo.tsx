@@ -1,7 +1,7 @@
 import { Image, View } from 'react-native';
 import ThemedText from './ThemedText';
  
-const Logo = ({ width = 30, height = 30, scale = 1, gap = 1 }: { width?: number, height?: number, scale?: number, gap: number}) => {
+const Logo = ({ width = 30, height = 30, scale = 1, gap = 1 }: { width?: number, height?: number, scale?: number, gap?: number}) => {
     return (
         <View className='flex-row items-center'>
             <Image

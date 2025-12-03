@@ -5,6 +5,7 @@ import { getInstallationId } from '@/utilities/getInstallationId';
 import * as Localization from 'expo-localization';
 import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { DateTime } from 'luxon';
 import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
@@ -16,13 +17,14 @@ const Index = () => {
             const locals = Localization.getLocales();
             const languageCode = locals[0]?.languageCode || 'en'
             const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+            const todayDate = DateTime.now().toISODate();
             const user = await db.getFirstAsync<User>('SELECT * FROM users');
 
             if (!user) {
                 await db.runAsync(
-                    `INSERT INTO users (native_lang, learn_lang, words_per_day, onboarding_completed, timezone) 
+                    `INSERT INTO users (native_lang, learn_lang, onboarding_completed, timezone, fresh_date) 
                     VALUES (?, ?, ?, ?, ?)`,
-                    [languageCode, '', 5, 0, userTimezone]
+                    [languageCode, '', 0, userTimezone, todayDate]
                 );
 
                 router.replace('/(onboarding)/welcomeScreens/welcomeOne');

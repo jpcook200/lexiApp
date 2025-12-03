@@ -17,6 +17,7 @@ type UserState = {
     reorderWordStore: (index: number) => void;
     prependActiveWordStore: (word: Word) => void;
     filterActiveWordsStore: () => void;
+    toggleFavouriteStore: (id: number) => void;
 };
 
 // Create Zustand store
@@ -96,7 +97,16 @@ export const useUserStore = create<UserState>((set) => ({
                 )
                 : []
         })),
-
+    toggleFavouriteStore: (id: number) =>
+        set((state) => ({
+            activeWordsStore: Array.isArray(state.activeWordsStore)
+                ? state.activeWordsStore.map((w: Word) =>
+                    w.id === id
+                        ? { ...w, favourite: w.favourite === 1 ? 0 : 1 }
+                        : w
+                )
+                : []
+        })),
 
 
 }));

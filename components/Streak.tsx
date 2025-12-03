@@ -88,7 +88,7 @@ const Streak = ({ displayOnly }: {displayOnly: boolean}) => {
                             ) : (
                                 <View className={`w-10 h-10 rounded-full border-4 ${day.date === today ? 'border-primary' : 'border-background-light dark:border-background-dark'}`}></View>    
                             ) }
-                            <ThemedText variant='subtext' className='text-center uppercase font-black mt-2'>{ displayOnly ? days[index][0] : getWeekdayAbbreviation(day.date)[0] }</ThemedText>
+                            <ThemedText variant='subtext' className='text-center uppercase font-black mt-2'>{ displayOnly ? days[index] : getWeekdayAbbreviation(day.date) }</ThemedText>
                         </View>    
                     ))}
                 </View>
@@ -96,7 +96,7 @@ const Streak = ({ displayOnly }: {displayOnly: boolean}) => {
                     <ThemedText variant='subtext' className='text-lg font-bold'>{t("current_streak")}</ThemedText>
                     <View className='flex-row items-center gap-1'>
                         <Flame size={16} color='#fc6a03' strokeWidth={3} />
-                        <ThemedText className='text-2xl font-bold'>{displayOnly ? '100' : (streakCounts.current || 0)}</ThemedText>
+                        <ThemedText className='text-2xl font-bold'>{displayOnly ? '60' : (streakCounts.current || 0)}</ThemedText>
                         <ThemedText variant='subtext'>{ streakCounts.current === 1 ? t("day") : t("days") }</ThemedText>
                     </View>
                     
@@ -105,7 +105,7 @@ const Streak = ({ displayOnly }: {displayOnly: boolean}) => {
                     <ThemedText variant='subtext' className='text-md'>{t("longest_streak")}</ThemedText>
                     <View className='flex-row items-center gap-1'>
                         <Flame size={14} color='#fc6a03' strokeWidth={3} />
-                        <ThemedText className='text-lg font-bold'>{displayOnly ? '100' : (streakCounts.longest || 0)}</ThemedText>
+                        <ThemedText className='text-lg font-bold'>{displayOnly ? '60' : (streakCounts.longest || 0)}</ThemedText>
                         <ThemedText className='text-sm' variant='subtext'>{ streakCounts.longest === 1 ? t("day") : t("days") }</ThemedText>
                     </View>
                     

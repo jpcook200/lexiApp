@@ -1,6 +1,7 @@
 import { useTextToSpeech } from '@/api/textToSpeech';
 import useDatabase from '@/db/useDatabase';
-import { User, Word } from '@/types/types';
+import { useUserStore } from '@/hooks/useGetUser';
+import { User } from '@/types/types';
 import { formatSentenceByLanguage, trimEdgeChars } from '@/utilities/helpers';
 import { Heart, Mars, Venus } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
@@ -13,7 +14,6 @@ import ThemedView from './ThemedView';
 
 type WordCardProps = {
     word: any;
-    setActiveWords?: React.Dispatch<React.SetStateAction<Word[]>>;
     displayOnly?: boolean;
     practice?: boolean;
     user?: User;
@@ -22,7 +22,7 @@ type WordCardProps = {
 };
 
 
-export default function WordCard({ word, setActiveWords, displayOnly, practice, user, switchFace, cardsMoving }: WordCardProps) {
+export default function WordCard({ word, displayOnly, practice, user, switchFace, }: WordCardProps) {
     const { t } = useTranslation();
     const { toggleFavourite } = useDatabase();
     const [ttsDisabled, setTtsDisabled] = useState(false);
@@ -32,6 +32,7 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
     const flipAnimation = useRef(new Animated.Value(switchFace ? 180 : 0)).current
     const { tts, } = useTextToSpeech();
     const [showTranslation, setShowTranslation] = useState(false);
+    const { toggleFavouriteStore } = useUserStore();
 
     useEffect(() => {
     // update local state
@@ -84,17 +85,8 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
     };
 
     const handleFavourite = async () => {
-        if (!word || !setActiveWords) return;
-        setActiveWords((prev: Word[]) => prev!.map(w => {
-            if (w.id === word.id) {
-                return {
-                    ...w,
-                    favourite: w.favourite === 1 ? 0 : 1
-                };
-            }
-            return w;
-            })
-        );
+        if (!word) return;
+        toggleFavouriteStore(word.id);
 
         if (practice) {
             toggleFavourite(word.id, word.favourite === false ? 1 : 0); // update database
@@ -118,7 +110,7 @@ export default function WordCard({ word, setActiveWords, displayOnly, practice, 
             <TouchableWithoutFeedback accessibilityLabel='Flip Card' onPress={flipCard}>
                 <View className='w-full h-full'>
                     <Animated.View style={[styles.card, flipToFrontStyle]} className='flex-1'>
-                        <ThemedView variant='shaded' className={cardClass}>
+                        <ThemedView variant='shaded' className={cardClass} style={{boxShadow: '0 3px 5px rgba(0,0,0,0.2)' }}>
                             <View className='p-8 sm:p-4 flex-1'>
                                 <View className=' flex-1'>
                                     <View className='w-full flex-row justify-end'>

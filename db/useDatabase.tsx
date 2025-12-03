@@ -12,8 +12,8 @@ const useDatabase = () => {
             if (!userResults) {
                 throw new Error('User not found');
             }
-            let query = `SELECT * FROM learned_words WHERE user_id = ? AND learn_lang = ? AND native_lang = ?`;
-            const params = [1, userResults.learn_lang, userResults.native_lang];
+            let query = `SELECT * FROM learned_words WHERE user_id = ? AND learn_lang = ?`;
+            const params = [1, userResults.learn_lang];
 
             if (filters.favouritesOnly) {
                 query += ` AND favourite = 1`;
@@ -51,27 +51,24 @@ const useDatabase = () => {
             const todayResults = await db.getFirstAsync<CountType>(
                 `SELECT COUNT(*) as count 
                     FROM learned_words 
-                    WHERE DATE(learned_at) = DATE(?) 
-                    AND native_lang = ? 
+                    WHERE DATE(learned_at) = DATE(?)  
                     AND learn_lang = ?`,
-                [today, userResults.native_lang, userResults.learn_lang]
+                [today, userResults.learn_lang]
             );
 
             const pastWeekResults = await db.getFirstAsync<CountType>(
                 `SELECT COUNT(*) as count 
                     FROM learned_words 
                     WHERE DATE(learned_at) BETWEEN DATE(?) AND DATE(?) 
-                    AND native_lang = ? 
                     AND learn_lang = ?`,
-                [weekAgo, today, userResults.native_lang, userResults.learn_lang]
+                [weekAgo, today, userResults.learn_lang]
             );
 
             const allTimeResults = await db.getFirstAsync<CountType>(
                 `SELECT COUNT(*) as count 
                     FROM learned_words 
-                    WHERE native_lang = ? 
-                    AND learn_lang = ?`,
-                [userResults.native_lang, userResults.learn_lang]
+                    WHERE learn_lang = ?`,
+                [userResults.learn_lang]
             );
             
             return { today: todayResults?.count || 0, pastWeek: pastWeekResults?.count || 0, allTime: allTimeResults?.count || 0 };
@@ -150,7 +147,7 @@ const useDatabase = () => {
         }
     }
 
-    const getLearnedWordsIds = async (learnLang?: string, nativeLang?: string) => {
+    const getLearnedWordsIds = async (learnLang?: string) => {
         try {
             type WordIdResult = { word_id: number }
             const userResults = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = ?', [1])
@@ -159,8 +156,8 @@ const useDatabase = () => {
                 throw new Error('User not found');
             }
             const results = await db.getAllAsync<WordIdResult>(
-                `SELECT word_id FROM learned_words WHERE user_id = ? AND learn_lang = ? AND native_lang = ?`,
-                [1, learnLang || userResults.learn_lang, nativeLang || userResults.native_lang]
+                `SELECT word_id FROM learned_words WHERE user_id = ? AND learn_lang = ?`,
+                [1, learnLang || userResults.learn_lang,]
             );
             const mappedResults = results.map((result) => result.word_id);
             
@@ -184,9 +181,8 @@ const useDatabase = () => {
                 SELECT * FROM learned_words
                 WHERE user_id = ?
                 AND learn_lang = ?
-                AND native_lang = ?
             `;
-            const params: any[] = [1, userResults.learn_lang, userResults.native_lang];
+            const params: any[] = [1, userResults.learn_lang];
 
             // Filter by date if provided
             if (filters.date) {
@@ -222,8 +218,8 @@ const useDatabase = () => {
                 throw new Error('User not found');
             }
             const result = await db.getFirstAsync<CountType>(
-                `SELECT COUNT(*) as count FROM daily_words WHERE user_id = ? AND learned = 1 AND native_lang = ? AND learn_lang = ?`,
-                [1, userResults.native_lang, userResults.learn_lang]
+                `SELECT COUNT(*) as count FROM daily_words WHERE user_id = ? AND learned = 1 AND learn_lang = ?`,
+                [1, userResults.learn_lang]
             );
             
             return result?.count || 0;
@@ -482,7 +478,6 @@ const useDatabase = () => {
 
     const setLastSet = async () => {
         try {
-            
             const userResults = await db.getFirstAsync<User>(
                 'SELECT * FROM users WHERE id = ?',
                 [1]
@@ -527,13 +522,11 @@ const useDatabase = () => {
             );
             if (!userResults) throw new Error('User not found');
 
-            const userLangPair = `${userResults.native_lang}-${userResults.learn_lang}`;
-
             const results = await db.getFirstAsync<CompletedType>(
                 `SELECT completed, reset_today FROM streak 
-                WHERE user_id = ? AND date = ? AND lang_pair_code = ? 
+                WHERE user_id = ? AND date = ? AND learn_lang = ? 
                 ORDER BY date DESC`,
-                [1, today, userLangPair]
+                [1, today, userResults.learn_lang]
             );
 
             if(!results) {
@@ -546,12 +539,12 @@ const useDatabase = () => {
                         await db.runAsync(
                             `UPDATE streak_counts 
                             SET current = current + 1 
-                            WHERE lang_pair_code = ?`,
-                            [userLangPair]
+                            WHERE learn_lang = ?`,
+                            [userResults.learn_lang]
                         );
-                        const getNewStreakCount = await db.getFirstAsync<{ current: number }>(
-                            `SELECT * FROM streak_counts WHERE lang_pair_code = ?`,
-                            [userLangPair]
+                        await db.getFirstAsync<{ current: number }>(
+                            `SELECT * FROM streak_counts WHERE learn_lang = ?`,
+                            [userResults.learn_lang]
                         );
                     }
                     break;
@@ -566,14 +559,14 @@ const useDatabase = () => {
                                     ELSE longest 
                                 END,
                                 current = 0
-                            WHERE lang_pair_code = ?`,
-                            [userLangPair]
+                            WHERE learn_lang = ?`,
+                            [userResults.learn_lang]
                         );
                         await db.runAsync(
                             `UPDATE streak 
                             SET reset_today = 1
-                            WHERE user_id = ? AND date = ? AND lang_pair_code = ?`,
-                            [1, today, userLangPair]
+                            WHERE user_id = ? AND date = ? AND learn_lang = ?`,
+                            [1, today, userResults.learn_lang]
                         );
                     }
                     break;
@@ -583,8 +576,8 @@ const useDatabase = () => {
                         await db.runAsync(
                             `UPDATE streak_counts 
                             SET current = CASE WHEN current > 0 THEN current - 1 ELSE 0 END 
-                            WHERE lang_pair_code = ?`,
-                            [userLangPair]
+                            WHERE learn_lang = ?`,
+                            [userResults.learn_lang]
                         );
                     }
                     break;
@@ -595,8 +588,8 @@ const useDatabase = () => {
 
             // Fetch and return the new streak count
             const updated = await db.getFirstAsync<{ current: number }>(
-                `SELECT current FROM streak_counts WHERE lang_pair_code = ?`,
-                [userLangPair]
+                `SELECT current FROM streak_counts WHERE learn_lang = ?`,
+                [userResults.learn_lang]
             );
 
             return updated?.current ?? 0;
@@ -619,26 +612,24 @@ const useDatabase = () => {
             
             if (!userResults) throw new Error('User not found');
 
-            const userLangPair = `${userResults.native_lang}-${userResults.learn_lang}`;
-
             // Insert today's record if missing
             await db.runAsync(
-                `INSERT OR IGNORE INTO streak (user_id, date, completed, lang_pair_code) VALUES (?, ?, ?, ?)`,
-                [1, date, 0, userLangPair]
+                `INSERT OR IGNORE INTO streak (user_id, date, completed, learn_lang) VALUES (?, ?, ?, ?)`,
+                [1, date, 0, userResults.learn_lang]
             );
 
             // Total count (safe)
             const totalStreaks = await db.getFirstAsync<CountType>(
-                `SELECT COUNT(*) as count FROM streak WHERE user_id = ? AND lang_pair_code = ?`,
-                [1, userLangPair]
+                `SELECT COUNT(*) as count FROM streak WHERE user_id = ? AND learn_lang = ?`,
+                [1, userResults.learn_lang]
             );
 
             const totalCount = totalStreaks?.count ?? 0;
 
             // Check yesterday's record
             const yesterdayStreakRecord = await db.getAllAsync<StreakRow>(
-                `SELECT * FROM streak WHERE user_id = ? AND lang_pair_code = ? AND date = ?`,
-                [1, userLangPair, yesterday]
+                `SELECT * FROM streak WHERE user_id = ? AND learn_lang = ? AND date = ?`,
+                [1, userResults.learn_lang, yesterday]
             );
 
             if (totalCount > 1) {
@@ -651,8 +642,8 @@ const useDatabase = () => {
             }
 
             await db.runAsync(
-                `INSERT OR IGNORE INTO streak_counts (user_id, lang_pair_code, current, longest) VALUES (?, ?, ?, ?)`,
-                [1, userLangPair, 0, 0]
+                `INSERT OR IGNORE INTO streak_counts (user_id, learn_lang, current, longest) VALUES (?, ?, ?, ?)`,
+                [1, userResults.learn_lang, 0, 0]
             );
 
         } catch (error) {
@@ -674,11 +665,9 @@ const useDatabase = () => {
                 throw new Error('User not found');
             }
 
-            const userLangPair = `${userResults.native_lang}-${userResults.learn_lang}`;
-
             const result = await db.runAsync(
-                `UPDATE streak SET completed = ? WHERE user_id = ? AND date = ? AND lang_pair_code = ?`,
-                [completed, 1, date, userLangPair]
+                `UPDATE streak SET completed = ? WHERE user_id = ? AND date = ? AND learn_lang = ?`,
+                [completed, 1, date, userResults.learn_lang]
             );
 
             return completed === 1;
@@ -696,11 +685,10 @@ const useDatabase = () => {
             if (!userResults) {
                 throw new Error('User not found');
             }
-            const userLangPair = `${userResults.native_lang}-${userResults.learn_lang}`;
 
             const results = await db.getAllAsync<StreakRow>(
-                `SELECT * FROM streak WHERE user_id = ? AND lang_pair_code = ? AND date BETWEEN ? AND ? ORDER BY date ASC`,
-                [1, userLangPair, sevenDaysAgo, today]
+                `SELECT * FROM streak WHERE user_id = ? AND learn_lang = ? AND date BETWEEN ? AND ? ORDER BY date ASC`,
+                [1, userResults.learn_lang, sevenDaysAgo, today]
             );
 
             return results;
@@ -722,10 +710,10 @@ const useDatabase = () => {
             if (!userResults) {
                 throw new Error('User not found');
             }
-            const userLangPair = `${userResults.native_lang}-${userResults.learn_lang}`;
+
             const result = await db.getFirstAsync<Streak>(
-                `SELECT * FROM streak_counts WHERE user_id = ? AND lang_pair_code = ?`,
-                [1, userLangPair]
+                `SELECT * FROM streak_counts WHERE user_id = ? AND learn_lang = ?`,
+                [1, userResults.learn_lang]
             )
             
             return result;
@@ -750,35 +738,35 @@ const useDatabase = () => {
         }
     };
 
-    const resetProgressByLanguagePair = async (nativeLang: string, learnLang: string) => {
-        const langPairCode = `${nativeLang}-${learnLang}`;
-
+    const resetProgressByLanguage = async (learnLang: string) => {
         try {
             await db.withTransactionAsync(async () => {
                 await db.runAsync(
-                    `DELETE FROM learned_words WHERE native_lang = ? AND learn_lang = ?`,
-                    [nativeLang, learnLang]
+                    `DELETE FROM learned_words WHERE learn_lang = ?`,
+                    [learnLang]
                 );
 
                 await db.runAsync(
-                    `DELETE FROM streak WHERE lang_pair_code = ?`,
-                    [langPairCode]
+                    `DELETE FROM streak WHERE learn_lang = ?`,
+                    [learnLang]
                 );
 
                 await db.runAsync(
-                    `DELETE FROM streak_counts WHERE lang_pair_code = ?`,
-                    [langPairCode]
+                    `DELETE FROM streak_counts WHERE learn_lang = ?`,
+                    [learnLang]
                 );
             });
 
             await db.runAsync(
-                `UPDATE users SET last_set = 0 WHERE id = 1`,
+                `UPDATE users SET last_fetched = NULL, last_set = 0, fresh_date = ? WHERE id = 1`,
+            [DateTime.now().toISODate()]
             );
 
             await db.runAsync(
                 'UPDATE difficulties set level = ? WHERE lang = ?',
                 ['a1', learnLang]
             )
+
         } catch (error) {
             console.error('Error resetting progress by language pair:', error);
             throw error;
@@ -793,29 +781,6 @@ const useDatabase = () => {
             );
         } catch (error) {
             console.error('Error setting tutorial completed:', error);
-            throw error;
-        }
-    }
-
-    const getUserLearnedWordsCount = async (): Promise<number> =>{
-        try {
-            const userResults = await db.getFirstAsync<User>('SELECT * FROM users WHERE id = ?', [1]);
-            if (!userResults) {
-                throw new Error('User not found');
-            }
-
-            const userLearnedWordsCount = await db.getFirstAsync<CountType>(
-                `SELECT COUNT(*) as count FROM daily_words WHERE user_id = ? AND learn_lang = ? AND native_lang = ? AND learned = 1`,
-                [1, userResults.learn_lang, userResults.native_lang]
-            );
-
-            if(!userLearnedWordsCount || userLearnedWordsCount.count === undefined) { 
-                throw new Error('Could not retrieve learned words count');
-            }
-
-            return userLearnedWordsCount.count;
-        } catch (error) {
-            console.error('Error getting user learned words count:', error);
             throw error;
         }
     }
@@ -845,14 +810,13 @@ const useDatabase = () => {
                         FROM daily_words
                         WHERE user_id = ?
                         AND learn_lang = ?
-                        AND native_lang = ?
                         AND learned = 0
                         AND hidden = ?
                         ORDER BY RANDOM()
                         LIMIT ?
                     );
                     `,
-                [newHiddenStatus, 1, userResults.learn_lang, userResults.native_lang, whereClause, amount]
+                [newHiddenStatus, 1, userResults.learn_lang, whereClause, amount]
             );
         } catch (error) {
             console.error('Error hiding daily words:', error);
@@ -873,7 +837,7 @@ const useDatabase = () => {
             );
             
             if ((userResults.words_per_day > freeWordsAllowance) && accessLevel === 'free') {
-                const userLearnedWordsCount = await getUserLearnedWordsCount();
+                const userLearnedWordsCount = await getDailyLearnedCount();
                 if (userLearnedWordsCount === undefined) { 
                     throw new Error('Could not retrieve learned words count');
                 }
@@ -942,7 +906,7 @@ const useDatabase = () => {
         setTutorialCompleted,
         insertDifficultyLevel,
         saveLastFetchedDate,
-        resetProgressByLanguagePair,
+        resetProgressByLanguage,
         getStreakCount,
         getLearnedWordsByTimeframe,
         updateStreakCount,
@@ -969,7 +933,6 @@ const useDatabase = () => {
         saveDailyWords,
         removeFromLearnedWords,
         getAllStreakCounts,
-        getUserLearnedWordsCount,
         toggleRandomDailyWords,
         toggleMuted,
         switchCardFace,
