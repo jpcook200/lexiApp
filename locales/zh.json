@@ -17,7 +17,7 @@
     "daily_flashcards_desc": "每天学习最多30个精心挑选的单词。滑动查看卡片，记忆并重复。",
 
     "simple_effective": "简单高效",
-    "simple_effective_desc": "每日练习随着时间积累强大的词汇量。专注学习，无杂乱和干扰。词汇量越大，上下文理解越轻松。",
+    "simple_effective_desc": "学习你的每日目标，保持每日连胜。随着时间推移跟踪你的进度，保持动力。",
 
     "whats_your_native_language": "你的母语是什么？",
     "whats_your_learning_language": "你正在学习哪种语言？",
@@ -200,6 +200,6 @@
     "check_connection": "请检查您的网络连接。",
     "not_avail": "此商品无法购买。",
     "no_words_available": "没有可用的单词",
-    "lang_change_limit": "您每天只能更改一次学习语言或母语。",
+    "lang_change_limit": "您每天只能更改一次学习语言。",
     "could_not_change_language": "无法更改语言。请稍后再试。"
 }

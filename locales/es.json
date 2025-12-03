@@ -17,7 +17,7 @@
     "daily_flashcards_desc": "Aprende hasta 30 palabras cuidadosamente seleccionadas cada día. Desliza tus tarjetas, recuerda y repite.",
     
     "simple_effective": "Simple y efectivo",
-    "simple_effective_desc": "La práctica diaria fortalece tu vocabulario con el tiempo. Un aprendizaje enfocado, sin distracciones. Un vocabulario más amplio facilita la comprensión contextual.",
+    "simple_effective_desc": "Aprende tu objetivo diario y consigue tu racha diaria. Sigue tu progreso con el tiempo y mantente motivado.",
     
     "whats_your_native_language": "¿Cuál es tu idioma nativo?",
     "whats_your_learning_language": "¿Qué idioma estás aprendiendo?",
@@ -202,7 +202,7 @@
     "check_connection": "Por favor, revisa tu conexión.",
     "not_avail": "Este artículo no está disponible para su compra.",
     "no_words_available": "No hay palabras disponibles",
-    "lang_change_limit": "Solo puedes cambiar tu idioma de aprendizaje o nativo una vez al día.",
+    "lang_change_limit": "Solo puedes cambiar tu idioma de aprendizaje una vez al día.",
     "could_not_change_language": "No se pudo cambiar el idioma. Por favor, inténtalo de nuevo más tarde."
 
 }

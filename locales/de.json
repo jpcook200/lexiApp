@@ -17,7 +17,7 @@
     "daily_flashcards_desc": "Lerne bis zu 30 sorgfältig ausgewählte Wörter pro Tag. Wische durch deine Karten, merke sie dir und wiederhole sie.",
     
     "simple_effective": "Einfach & Effektiv",
-    "simple_effective_desc": "Tägliches Üben stärkt deinen Wortschatz im Laufe der Zeit. Konzentriertes Lernen ohne Ablenkung. Ein größerer Wortschatz führt zu einem besseren Verständnis im Kontext.",
+    "simple_effective_desc": "Lerne dein Tagesziel und erreiche deine tägliche Serie. Verfolge deinen Fortschritt im Laufe der Zeit und bleibe motiviert.",
     
     "whats_your_native_language": "Was ist deine Muttersprache?",
     "whats_your_learning_language": "Welche Sprache lernst du?",
@@ -203,6 +203,6 @@
     "check_connection": "Bitte überprüfe deine Verbindung.",
     "not_avail": "Dieser Artikel ist nicht zum Kauf verfügbar.",
     "no_words_available": "Keine Wörter verfügbar",
-    "lang_change_limit": "Du kannst deine Lern- oder Muttersprache nur einmal am Tag ändern.",
+    "lang_change_limit": "Du kannst deine Lernsprache nur einmal am Tag ändern.",
     "could_not_change_language": "Konnte die Sprache nicht ändern. Bitte versuche es später erneut."
 }

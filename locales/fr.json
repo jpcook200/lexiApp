@@ -17,7 +17,7 @@
     "daily_flashcards_desc": "Apprenez jusqu’à 30 mots soigneusement sélectionnés chaque jour. Faites défiler vos cartes, mémorisez et répétez.",
 
     "simple_effective": "Simple et efficace",
-    "simple_effective_desc": "Une pratique quotidienne construit un vocabulaire solide au fil du temps. Un apprentissage ciblé, sans distractions. Un vocabulaire plus riche facilite la compréhension du contexte.",
+    "simple_effective_desc": "Apprenez votre objectif quotidien et maintenez votre série quotidienne. Suivez vos progrès au fil du temps et restez motivé.",
 
     "whats_your_native_language": "Quelle est votre langue maternelle ?",
     "whats_your_learning_language": "Quelle langue apprenez-vous ?",
@@ -203,6 +203,6 @@
     "check_connection": "Veuillez vérifier votre connexion.",
     "not_avail": "Cet article n'est pas disponible à l'achat.",
     "no_words_available": "Aucun mot disponible",
-    "lang_change_limit": "Vous ne pouvez changer votre langue d'apprentissage ou maternelle qu'une fois par jour.",
+    "lang_change_limit": "Vous ne pouvez changer votre langue d'apprentissage qu'une fois par jour.",
     "could_not_change_language": "Impossible de changer de langue. Veuillez réessayer plus tard."
 }

@@ -17,7 +17,7 @@
     "daily_flashcards_desc": "Learn up to 30 carefully selected words every day. Swipe through your cards, remember and repeat.",
     
     "simple_effective": "Simple & Effective",
-    "simple_effective_desc": "Daily practice builds strong vocabulary over time. Focused learning with no clutter or distractions. A larger vocabulary leads to easier contextual understanding.",
+    "simple_effective_desc": "Learn your daily goal and achieve your daily streak. Track your progress over time and stay motivated.",
     
     "whats_your_native_language": "What's Your Native Language?",
     "whats_your_learning_language": "What Language Are You Learning?",
@@ -203,6 +203,6 @@
     "check_connection": "Please check your connection.", 
     "not_avail": "This item is not available for purchase.",
     "no_words_available": "No words available",
-    "lang_change_limit": "You can only change your learning or native language once a day.",
+    "lang_change_limit": "You can only change your learning language once a day.",
     "could_not_change_language": "Could not change language. Please try again later."
 }

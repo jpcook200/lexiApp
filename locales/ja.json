@@ -17,7 +17,7 @@
     "daily_flashcards_desc": "毎日厳選された最大30単語を学びましょう。カードをスワイプして覚え、繰り返し練習できます。",
     
     "simple_effective": "シンプルで効果的",
-    "simple_effective_desc": "毎日の練習で強い語彙力を身につけましょう。集中できるシンプルな学習体験で、文脈理解も向上します。",
+    "simple_effective_desc": "毎日の目標を学び、連続記録を達成しましょう。時間の経過とともに進捗を追跡し、モチベーションを維持します。",
     
     "whats_your_native_language": "あなたの母国語は何ですか？",
     "whats_your_learning_language": "学習中の言語は何ですか？",
@@ -203,6 +203,6 @@
     "check_connection": "接続を確認してください。",
     "not_avail": "この商品は購入できません。",
     "no_words_available": "利用可能な単語がありません",
-    "lang_change_limit": "学習言語または母国語は1日に1回だけ変更できます。",
+    "lang_change_limit": "学習言語は1日に1回だけ変更できます。",
     "could_not_change_language": "言語を変更できませんでした。後でもう一度お試しください。"
 }
