@@ -35,10 +35,6 @@ const faqs = () => {
             answer: t("faq_how_to_practice_a"),
         },
         {
-            question: t("faq_reset_session_q"),
-            answer: t("faq_reset_session_a"),
-        },
-        {
             question: t("faq_word_selection_q"),
             answer: t("faq_word_selection_a"),
         },

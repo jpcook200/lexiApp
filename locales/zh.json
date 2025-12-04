@@ -144,9 +144,6 @@
     "faq_how_to_practice_q": "如何练习单词？",
     "faq_how_to_practice_a": "在首页点击“练习”。你将使用单词卡浏览当前单词，向上滑动标记为已学，或放回卡片末尾以便复习。",
 
-    "faq_reset_session_q": "我可以重置练习吗？",
-    "faq_reset_session_a": "可以！完成所有活动卡片后，点击“重置”可重新开始练习，或在练习模式下获取新的单词。",
-
     "faq_word_selection_q": "每日单词如何选择？",
     "faq_word_selection_a": "每日单词基于你的学习目标和已学单词选择。应用优先展示未掌握的单词。",
 
@@ -158,7 +155,7 @@
 
     "reset_progress": "重置进度",
     "are_you_sure": "确定吗？",
-    "confirm_reset_message": "这将清除当前语言对的所有进度。\n如果今天已有学习单词，将在明天重置。\n此操作无法撤销。",
+    "confirm_reset_message": "删除当前语言的所有进度？ \n此操作无法撤销。",
 
     "swipe_left_right": "左右滑动",
     "to_navigate": "在单词间导航",

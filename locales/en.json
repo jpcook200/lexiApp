@@ -144,9 +144,6 @@
     "faq_how_to_practice_q": "How do I practice my words?",
     "faq_how_to_practice_a": "Tap on \"Practice\" from the home tab. You will go through your active words using flashcards. Swipe up to mark a word as learned or loop it to the back of the stack for more practice.",
 
-    "faq_reset_session_q": "Can I reset my practice session?",
-    "faq_reset_session_a": "Yes! After finishing all active cards, you can tap \"Reset\" to start practicing your words again, or fetch new practice words if in practice mode.",
-
     "faq_word_selection_q": "How are my words selected each day?",
     "faq_word_selection_a": "Your daily words are selected based on your learning goals and previously learned words. The app prioritizes words you haven’t mastered yet.",
 
@@ -158,7 +155,7 @@
 
     "reset_progress": "Reset Progress",
     "are_you_sure": "Are you sure?",
-    "confirm_reset_message": "This will erase all progress for the current language pair.\nIf you already have had words today, they will be reset tomorrow.\nThis action cannot be undone.",
+    "confirm_reset_message": "Erase all progress for the current language? \nThis action cannot be undone.",
 
     "swipe_left_right": "Swipe Left Or Right",
     "to_navigate": "To Navigate Between Words",

@@ -144,9 +144,6 @@
     "faq_how_to_practice_q": "Come posso esercitarmi con le parole?",
     "faq_how_to_practice_a": "Tocca \"Esercitati\" dalla schermata principale. Scorri le schede: scorri verso l’alto per segnare una parola come appresa o rimandala indietro per ripeterla.",
 
-    "faq_reset_session_q": "Posso reimpostare la sessione di pratica?",
-    "faq_reset_session_a": "Sì! Dopo aver completato tutte le schede attive, puoi toccare \"Reimposta\" per ripetere la sessione o ottenere nuove parole.",
-
     "faq_word_selection_q": "Come vengono scelte le mie parole ogni giorno?",
     "faq_word_selection_a": "Le parole giornaliere vengono selezionate in base ai tuoi obiettivi e alle parole già apprese. L’app dà priorità a quelle che non hai ancora padroneggiato.",
 
@@ -158,7 +155,7 @@
 
     "reset_progress": "Reimposta progressi",
     "are_you_sure": "Sei sicuro?",
-    "confirm_reset_message": "Questo cancellerà tutti i progressi per la coppia di lingue corrente.\nSe hai già studiato oggi, verranno azzerati domani.\nQuesta azione non può essere annullata.",
+    "confirm_reset_message": "Cancella tutti i progressi per la lingua attuale? \nQuesta azione non può essere annullata.",
 
     "swipe_left_right": "Scorri a sinistra o destra",
     "to_navigate": "Per navigare tra le parole",

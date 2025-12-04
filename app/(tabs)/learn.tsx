@@ -21,13 +21,12 @@ const learn = () => {
     const { handleGetWords, handleGetProgessCount, progressToday, wordsLoading, error } = useGetWords();
     const { t } = useTranslation();
     const db = useSQLiteContext();
-    const { user, loading, fetchUser, activeWordsStore, setActiveWordsStore, prependActiveWordStore, filterActiveWordsStore } = useUserStore();
-    const { toggleLearned, initStreakRecord, removeFromLearnedWords, switchCardFace, getDailyWords } = useDatabase();
+    const { user, fetchUser, activeWordsStore, setActiveWordsStore, prependActiveWordStore, filterActiveWordsStore } = useUserStore();
+    const { toggleLearned, removeFromLearnedWords } = useDatabase();
     const [switchCardFaceState, setSwitchCardFaceState] = useState(false);
     const [currentStreak, setCurrentStreak] = useState <boolean>(false);
     const [showTutorial, setShowTutorial] = useState(false);
     const [lastWordLearned, setlastWordLearned] = useState<Word | null>(null);
-    
     const { colorScheme } = useColorScheme();
 
     const handleUndoLearned = async () => {
@@ -51,12 +50,11 @@ const learn = () => {
         const todayDate = DateTime.now().setZone(updatedUser!.timezone).toString();
         const wordsToReturn = await handleGetWords(updatedUser!, todayDate);
 
-        if (wordsToReturn) { 
+        if (wordsToReturn) {
             setActiveWordsStore(wordsToReturn);
         }
         filterActiveWordsStore();
-
-    }
+    };
 
     //effects ------------------------------------------------------------------------------
     useFocusEffect(
@@ -66,6 +64,8 @@ const learn = () => {
     ); 
 
     useEffect(() => {
+        console.log(user?.words_per_day + " words per day");
+        console.log(progressToday + " progress today");
         if (user) { 
             setShowTutorial(user.tutorial_completed === 0)
         }
@@ -98,7 +98,7 @@ const learn = () => {
                         switchFaceState={switchCardFaceState}
                     />
                 </View>
-                {wordsLoading ? (
+                {wordsLoading && (progressToday < user.words_per_day)  ? (
                     <ActivityIndicator size={"small"} className='flex-1 justify-center items-center'/>
                 ) : (
                     <>

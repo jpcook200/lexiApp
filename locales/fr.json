@@ -144,9 +144,6 @@
     "faq_how_to_practice_q": "Comment pratiquer mes mots ?",
     "faq_how_to_practice_a": "Appuyez sur « Pratiquer » depuis l’onglet d’accueil. Vous parcourrez vos mots actifs à l’aide de cartes. Balayez vers le haut pour marquer un mot comme appris ou renvoyez-le à la fin du paquet pour le revoir.",
 
-    "faq_reset_session_q": "Puis-je réinitialiser ma session d’entraînement ?",
-    "faq_reset_session_a": "Oui ! Après avoir terminé toutes les cartes actives, vous pouvez appuyer sur « Réinitialiser » pour recommencer ou obtenir de nouveaux mots si vous êtes en mode pratique.",
-
     "faq_word_selection_q": "Comment mes mots quotidiens sont-ils sélectionnés ?",
     "faq_word_selection_a": "Vos mots du jour sont choisis en fonction de vos objectifs d’apprentissage et des mots déjà appris. L’application privilégie ceux que vous n’avez pas encore maîtrisés.",
 
@@ -158,7 +155,7 @@
 
     "reset_progress": "Réinitialiser la progression",
     "are_you_sure": "Êtes-vous sûr ?",
-    "confirm_reset_message": "Cela effacera toute la progression pour la paire de langues actuelle.\nSi vous avez déjà appris des mots aujourd’hui, ils seront réinitialisés demain.\nCette action est irréversible.",
+    "confirm_reset_message": "Effacer toute la progression pour la langue actuelle ? \nCette action ne peut pas être annulée.",
 
     "swipe_left_right": "Balayez vers la gauche ou la droite",
     "to_navigate": "Pour naviguer entre les mots",

@@ -76,8 +76,9 @@ const changeLangConfirm = () => {
                             <View>
                                 <View className="items-center justify-center mt-20 mb-10">
                                     <CircleAlert size={64} color="#1c95ff" />
-                                    <ThemedText className='text-center mt-8 mb-6'>{t("warning_title") }</ThemedText>
-                                    <ThemedText className='text-center'>{ t("warning_body") }</ThemedText>
+                                    <ThemedText className='text-center mt-8 '>{t("warning_title") }</ThemedText>
+                                    <ThemedText className='text-center my-6'>{t("warning_body")}</ThemedText>
+                                    <ThemedText className='text-center'>{t("lang_change_limit")}</ThemedText>
                                 </View>
                             </View>
                             <View className='py-12 gap-4'>

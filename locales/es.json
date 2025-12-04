@@ -144,9 +144,6 @@
     "faq_how_to_practice_q": "¿Cómo practico mis palabras?",
     "faq_how_to_practice_a": "Toca \"Practicar\" en la pestaña principal. Revisarás tus palabras activas con tarjetas. Desliza hacia arriba para marcar una palabra como aprendida o devuélvela al final del mazo para practicarla más.",
 
-    "faq_reset_session_q": "¿Puedo reiniciar mi sesión de práctica?",
-    "faq_reset_session_a": "¡Sí! Después de terminar todas las tarjetas activas, puedes tocar \"Reiniciar\" para comenzar de nuevo o conseguir nuevas palabras si estás en modo práctica.",
-
     "faq_word_selection_q": "¿Cómo se eligen mis palabras cada día?",
     "faq_word_selection_a": "Tus palabras diarias se seleccionan según tus objetivos de aprendizaje y las palabras que ya hayas aprendido. La app prioriza las palabras que aún no dominas.",
 
@@ -158,7 +155,7 @@
 
     "reset_progress": "Reiniciar progreso",
     "are_you_sure": "¿Estás seguro?",
-    "confirm_reset_message": "Esto eliminará todo el progreso del par de idiomas actual.\nSi ya has aprendido palabras hoy, se restablecerán mañana.\nEsta acción no se puede deshacer.",
+    "confirm_reset_message": "Borrar todo el progreso para el idioma actual? \nEsta acción no se puede deshacer.",
 
     "swipe_left_right": "Desliza a izquierda o derecha",
     "to_navigate": "Para navegar entre palabras",

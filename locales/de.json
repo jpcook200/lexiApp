@@ -144,9 +144,6 @@
     "faq_how_to_practice_q": "Wie übe ich meine Wörter?",
     "faq_how_to_practice_a": "Tippe auf „Üben“ im Startbildschirm. Du gehst durch deine aktiven Wörter mit Lernkarten. Wische nach oben, um ein Wort als gelernt zu markieren, oder wische zurück, um es später erneut zu üben.",
 
-    "faq_reset_session_q": "Kann ich meine Übungssitzung zurücksetzen?",
-    "faq_reset_session_a": "Ja! Nachdem du alle aktiven Karten beendet hast, kannst du auf „Zurücksetzen“ tippen, um erneut zu üben oder neue Wörter abzurufen, falls du im Übungsmodus bist.",
-
     "faq_word_selection_q": "Wie werden meine täglichen Wörter ausgewählt?",
     "faq_word_selection_a": "Deine täglichen Wörter werden basierend auf deinen Lernzielen und bereits gelernten Wörtern ausgewählt. Die App priorisiert Wörter, die du noch nicht gemeistert hast.",
 
@@ -158,7 +155,7 @@
 
     "reset_progress": "Fortschritt zurücksetzen",
     "are_you_sure": "Bist du sicher?",
-    "confirm_reset_message": "Dies löscht den gesamten Fortschritt für das aktuelle Sprachpaar.\nWenn du heute bereits Wörter hattest, werden sie morgen zurückgesetzt.\nDiese Aktion kann nicht rückgängig gemacht werden.",
+    "confirm_reset_message": "Alle Fortschritte für die aktuelle Sprache löschen? \nDiese Aktion kann nicht rückgängig gemacht werden.",
 
     "swipe_left_right": "Wische nach links oder rechts",
     "to_navigate": "Um zwischen den Wörtern zu navigieren",
