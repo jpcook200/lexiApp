@@ -47,7 +47,7 @@ const learn = () => {
     const handleFocus = async () => {
         await fetchUser(db);
         const updatedUser = useUserStore.getState().user;
-        const todayDate = DateTime.now().setZone(updatedUser!.timezone).toString();
+        const todayDate = DateTime.now().toISODate();
         const wordsToReturn = await handleGetWords(updatedUser!, todayDate);
 
         if (wordsToReturn) {
@@ -64,8 +64,6 @@ const learn = () => {
     ); 
 
     useEffect(() => {
-        console.log(user?.words_per_day + " words per day");
-        console.log(progressToday + " progress today");
         if (user) { 
             setShowTutorial(user.tutorial_completed === 0)
         }
