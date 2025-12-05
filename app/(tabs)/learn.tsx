@@ -21,7 +21,7 @@ const learn = () => {
     const { handleGetWords, handleGetProgessCount, progressToday, wordsLoading, error } = useGetWords();
     const { t } = useTranslation();
     const db = useSQLiteContext();
-    const { user, fetchUser, activeWordsStore, setActiveWordsStore, prependActiveWordStore, filterActiveWordsStore } = useUserStore();
+    const { user, fetchUser, activeWordsStore, setActiveWordsStore, prependActiveWordStore, filterActiveWordsStore, reorderWordStore, setSelectedWordId } = useUserStore();
     const { toggleLearned, removeFromLearnedWords } = useDatabase();
     const [switchCardFaceState, setSwitchCardFaceState] = useState(false);
     const [currentStreak, setCurrentStreak] = useState <boolean>(false);
@@ -54,6 +54,18 @@ const learn = () => {
             setActiveWordsStore(wordsToReturn);
         }
         filterActiveWordsStore();
+    };
+
+    const loopCards = (index: number) => {
+        if (!activeWordsStore) return;
+        
+        setTimeout(() => {
+            reorderWordStore(index);
+            const newActiveWords = useUserStore.getState().activeWordsStore;
+            if (newActiveWords && newActiveWords.length > 0) {
+                setSelectedWordId(newActiveWords[0].word_id);
+            }
+        }, 150);
     };
 
     //effects ------------------------------------------------------------------------------
@@ -108,10 +120,10 @@ const learn = () => {
                                 user={user}
                                 setCurrentStreak={setCurrentStreak}
                                 setlastWordLearned={setlastWordLearned}
-                                lastWordLearned={lastWordLearned}
                                 switchFace={switchCardFaceState}
                                 error={error}
                                 wordsLoading={wordsLoading}
+                                loopCards={loopCards}
                         />
                     </>
                 )}

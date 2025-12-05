@@ -19,10 +19,11 @@ type WordCardProps = {
     user?: User;
     switchFace: boolean;
     cardsMoving: boolean;
+    setActiveWords?: React.Dispatch<React.SetStateAction<any[]>>;
 };
 
 
-export default function WordCard({ word, displayOnly, practice, user, switchFace, }: WordCardProps) {
+export default function WordCard({ word, displayOnly, practice, user, switchFace, setActiveWords }: WordCardProps) {
     const { t } = useTranslation();
     const { toggleFavourite } = useDatabase();
     const [ttsDisabled, setTtsDisabled] = useState(false);
@@ -35,17 +36,15 @@ export default function WordCard({ word, displayOnly, practice, user, switchFace
     const { toggleFavouriteStore } = useUserStore();
 
     useEffect(() => {
-    // update local state
-    setIsFlipped(switchFace);
+        setIsFlipped(switchFace);
 
-    // animate the card to the new face
-    Animated.spring(flipAnimation, {
-        toValue: switchFace ? 180 : 0,
-        friction: 8,
-        tension: 10,
-        useNativeDriver: true,
-    }).start();
-}, [switchFace]); // runs whenever switchFace prop changes
+        Animated.spring(flipAnimation, {
+            toValue: switchFace ? 180 : 0,
+            friction: 8,
+            tension: 10,
+            useNativeDriver: true,
+        }).start();
+    }, [switchFace]);
 
     const frontInterpolate = flipAnimation.interpolate({
         inputRange: [0, 180],
@@ -86,10 +85,18 @@ export default function WordCard({ word, displayOnly, practice, user, switchFace
 
     const handleFavourite = async () => {
         if (!word) return;
-        toggleFavouriteStore(word.id);
-
-        if (practice) {
-            toggleFavourite(word.id, word.favourite === false ? 1 : 0); // update database
+        if (practice && setActiveWords) {
+            console.log(word.favourite)
+            toggleFavourite(word.id, word.favourite);
+            setActiveWords((prevWords) =>
+                prevWords.map((w) =>
+                    w.id === word.id
+                        ? { ...w, favourite: word.favourite ? 0 : 1 } // flip favourite
+                        : w
+                )
+            );
+        } else { 
+            toggleFavouriteStore(word.id);
         }
     };
 

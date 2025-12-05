@@ -18,14 +18,14 @@ type CardStackSwiperProps = {
     practice?: boolean;
     user: User;
     setCurrentStreak: React.Dispatch<React.SetStateAction<boolean>>;
-    lastWordLearned: Word | null;
     setlastWordLearned: React.Dispatch<React.SetStateAction<Word | null>>;
     switchFace: boolean;
     error?: boolean;
     wordsLoading?: boolean;
+    loopCards: (index: number) => void;
 };
 
-const CardStackSwiper = ({ activeWords, setActiveWords, updateProgress, progress, practice, user, setCurrentStreak, lastWordLearned, setlastWordLearned, switchFace, error, wordsLoading}: CardStackSwiperProps) => {
+const CardStackSwiper = ({ activeWords, setActiveWords, updateProgress, progress, practice, user, setCurrentStreak, setlastWordLearned, switchFace, error, loopCards}: CardStackSwiperProps) => {
     const activeIndex = useSharedValue(0);
     const [indexState, setIndexState] = useState(0);
     const { t } = useTranslation();
@@ -39,6 +39,7 @@ const CardStackSwiper = ({ activeWords, setActiveWords, updateProgress, progress
 
         return false;
     };
+
 
     useEffect(() => {
         scheduleOnRN(() => {
@@ -76,15 +77,15 @@ const CardStackSwiper = ({ activeWords, setActiveWords, updateProgress, progress
                                         indexState={indexState}
                                         activeIndex={activeIndex}
                                         word={word}
-                                        setActiveWords={setActiveWords}
                                         activeWords={activeWords}
+                                        setActiveWords={setActiveWords}
                                         updateProgress={updateProgress}
                                         practice={practice}
                                         numOfCards={activeWords.length}
                                         user={user!}
                                         progress={progress}
                                         setCurrentStreak={setCurrentStreak}
-                                        lastWordLearned={lastWordLearned}
+                                        loopCards={loopCards}
                                         setlastWordLearned={setlastWordLearned}
                                         switchFace={switchFace}
                                     />

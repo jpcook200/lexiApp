@@ -9,15 +9,11 @@ import { View } from 'react-native';
 import ThemedText from './ThemedText';
 import ThemedView from './ThemedView';
 
+
+
 const Streak = ({ displayOnly }: {displayOnly: boolean}) => {
     const today = DateTime.now().toISODate();
     const { t } = useTranslation();
-    const [streakData, setStreakData] = useState<StreakRow[]>([]);
-    const [streakCounts, setStreakCounts] = useState({
-        current: 0,
-        longest: 0,
-    });
-    const { getWeeklyStreak, getStreakCount, initStreakRecord } = useDatabase();
     const days = [
         t("monday_abrv"),
         t("tuesday_abrv"),
@@ -27,6 +23,18 @@ const Streak = ({ displayOnly }: {displayOnly: boolean}) => {
         t("saturday_abrv"),
         t("sunday_abrv"),
     ];
+    const placeholderWeek = Array.from({ length: 7 }).map(() => ({
+        date: "",
+        completed: 0,
+    }));
+    const [streakData, setStreakData] = useState<StreakRow[]>(placeholderWeek);
+    const [streakCounts, setStreakCounts] = useState({
+        current: 0,
+        longest: 0,
+    });
+    const { getWeeklyStreak, getStreakCount, initStreakRecord } = useDatabase();
+    
+
 
     const normalizeStreak = (streakData: StreakRow[]) => {   
         const last7Dates = Array.from({ length: 7 }).map((_, i) =>
@@ -79,7 +87,7 @@ const Streak = ({ displayOnly }: {displayOnly: boolean}) => {
                 <ThemedText className='text-lg font-bold mb-2'>{t("streak")}</ThemedText>
                 <View className='flex-row justify-between mt-2'>
                     {streakData.map((day, index) => (
-                        <View key={day.date}>
+                        <View key={`${day.date}-${index}`}>
                             {(day.completed === 1 || displayOnly)  ? (
                                     <View className='w-10 h-10 bg-primaryDark rounded-full flex justify-center items-center relative overflow-hidden'>
                                         <View className='absolute bg-primary w-[92%] h-[92%] left-0 top-0 rounded-full'></View>

@@ -24,9 +24,9 @@ type CardStackCardProps = {
     practice?: boolean;
     progress?: number;
     setCurrentStreak: React.Dispatch<React.SetStateAction<boolean>>;
-    lastWordLearned: Word | null;
     setlastWordLearned: React.Dispatch<React.SetStateAction<Word | null>>;
     switchFace: boolean;
+    loopCards: (index: number) => void;
 };
 
 const sounds: Record<string, any> = {
@@ -35,9 +35,9 @@ const sounds: Record<string, any> = {
 };
 
 
-const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWords, activeWords = [], updateProgress, practice = false, progress, setCurrentStreak, lastWordLearned, setlastWordLearned, switchFace}: CardStackCardProps) => {
+const CardStackCard = ({ user, index, numOfCards, activeIndex, word, activeWords = [], setActiveWords, updateProgress, practice = false, progress, setCurrentStreak, loopCards, setlastWordLearned, switchFace}: CardStackCardProps) => {
     const { t } = useTranslation();
-    const { removeActiveWordStore, reorderWordStore } = useUserStore();
+    const { removeActiveWordStore} = useUserStore();
     const player = useAudioPlayer(require("@/assets/sounds/cardswipe.mp3"));
     const status = useAudioPlayerStatus(player);
     const [cardsMoving, setCardsMoving] = useState(false);
@@ -70,18 +70,6 @@ const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWo
         }
     }
     
-    const loopCards = (index: number) => {
-    if (!activeWords) return;
-    
-    setTimeout(() => {
-        reorderWordStore(index);
-        const newActiveWords = useUserStore.getState().activeWordsStore;
-        if (newActiveWords && newActiveWords.length > 0) {
-            setSelectedWordId(newActiveWords[0].word_id);
-        }
-        }, 150);
-    };
-
     const disableSoundTemporarily = (ms = 200) => {
         soundDisabled.current = true;
         setTimeout(() => {
@@ -104,7 +92,6 @@ const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWo
 
         disableSoundTemporarily(250);
     };
-
 
 
     const handleSetCardsMoving = (moving: boolean) => {
@@ -214,11 +201,11 @@ const CardStackCard = ({ user, index, numOfCards, activeIndex, word, setActiveWo
             >
                 <WordCard
                     word={word}
-                    setActiveWords={setActiveWords}
                     practice={practice}
                     user={user}
                     switchFace={switchFace}
                     cardsMoving={cardsMoving}
+                    setActiveWords={setActiveWords}
                 />
                 {!practice &&
                     <Animated.View style={[learnedAnimatedStyle]} className='absolute bottom-10 left-[50%] -translate-x-[50%] bg-green-400 rounded-md flex justify-center items-center overflow-hidden p-2 shadow-sm'>

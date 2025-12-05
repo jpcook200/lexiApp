@@ -42,6 +42,28 @@ const Practice = () => {
         }
     };
 
+    const loopCards = (index: number) => {
+        if (!activeWords) return;
+        
+        setTimeout(() => {
+            setActiveWords((prev = []) => {
+                if (index < 0 || index >= prev.length) return prev;
+
+                const swipedCard = prev[index];
+
+                const remaining = [
+                    ...prev.slice(0, index),
+                    ...prev.slice(index + 1)
+                ];
+
+                const updated = [...remaining, swipedCard];
+
+                return updated;
+            });
+        }, 150);
+    };
+    
+
     useFocusEffect(
         useCallback(() => {
             let isActive = true;
@@ -83,7 +105,7 @@ const Practice = () => {
                         user={user}
                         setlastWordLearned={() => { }}
                         setCurrentStreak={() => { }}
-                        lastWordLearned={null}
+                        loopCards={loopCards}
                         switchFace={switchCardFaceState}
                     />
                 )}
