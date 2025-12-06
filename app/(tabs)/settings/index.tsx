@@ -23,12 +23,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function Settings() {
     const { t } = useTranslation();
     const db = useSQLiteContext()
-    const { user, loading, fetchUser, setUser, setActiveWordsStore } = useUserStore();
+    const { user, fetchUser, setActiveWordsStore } = useUserStore();
     const { colorScheme, toggleColorScheme } = useColorScheme();
     const { setRemindersOn, resetProgressByLanguage, toggleMuted } = useDatabase();
     const { setUserAccessLevel } = useDatabase();
-    const { connected, hasActiveSubscriptions, getActiveSubscriptions } = useIAP();
-    const [checkingConnection, setCheckingConnection] = useState(true);
+    const { connected, getActiveSubscriptions } = useIAP();
     const [installationId, setInstallationId] = useState('');
     const [mutedSwitchValue, setMutedSwitchValue] = useState(user?.muted === 1);
 
@@ -51,7 +50,6 @@ export default function Settings() {
 
             const newValue = user?.reminders_on === 1 ? 0 : 1;
             await setRemindersOn(newValue);
-            console.log('Reminders toggled to:', newValue);
             // Notify user
             if (newValue === 1) {
                 await scheduleDailyReminder();
@@ -104,8 +102,6 @@ export default function Settings() {
             
         } catch (error) {
             console.error('Error checking subscription status:', error);
-        } finally { 
-            setCheckingConnection(false);
         }
     }
 
@@ -124,7 +120,6 @@ export default function Settings() {
 
     useFocusEffect(
         useCallback(() => {
-            setCheckingConnection(true);
             if (connected) {
                 handleCheckSubscription(); 
                 
@@ -139,7 +134,7 @@ export default function Settings() {
         })();
     }, []);
 
-    if (checkingConnection || !user) {
+    if (!user) {
         return (
             <SafeAreaView edges={['top']} className='flex-1 h-full bg-background-light dark:bg-background-dark p-4 justify-center items-center'>
                 <ActivityIndicator size='small'/>
@@ -202,14 +197,10 @@ export default function Settings() {
                             <TouchableOpacity onPress={() => router.push('../../(onboarding)/Subscribe')} className='flex-row items-center gap-4 h-20' disabled={ user.access_level === 'pro' }>
                                 <ThemedIcon name={'CreditCard'} size={20} />
                                 <ThemedText className='text-lg font-medium'>{t("subscription")}</ThemedText>
-                                { checkingConnection ? (
-                                    <ActivityIndicator size='small' className='ml-auto' />
-                                ) : (
-                                    user?.access_level === 'pro' ? (
+                                {user?.access_level === 'pro' ? (
                                     <Text className='ml-auto text-primary font-black text-primary'>{ t(user?.access_level) }</Text>
                                 ) : (
                                     <ThemedText className='ml-auto text-secondary font-medium'>{ t(user?.access_level) }</ThemedText>
-                                )
                                 )}
                                 <ThemedIcon name='ChevronRight' size={20} />
                             </TouchableOpacity>
