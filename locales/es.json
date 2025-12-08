@@ -200,6 +200,9 @@
     "not_avail": "Este artículo no está disponible para su compra.",
     "no_words_available": "No hay palabras disponibles",
     "lang_change_limit": "Solo puedes cambiar tu idioma de aprendizaje una vez al día.",
-    "could_not_change_language": "No se pudo cambiar el idioma. Por favor, inténtalo de nuevo más tarde."
+    "could_not_change_language": "No se pudo cambiar el idioma. Por favor, inténtalo de nuevo más tarde.",
+    "no_sub_found": "No se encontraron suscripciones activas.",
+    "sub_restored": "Suscripción restaurada con éxito.",
+    "restore_purchase": "Restaurar compra"
 
 }

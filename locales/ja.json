@@ -201,5 +201,9 @@
     "not_avail": "この商品は購入できません。",
     "no_words_available": "利用可能な単語がありません",
     "lang_change_limit": "学習言語は1日に1回だけ変更できます。",
-    "could_not_change_language": "言語を変更できませんでした。後でもう一度お試しください。"
+    "could_not_change_language": "言語を変更できませんでした。後でもう一度お試しください。",
+
+    "no_sub_found": "アクティブなサブスクリプションが見つかりません。",
+    "sub_restored": "サブスクリプションが正常に復元されました。",
+    "restore_purchase": "購入を復元"
 }

@@ -201,5 +201,9 @@
     "not_avail": "Este item não está disponível para compra.",
     "no_words_available": "Nenhuma palavra disponível",
     "lang_change_limit": "Você só pode mudar seu idioma de aprendizado uma vez por dia.",
-    "could_not_change_language": "Não foi possível mudar o idioma. Por favor, tente novamente mais tarde."
+    "could_not_change_language": "Não foi possível mudar o idioma. Por favor, tente novamente mais tarde.",
+
+    "no_sub_found": "Nenhuma assinatura ativa encontrada.",
+    "sub_restored": "Assinatura restaurada com sucesso.",
+    "restore_purchase": "Restaurar compra"
 }

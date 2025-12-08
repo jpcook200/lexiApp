@@ -198,5 +198,9 @@
     "not_avail": "此商品无法购买。",
     "no_words_available": "没有可用的单词",
     "lang_change_limit": "您每天只能更改一次学习语言。",
-    "could_not_change_language": "无法更改语言。请稍后再试。"
+    "could_not_change_language": "无法更改语言。请稍后再试。",
+
+    "no_sub_found": "未找到有效订阅。",
+    "sub_restored": "订阅恢复成功。",
+    "restore_purchase": "恢复购买"
 }

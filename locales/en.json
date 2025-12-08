@@ -201,5 +201,8 @@
     "not_avail": "This item is not available for purchase.",
     "no_words_available": "No words available",
     "lang_change_limit": "You can only change your learning language once a day.",
-    "could_not_change_language": "Could not change language. Please try again later."
+    "could_not_change_language": "Could not change language. Please try again later.",
+    "no_sub_found": "No active subscriptions found.",
+    "sub_restored": "Subscription restored successfully.",
+    "restore_purchase": "Restore Purchase"
 }
