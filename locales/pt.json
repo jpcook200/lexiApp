@@ -1,7 +1,7 @@
 {
     "next": "Próximo",
     "get_started": "Começar",
-    "subscribe_now": "Experimente grátis",
+    "subscribe_now": "Teste grátis 7 dias – {{price}}{{per}} depois",
     "back": "Voltar",
     "view_all": "Ver tudo",
     "practice": "Praticar",

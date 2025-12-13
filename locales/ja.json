@@ -1,7 +1,7 @@
 {
     "next": "次へ",
     "get_started": "始める",
-    "subscribe_now": "無料で試す",
+    "subscribe_now": "7日間無料を開始 — その後 {{price}}{{per}}",
     "back": "戻る",
     "view_all": "すべて表示",
     "practice": "練習",

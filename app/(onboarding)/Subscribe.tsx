@@ -197,7 +197,7 @@ const Subscribe = () => {
               </View>
             ))}
 
-            <ThemedText className='my-6 font-bold'>{t("try_free")}</ThemedText>
+            <ThemedText variant='subtext' className='my-6 font-bold'>{t("try_free")}</ThemedText>
             <ThemedText className='font-bold text-lg'>{t("select_plan")}:</ThemedText>
 
             <View className='flex-row items-center justify-center gap-6 mt-6'>
@@ -234,7 +234,7 @@ const Subscribe = () => {
           <ActivityIndicator size="small" />
         ) : (
           <MainButton
-            text={t("subscribe_now")}
+            text={t("subscribe_now").replace("{{price}}", plans.find(p => p.id === selectedPlan)?.price || "").replace("{{per}}", plans.find(p => p.id === selectedPlan)?.per || "")}
             onPress={() => {
               const plan = plans.find(p => p.id === selectedPlan);
               if (plan) {

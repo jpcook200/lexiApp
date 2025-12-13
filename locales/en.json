@@ -1,7 +1,7 @@
 {
     "next": "Next",
     "get_started": "Get Started",
-    "subscribe_now": "Try Free",
+    "subscribe_now": "Start 7-day free trial – then {{price}}{{per}}",
     "back": "Back",
     "view_all": "View All",
     "practice": "Practice",
@@ -125,7 +125,7 @@
     "basic": "Basic",
     "selected": "Selected",
     "select_plan": "Select a Plan",
-    "try_free": "Try free for 7 days. Cancel anytime",
+    "try_free": "Try free for 7 days. Cancel anytime.",
     "get": "Get",
     "take_your_learning": "Take your learning to the next level with Pro.",
 

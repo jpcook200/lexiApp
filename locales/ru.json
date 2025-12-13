@@ -1,7 +1,7 @@
 {
     "next": "Далее",
     "get_started": "Начать",
-    "subscribe_now": "Попробовать бесплатно",
+    "subscribe_now": "Начать 7 дней бесплатно — затем {{price}}{{per}}",
     "back": "Назад",
     "view_all": "Показать все",
     "practice": "Практика",

@@ -1,7 +1,7 @@
 {
     "next": "Weiter",
     "get_started": "Loslegen",
-    "subscribe_now": "Kostenlos testen",
+    "subscribe_now": "7 Tage gratis starten – danach {{price}}{{per}}",
     "back": "Zurück",
     "view_all": "Alle anzeigen",
     "practice": "Üben",

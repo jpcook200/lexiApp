@@ -1,7 +1,7 @@
 {
     "next": "Suivant",
     "get_started": "Commencer",
-    "subscribe_now": "Essai gratuit",
+    "subscribe_now": "Commencer l’essai gratuit 7 jours – {{price}}{{per}} après",
     "back": "Retour",
     "view_all": "Tout voir",
     "practice": "Pratiquer",
