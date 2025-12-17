@@ -126,7 +126,7 @@ export default function WordCard({ word, displayOnly, practice, user, switchFace
                                         </TouchableOpacity>
                                     </View>
                                     <View>
-                                        <ThemedText variant='primary' className='text-5xl sm:text-4xl font-bold'>
+                                        <ThemedText variant='primary' className='text-[35px] sm:text-4xl font-bold'>
                                             { (word?.learning_word).toLowerCase() }
                                         </ThemedText>
                                         <ThemedText variant='subtext' className='text-xl'>{ trimEdgeChars(word?.learning_pronunciation) }</ThemedText>
@@ -168,7 +168,7 @@ export default function WordCard({ word, displayOnly, practice, user, switchFace
                                     </View>
                                     <View>
                                         <View>
-                                            <ThemedText variant='primary' className='text-5xl mb-1 font-bold sm:text-4xl'>{ (word?.native_word).toLowerCase() }</ThemedText>
+                                            <ThemedText variant='primary' className='text-[35px] mb-1 font-bold sm:text-4xl'>{ (word?.native_word).toLowerCase() }</ThemedText>
                                         </View>
                                         <ThemedText variant='subtext' className='text-lg'>{ formatSentenceByLanguage(word?.native_definition, word?.native_lang) }</ThemedText>
                                     </View>

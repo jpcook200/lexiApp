@@ -29,7 +29,7 @@ const Tutorial = ({ setShowTutorial }: {setShowTutorial: Dispatch<SetStateAction
                     </View>
                     
                     <MainButton
-                        text='Next'
+                        text={t("next")}
                         onPress={() => setPage(1)}
                         className='self-end'
                         accessibilityLabel='Next Page'
@@ -47,7 +47,7 @@ const Tutorial = ({ setShowTutorial }: {setShowTutorial: Dispatch<SetStateAction
                         <ThemedText className='text-xl text-center font-bold text-gray-600'>{ t("to_see_translation") }</ThemedText>
                     </View>
                     <MainButton
-                        text='Next'
+                        text={t("next")}
                         onPress={() => setPage(2)}
                         accessibilityLabel='Next Page'
                     />
@@ -65,7 +65,7 @@ const Tutorial = ({ setShowTutorial }: {setShowTutorial: Dispatch<SetStateAction
                         <ThemedText className='text-center font-medium text-lg text-gray-600'>{t("swipe_up_info")}</ThemedText>
                     </View>
                         <MainButton
-                        text='Next'
+                        text={t("next")}
                         onPress={() => handleFinish()}
                         accessibilityLabel='Close Tutorial'
                     />
