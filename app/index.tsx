@@ -1,4 +1,5 @@
 // app/index.tsx
+import { commonLanguages } from '@/constants/languages';
 import i18next from '@/services/i18next';
 import { User } from '@/types/types';
 import { getInstallationId } from '@/utilities/getInstallationId';
@@ -15,7 +16,11 @@ const Index = () => {
     const checkUser = async () => {
         try {
             const locals = Localization.getLocales();
-            const languageCode = locals[0]?.languageCode || 'en'
+            const deviceLang = locals[0]?.languageCode || 'en'
+            const supportedLanguageCodes = commonLanguages.map(l => l.code);
+            const languageCode = supportedLanguageCodes.includes(deviceLang)
+            ? locals[0].languageCode
+            : 'en';
             const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
             const todayDate = DateTime.now().toISODate();
             const user = await db.getFirstAsync<User>('SELECT * FROM users');
